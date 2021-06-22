@@ -1,5 +1,5 @@
 <template>
-  <header class="shadow-md flex flex-wrap flex-row justify-between md:items-center md:space-x-4 bg-white py-4 px-6 relative">
+  <header class="shadow-md flex flex-wrap flex-row justify-between md:items-center md:space-x-4 bg-white py-4 px-6 relative h-header">
     <a href="#" class="block">
       <span class="sr-only">themes.dev</span>
       <img class="h-6 md:h-8" src="~/assets/logo.png" alt="Themes.dev Logo" title="Themes.dev Logo">
@@ -23,6 +23,8 @@ export default {
 }
 </script>
 
-<style>
-
+<style scope>
+  .h-header{
+    height: 7%;
+  }
 </style>

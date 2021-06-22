@@ -1,6 +1,6 @@
 <template>
   <div>
-    <article class="text-center	 text-lg px-6 py-6 text-gray-600 mx-auto max-w-2xl" v-if="pages == 0">
+    <article class="text-center	text-lg px-6 py-6 text-gray-600 mx-auto max-w-2xl">
       <h2 class="text-xl font-semibold">{{tittle}}</h2>
       <p class="mt-6">
         {{description}}
@@ -19,8 +19,6 @@
 </template>
 
 <script>
-import { mapMutations } from 'vuex'
-
 export default {
   
   name: 'UploadFile',
@@ -28,8 +26,7 @@ export default {
 
   data() {
       return {
-        pages: 0,
-        forms: {}
+
       }
   },
 
@@ -38,8 +35,7 @@ export default {
       const fileReader = new FileReader()
       var files = evt.target.files;
       let context = this
-      this.pages = files.length
-      
+      this.$store.commit('toggleUploadFileShow')     
 
       for(let file of files){
         var reader = new FileReader();
