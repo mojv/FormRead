@@ -5,18 +5,21 @@
       :tittle='"MULTI-PAGE QR CODE READER"' 
       v-if="formsCant == 0"
     />  
-    <scrollable-forms-list v-if="formsCant > 0"/>
+    <scrollable-forms-list v-if="formsCant > 0" />
+    <form-editor-area v-if="formsCant > 0" />  
   </div>
 </template>
 
 <script>
 import UploadFile from '../components/UploadFile.vue'
 import ScrollableFormsList from '../components/ScrollableFormsList.vue'
+import FormEditorArea from '../components/FormEditorArea.vue'
 
 export default {
   components: {
     UploadFile,
-    ScrollableFormsList
+    ScrollableFormsList,
+    FormEditorArea
   },
 
   data() {

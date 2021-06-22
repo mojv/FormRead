@@ -24,18 +24,11 @@ export default {
   name: 'UploadFile',
   props: ['tittle', 'description'],
 
-  data() {
-      return {
-
-      }
-  },
-
   methods: {
     uploadImagesFiles: function (evt) {
       const fileReader = new FileReader()
       var files = evt.target.files;
-      let context = this
-      this.$store.commit('toggleUploadFileShow')     
+      let context = this   
 
       for(let file of files){
         var reader = new FileReader();
