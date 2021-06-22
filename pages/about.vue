@@ -1,6 +1,6 @@
 <template>
   <div class="container">
-    Hello
+    Chao
   </div>
 </template>
 
