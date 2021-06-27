@@ -1,7 +1,7 @@
 <template>
   <div class="w-full py-1 shadow-md overflow-y-auto h-full pr-6" >    
     <img 
-      :id="id"
+      :id='`form-preview-${id}`'
       v-for="(form, id) in forms" 
       @click='selectForm(id)' 
       :src="form.src" :key="id" 
