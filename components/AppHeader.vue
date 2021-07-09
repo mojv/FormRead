@@ -1,30 +1,49 @@
 <template>
-  <header class="shadow-md flex flex-wrap flex-row justify-between md:items-center md:space-x-4 bg-white py-4 px-6 relative h-header">
-    <a href="#" class="block">
-      <span class="sr-only">themes.dev</span>
-      <img class="h-6 md:h-8" src="~/assets/logo.png" alt="Themes.dev Logo" title="Themes.dev Logo">
-    </a>
-    <button  class="inline-block md:hidden w-8 h-8 bg-gray-200 text-gray-600 p-1">
-      <svg fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M3 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 15a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd"></path></svg>
-    </button>
-    <nav class="absolute md:relative top-16 left-0 md:top-0 z-20 md:flex flex-col md:flex-row md:space-x-6 font-semibold w-full md:w-auto bg-white shadow-md rounded-lg md:rounded-none md:shadow-none md:bg-transparent p-6 pt-0 md:p-0">
-      <a href="#" class="block py-1 text-indigo-600 hover:underline">Home</a>
-      <a href="#" class="block py-1 text-gray-600 hover:underline">About us</a>
-      <a href="#" class="block py-1 text-gray-600 hover:underline">Services</a>
-      <a href="#" class="block py-1 text-gray-600 hover:underline">Blog</a>
-      <a href="#" class="block py-1 text-gray-600 hover:underline">Contact</a>
-    </nav>
-  </header>
+  <nav class="relative flex flex-wrap items-center justify-between px-2 py-3 bg-white shadow-md">
+    <div class="container px-4 mx-auto flex flex-wrap items-center justify-between">
+      <div class="w-full relative flex justify-between lg:w-auto  px-4 lg:static lg:block lg:justify-start">
+        <a class="text-sm font-bold leading-relaxed inline-block mr-4 py-2 whitespace-nowrap uppercase text-black" href="#">
+          FormRead
+        </a>
+        <button class="text-black cursor-pointer text-xl leading-none px-3 py-1 border border-solid border-transparent rounded bg-transparent block lg:hidden outline-none focus:outline-none" type="button" v-on:click="toggleNavbar()">
+          <i class="fas fa-bars"></i>
+        </button>
+      </div>
+      <div v-bind:class="{'hidden': !showMenu, 'flex': showMenu}" class="lg:flex lg:flex-grow items-center">
+        <ul class="flex flex-col lg:flex-row list-none ml-auto">
+          <li class="nav-item">
+            <a class="px-3 py-2 flex items-center text-xs uppercase font-bold leading-snug text-black hover:opacity-75" href="#">
+              <i class="fab fa-facebook-square text-lg leading-lg text-black opacity-75" /><span class="ml-2">Something</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="px-3 py-2 flex items-center text-xs uppercase font-bold leading-snug text-black hover:opacity-75" href="#p">
+              <i class="fab fa-twitter text-lg leading-lg text-black opacity-75" /><span class="ml-2">Something</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="px-3 py-2 flex items-center text-xs uppercase font-bold leading-snug text-black hover:opacity-75" href="#">
+              <i class="fab fa-pinterest text-lg leading-lg text-black opacity-75" /><span class="ml-2">Something</span>
+            </a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
 </template>
 
 <script>
 export default {
-  name: 'AppHeader'
+  name: "AppHeader",
+  data() {
+    return {
+      showMenu: false
+    }
+  },
+  methods: {
+    toggleNavbar: function(){
+      this.showMenu = !this.showMenu;
+    }
+  }
 }
 </script>
-
-<style scope>
-  .h-header{
-    height: 7%;
-  }
-</style>

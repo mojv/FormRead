@@ -21,7 +21,21 @@ export const mutations = {
     state.selectedFormId = formId
   },
   updateFormReadAreas(state, areas){
-    state.formReadAreas = areas
+    state.formReadAreas = []
+    for(let area of areas){
+      state.formReadAreas.push(
+        {
+          width: area.width,
+          height: area.height,
+          left: area.left,
+          top: area.top,
+          fill: area.fill,
+          lockRotation: true,
+          hasRotatingPoint: false,
+          name: area.name
+        }        
+      )
+    }
   },
   setCanvasHeight(state, height){
     state.canvasHeight = height
