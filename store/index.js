@@ -25,10 +25,10 @@ export const mutations = {
     for(let area of areas){
       state.formReadAreas.push(
         {
-          width: area.width,
-          height: area.height,
-          left: area.left,
-          top: area.top,
+          width: area.width/state.canvasWidth,
+          height: area.height/state.canvasHeight,
+          left: area.left/state.canvasWidth,
+          top: area.top/state.canvasHeight,
           fill: area.fill,
           lockRotation: true,
           hasRotatingPoint: false,

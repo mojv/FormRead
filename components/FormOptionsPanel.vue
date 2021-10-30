@@ -1,26 +1,30 @@
 <template>
-  <div class="w-full py-1 overflow-y-auto h-full shadow-md bg-white">  
-
+  <div class="w-full py-1 overflow-y-auto h-full shadow-md bg-white overflow-y-auto h-full">  
     <div class="relative z-20 flex justify-center flex-wrap flex-row sm:flex-row">
-      <button-area-type v-if="anchors.length < 4" @click.native="addAnchor()" :buttonType="'anchor'"/>
+      <button-area-type v-if="anchors.length < 4" @click.native="addAnchor()" :buttonType="'anchor'" />
       <button-area-type @click.native="addArea('rgb(110,214,36,0.3)','QR')" :buttonType="'QR'"/>
       <button-area-type @click.native="addArea('rgb(158,68,226,0.3)','OCR')" :buttonType="'OCR'"/>
       <button-area-type @click.native="addArea('rgb(33,239,160,0.3)','OMR')" :buttonType="'OMR'"/>
       <button-area-type @click.native="addArea('rgb(255,117,140,0.3)','cuts')" :buttonType="'cuts'"/>
     </div>
-    <p v-for="(area, index) in formReadAreas" :key="index"><a @click="selectArea(index)" href="#">{{index}}</a> - {{area.name}}</p>        
-    
+    <section class="shadow row">
+      <div class="tabs">
+        <field-drop-down-otion v-for="(area, index) in formReadAreas" :key="index" :FieldName="area.name" @click.native="selectArea(index)" />
+      </div>
+    </section>
   </div>
 </template>
 
 <script>
+
 import ButtonAreaType from './ButtonAreaType.vue'
 import { fabric } from "fabric";
+import FieldDropDownOtion from './FieldDropDownOtion.vue'
 
 export default {  
   name: 'FormOptionsPanel',
 
-  components: {ButtonAreaType},
+  components: {ButtonAreaType, FieldDropDownOtion},
 
   methods: {    
     addArea(color, type){
