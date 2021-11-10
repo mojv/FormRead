@@ -58,7 +58,8 @@ export default {
         transparentCorners: true,
     }); 
     delete fabric.Object.prototype.controls.mtr 
-    this.gobalsProperties.canvas = new fabric.Canvas('formCanvas');
+    this.gobalsProperties.canvas = new fabric.Canvas('formCanvas')
+    this.gobalsProperties.canvas.uniformScaling = false
     helpers.updateCanvas.call(this)
     this.$store.commit('setCanvasHeight', document.getElementById('FormEditorArea').offsetHeight)
     this.gobalsProperties.canvas.on("object:modified", () => { 
