@@ -8,9 +8,10 @@
         v-if="formsCant == 0"
       />  
       <template v-if="formsCant > 0">
-        <scrollable-forms-list />
-        <form-editor-area />  
-        <form-options-panel />
+        <scrollable-forms-list class="scrollable-forms-list"/>
+        <form-toolbar class="form-toolbar"/>  
+        <form-editor-area class="form-editor-area"/>  
+        <form-options-panel class="form-options-panel"/>
       </template>
 
     </div>
@@ -23,6 +24,7 @@ import ScrollableFormsList from '../components/ScrollableFormsList.vue'
 import FormEditorArea from '../components/FormEditorArea.vue'
 import FormOptionsPanel from '../components/FormOptionsPanel.vue'
 import AppHeader from "../components/AppHeader.vue"
+import FormToolbar from "../components/FormToolbar.vue"
 
 
 export default {
@@ -32,6 +34,7 @@ export default {
     FormEditorArea,
     FormOptionsPanel,
     AppHeader,
+    FormToolbar
   },
 
   data() {
@@ -61,7 +64,27 @@ export default {
 
   .form-grid-display{
     display: grid;
+    grid-template-areas: 
+      'ScrollableFormsList FormToolbar FormOptionsPanel'
+      'ScrollableFormsList FormEditorArea FormOptionsPanel';
     grid-template-columns: 8% 65% 27%;
+    grid-template-rows: 2.5rem auto;
+  }
+
+  .scrollable-forms-list{
+    grid-area: ScrollableFormsList;
+  }
+
+  .form-toolbar{
+    grid-area: FormToolbar;
+  }
+
+  .form-editor-area{
+    grid-area: FormEditorArea;
+  }
+
+  .form-options-panel{
+    grid-area: FormOptionsPanel;
   }
 </style>
 

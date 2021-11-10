@@ -16,9 +16,8 @@ export default{
           });
         });
     },
-
-    selectArea(index){
-        this.gobalsProperties.canvas.setActiveObject(this.gobalsProperties.canvas.item(index))
-        this.gobalsProperties.canvas.requestRenderAll()
-    }
+        
+    updateFormReadAreas(){
+      store.commit('updateFormReadAreas', this.gobalsProperties.canvas.toObject().objects)  
+    },
 }

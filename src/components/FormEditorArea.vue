@@ -28,11 +28,7 @@ export default {
         this.gobalsProperties.canvas.remove(obj)
       });
       this.gobalsProperties.canvas.discardActiveObject().renderAll()
-      this.updateFormReadAreas()
-    },
-
-    updateFormReadAreas(){
-      this.$store.commit('updateFormReadAreas', this.gobalsProperties.canvas.toObject().objects)  
+       helpers.updateFormReadAreas.call(this)
     },
   },
 
@@ -58,18 +54,16 @@ export default {
   },
 
   mounted() { 
-    console.log(this.gobalsProperties.canvas)
     fabric.Object.prototype.set({
-        transparentCorners: false,
+        transparentCorners: true,
     }); 
     delete fabric.Object.prototype.controls.mtr 
     this.gobalsProperties.canvas = new fabric.Canvas('formCanvas');
     helpers.updateCanvas.call(this)
     this.$store.commit('setCanvasHeight', document.getElementById('FormEditorArea').offsetHeight)
-    this.gobalsProperties.canvas.on("object:modified", () => {        
-        this.updateFormReadAreas()
+    this.gobalsProperties.canvas.on("object:modified", () => { 
+        helpers.updateFormReadAreas.call(this)       
     });
-    console.log(this.canvasObject)
   }
 }
 </script>

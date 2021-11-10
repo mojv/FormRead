@@ -7,7 +7,7 @@ import {store} from './store'
 
 
 const app = createApp(App);
-const gobalsProperties = reactive({'canvas': null});
+const gobalsProperties = {'canvas': null};
 
 app.use(router);
 app.use(store);
