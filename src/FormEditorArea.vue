@@ -1,10 +1,7 @@
 <template>
-  <div class="form-area-grid-display">
     <div class="w-full py-1 overflow-y-auto h-full pr-6" id='FormEditorArea' @keydown.delete="deleteObjects()" tabindex="0">                
       <canvas class="shadow-lg rounded-lg" id="formCanvas"></canvas>       
-    </div>    
-    <form-options-panel @addArea="addArea($event)" @selectArea="selectArea($event)" />
-  </div>
+    </div>   
 </template>
 
 <script>
@@ -19,7 +16,6 @@ export default {
 
   data: function () {
     return {
-      canvas: null,
       renderForce: 0 
     }
   },
@@ -49,10 +45,10 @@ export default {
         };
       })(area.toObject);
       area.name = name;
-      this.canvas.add(area);
+      // this.canvas.add(area);
       this.updateFormReadAreas()
-      this.canvas.setActiveObject(area)
-      this.canvas.requestRenderAll()
+      // this.canvas.setActiveObject(area)
+      // this.canvas.requestRenderAll()
     },
 
     deleteObjects(e){
@@ -86,7 +82,10 @@ export default {
     },
     canvasHeight: function() {
       return this.$store.state.canvasHeight
-    }
+    },
+    canvas: function () {
+      return this.$store.state.canvas
+    },
   },
 
   watch: {
@@ -100,12 +99,12 @@ export default {
         transparentCorners: false,
     }); 
     delete fabric.Object.prototype.controls.mtr 
-    this.canvas = new fabric.Canvas('formCanvas');
+    this.$store.commit('addCanvas', new fabric.Canvas('formCanvas'))  
     this.updateCanvas()
     this.$store.commit('setCanvasHeight', document.getElementById('FormEditorArea').offsetHeight)
-    this.canvas.on("object:modified", () => {        
-        this.updateFormReadAreas()
-    });
+    // this.canvas.on("object:modified", () => {        
+    //     this.updateFormReadAreas()
+    // });
   }
 }
 </script>
@@ -115,8 +114,4 @@ export default {
   margin: auto;
 }
 
-.form-area-grid-display{
-  display: grid;
-  grid-template-columns: 70% 30%;
-}
 </style>
