@@ -18,7 +18,7 @@ import helpers from  "../helpers"
 
 export default {  
   name: 'FormToolbar',
-  inject: ['gobalsProperties'],
+  inject: ['$globals'],
 
   components: {ButtonAreaType},
 
@@ -55,10 +55,10 @@ export default {
         };
       })(area.toObject);
       area.name = name;
-      this.gobalsProperties.canvas.add(area);
+      this.$globals.canvas.add(area);
       helpers.updateFormReadAreas.call(this)
-      this.gobalsProperties.canvas.setActiveObject(area)
-      this.gobalsProperties.canvas.requestRenderAll()
+      this.$globals.canvas.setActiveObject(area)
+      this.$globals.canvas.requestRenderAll()
     },
     
     getFabricRect(left, top, color){

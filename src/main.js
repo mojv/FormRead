@@ -7,12 +7,12 @@ import {store} from './store'
 
 
 const app = createApp(App);
-const gobalsProperties = {'canvas': null};
+const globals = {'canvas': null};
 
 app.use(router);
 app.use(store);
 // app.config.globalProperties.$http = api; // Allow axios in all componenets this.$http.get
-app.provide('gobalsProperties', gobalsProperties)
+app.provide('$globals', globals)
 
 app.mount('#app');
 

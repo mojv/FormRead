@@ -14,7 +14,7 @@ const canvas = new fabric.Canvas('formCanvas')
 export default {  
   name: 'FormEditorArea',
   components: {FormOptionsPanel},
-  inject: ['gobalsProperties'],
+  inject: ['$globals'],
 
   data: function () {
     return {
@@ -24,10 +24,10 @@ export default {
 
   methods: {    
     deleteObjects(e){
-      this.gobalsProperties.canvas.getActiveObjects().forEach((obj) => {
-        this.gobalsProperties.canvas.remove(obj)
+      this.$globals.canvas.getActiveObjects().forEach((obj) => {
+        this.$globals.canvas.remove(obj)
       });
-      this.gobalsProperties.canvas.discardActiveObject().renderAll()
+      this.$globals.canvas.discardActiveObject().renderAll()
        helpers.updateFormReadAreas.call(this)
     },
   },
@@ -58,11 +58,11 @@ export default {
         transparentCorners: true,
     }); 
     delete fabric.Object.prototype.controls.mtr 
-    this.gobalsProperties.canvas = new fabric.Canvas('formCanvas')
-    this.gobalsProperties.canvas.uniformScaling = false
+    this.$globals.canvas = new fabric.Canvas('formCanvas')
+    this.$globals.canvas.uniformScaling = false
     helpers.updateCanvas.call(this)
     this.$store.commit('setCanvasHeight', document.getElementById('FormEditorArea').offsetHeight)
-    this.gobalsProperties.canvas.on("object:modified", () => { 
+    this.$globals.canvas.on("object:modified", () => {
         helpers.updateFormReadAreas.call(this)       
     });
   }

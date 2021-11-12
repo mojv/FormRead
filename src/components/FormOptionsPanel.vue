@@ -17,14 +17,14 @@ import helpers from  "../helpers"
 
 export default {  
   name: 'FormOptionsPanel',
-  inject: ['gobalsProperties'],
+  inject: ['$globals'],
 
   components: {ButtonAreaType, FieldDropDownOtion},
 
   methods: {    
     selectArea(index){
-        this.gobalsProperties.canvas.setActiveObject(this.gobalsProperties.canvas.item(index))
-        this.gobalsProperties.canvas.requestRenderAll()
+        this.$globals.canvas.setActiveObject(this.$globals.canvas.item(index))
+        this.$globals.canvas.requestRenderAll()
     }
   },
 
