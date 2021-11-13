@@ -51,6 +51,9 @@ export const store = createStore({
       addCanvas(state, canvas) {  
         state.canvas = canvas
       },
+      updateFormProp(state, [formId, propName, value]) {
+          state.forms[formId][propName] = value
+      },
     },
 
     getters: {

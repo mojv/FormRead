@@ -1,5 +1,5 @@
 <template>
-    <div class="w-full py-1 overflow-y-auto h-full pr-6" id='FormEditorArea' @keydown.delete="deleteObjects()" tabindex="0">                
+    <div class="w-full overflow-y-auto py-1 overflow-y-auto h-full pr-6" id='FormEditorArea' @keydown.delete="deleteObjects()" tabindex="0">
       <canvas class="shadow-lg rounded-lg" id="formCanvas"></canvas>       
     </div>   
 </template>
