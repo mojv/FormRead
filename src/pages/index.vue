@@ -1,4 +1,5 @@
 <template>
+<!--  <script src="https://badge.dimensions.ai/badge.js"></script>-->
   <div class="bg-gray-50 h-screen">
     <app-header />
     <div class="h-body" :class="{'form-grid-display': formsCant > 0}"> 

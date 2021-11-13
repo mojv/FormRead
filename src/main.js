@@ -5,7 +5,6 @@ import router from "./router/index"
 import './index.css'
 import {store} from './store'
 
-
 const app = createApp(App);
 const globals = {'canvas': null};
 

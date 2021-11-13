@@ -1,5 +1,5 @@
 import {store} from "./index";
-import '../helpers/numjs.min';
+import 'https://cdn.jsdelivr.net/gh/nicolaspanel/numjs@0.15.1/dist/numjs.min.js';
 
 export default class formClass {
     constructor(formId, src) {
