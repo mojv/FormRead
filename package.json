@@ -10,6 +10,7 @@
     "eslint-config-prettier": "^8.3.0",
     "eslint-plugin-vue": "^8.0.3",
     "fabric": "^4.6.0",
+    "opencv.js": "^1.2.1",
     "prettier": "^2.4.1",
     "vue": "^3.2.16",
     "vue-router": "4",

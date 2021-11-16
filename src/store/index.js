@@ -1,4 +1,4 @@
-import { createStore } from 'vuex'
+import {createStore} from 'vuex'
 import formClass from './form'
 
 
@@ -10,15 +10,15 @@ export const store = createStore({
           selectedFormId: "",
           formReadAreas: [],
           canvasHeight: 0,
-          canvasWidth: 0
+          canvasWidth: 0,
+          sheetAspectRatio: null
         }
     },
 
     mutations: {
-      addForm(state, [formId, imgSrc]) {  
-        let form =  new formClass(formId, imgSrc)
-        state.forms[formId] = form
-        if(Object.keys(state.forms).length == 1){
+      addForm(state, [formId, imgSrc, fromCam]) {
+        state.forms[formId] = new formClass(formId, imgSrc, fromCam)
+        if(Object.keys(state.forms).length === 1){
           state.selectedFormId = formId
         }
       },
@@ -53,6 +53,9 @@ export const store = createStore({
       },
       updateFormProp(state, [formId, propName, value]) {
           state.forms[formId][propName] = value
+      },
+      setSheetAspectRatio(state, ratio){
+          state.sheetAspectRatio = ratio
       },
     },
 

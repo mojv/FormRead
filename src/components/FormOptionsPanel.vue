@@ -11,9 +11,7 @@
 <script>
 
 import ButtonAreaType from './ButtonAreaType.vue'
-import { fabric } from "fabric";
 import FieldDropDownOtion from './FieldDropDownOtion.vue'
-import helpers from  "../helpers"
 
 export default {  
   name: 'FormOptionsPanel',
@@ -46,6 +44,6 @@ export default {
 }
 </script>
 
-<style scope>
+<style>
 
 </style>

@@ -23,7 +23,7 @@ export default {
   },
 
   methods: {    
-    deleteObjects(e){
+    deleteObjects(){
       this.$globals.canvas.getActiveObjects().forEach((obj) => {
         this.$globals.canvas.remove(obj)
       });
@@ -39,6 +39,9 @@ export default {
     selectedFormId: function () {
       return this.$store.state.selectedFormId
     },
+    selectedFormSrc: function () {
+      return this.$store.state.forms[this.selectedFormId].src
+    },
     formReadAreas: function() {
       return this.$store.state.formReadAreas
     },
@@ -48,7 +51,10 @@ export default {
   },
 
   watch: {
-    selectedFormId: function (newId, oldId) {
+    selectedFormId: function () {
+      helpers.updateCanvas.call(this)
+    },
+    selectedFormSrc: function () {
       helpers.updateCanvas.call(this)
     }
   },
@@ -69,8 +75,8 @@ export default {
 }
 </script>
 
-<style scope>
-.canvas-container, .upper-canvas, #formCanvas{
+<style>
+#formCanvas{
   margin: auto;
 }
 
