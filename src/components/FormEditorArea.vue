@@ -76,7 +76,7 @@ export default {
 </script>
 
 <style>
-#formCanvas{
+.canvas-container, .upper-canvas, #formCanvas{
   margin: auto;
 }
 

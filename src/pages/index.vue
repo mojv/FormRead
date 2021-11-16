@@ -4,8 +4,8 @@
     <app-header />
     <div class="h-body" :class="{'form-grid-display': formsCant > 0}"> 
       <upload-file 
-        :description='"Get list (csv) of QR code in multiple pages and even download all Imgs renamed"' 
-        :tittle='"MULTI-PAGE QR CODE READER"' 
+        :description='"Multiple sheets OMR (optical mark recognition) OCR (Optical Character Recognition) and BCR (Bar Code Recognition)"'
+        :tittle='"FREE OMR, OCR & BCR"'
         v-if="formsCant == 0"
       />  
       <template v-if="formsCant > 0">
