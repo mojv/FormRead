@@ -31,25 +31,31 @@ export default class formClass {
     constructor(formId, src, fromCam) {
         this.id = formId
         this.src = src
-        if (fromCam) {
-            this.edgesTransformation()
-        }
+        this.canvas = null
+        this.edgesTransformation(fromCam)
     }
 
     get area() {
         return this.calcArea();
     }
 
-    async edgesTransformation() {
-        var image = new Image()
+    async edgesTransformation(fromCam) {
+        this.canvas = await document.createElement('canvas')
+        let image = new Image()
         image.src = this.src
         await image.decode();
-        var src = imread(image)
 
-        let [contours, , ] = this.getContours(src, true)
+        if(fromCam){
+            let src = imread(image)
+            let [contours, , ] = this.getContours(src, false)
+            let dst = this.fourPointsTransform(src, contours)
+            this.updateSrc(dst)
+        }else{
+            this.canvas.height = image.height; this.canvas.width = image.width
+            let ctx = this.canvas.getContext('2d');
+            ctx.drawImage(image,0,0);
+        }
 
-        let dst = this.fourPointsTransform(src, contours)
-        this.updateSrc(dst)
     }
 
     getContours(src, draw) {
@@ -63,10 +69,10 @@ export default class formClass {
         if (draw) {
             for (let i = 0; i < contours.size(); ++i) {
                 let color = new Scalar(255, 0, 0, 255);
-                drawContours(dst, contours, i, color, 5, LINE_8, hierarchy, 100);
+                drawContours(src, contours, i, color, 5, LINE_8, hierarchy, 100);
             }
         }
-        return [contours, hierarchy, dst]
+        return [contours, hierarchy, src]
     }
 
     fourPointsTransform(src, contours) {
@@ -147,15 +153,14 @@ export default class formClass {
     }
 
     findAnchors() {
-        alert('hola')
+        console.log(store.state.formReadAreas)
     }
 
     async updateSrc(dst) {
         // display images in canvas
-        var edges = await document.createElement('canvas');
-        await imshow(edges, dst);
-        var edge_src = await edges.toDataURL()
-        store.commit('updateFormProp', [this.id, 'src', edge_src])
+        await imshow(this.canvas, dst);
+        let new_src = this.canvas.toDataURL()
+        store.commit('updateFormProp', [this.id, 'src', new_src])
     }
 }
 

@@ -1,5 +1,5 @@
 // src/main.js
-import { createApp, reactive } from 'vue'
+import {createApp, reactive} from 'vue'
 import App from './App.vue'
 import router from "./router/index"
 import './index.css'
@@ -11,8 +11,9 @@ const globals = {'canvas': null};
 app.use(router);
 app.use(store);
 // app.config.globalProperties.$http = api; // Allow axios in all componenets this.$http.get
+/**
+ * @property {fabric} $globals.canvas
+ */
 app.provide('$globals', globals)
 
 app.mount('#app');
-
-
