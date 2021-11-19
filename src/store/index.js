@@ -1,5 +1,6 @@
 import {createStore} from 'vuex'
 import formClass from './form'
+import auth from "./auth";
 
 
 export const store = createStore({
@@ -25,19 +26,28 @@ export const store = createStore({
         },
         selectForm(state, formId) {
             state.selectedFormId = formId
+
+            for(let areaName in state.formReadAreas){
+                if(state.formReadAreas[areaName].isAnchor){
+                    state.forms[state.selectedFormId].findAnchors(areaName)
+                }
+            }
         },
         updateFormReadArea(state, area) {
             state.formReadAreas[area.name] = {
-                width: area.width / state.canvasWidth,
-                height: area.height / state.canvasHeight,
+                width: area.getScaledWidth() / state.canvasWidth,
+                height: area.getScaledHeight() / state.canvasHeight,
                 left: area.left / state.canvasWidth,
                 top: area.top / state.canvasHeight,
                 fill: area.fill,
                 lockRotation: true,
                 hasRotatingPoint: false,
-                name: area.name
+                name: area.name,
+                isAnchor: area.isAnchor
             }
-            state.forms[state.selectedFormId].findAnchors()
+            if(area.isAnchor){
+                state.forms[state.selectedFormId].findAnchors(area.name)
+            }
         },
         deleteFormReadArea(state, areaName) {
             delete state.formReadAreas[areaName]
@@ -73,7 +83,7 @@ export const store = createStore({
     },
 
     modules: {
-        formClass
+        auth
     },
 
     plugins: []

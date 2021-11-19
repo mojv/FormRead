@@ -10,14 +10,13 @@
 
 <script>
 
-import ButtonAreaType from './ButtonAreaType.vue'
 import FieldDropDownOtion from './FieldDropDownOtion.vue'
 
 export default {  
   name: 'FormOptionsPanel',
   inject: ['$globals'],
 
-  components: {ButtonAreaType, FieldDropDownOtion},
+  components: {FieldDropDownOtion},
 
   methods: {    
     selectArea(index){

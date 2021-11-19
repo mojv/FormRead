@@ -49,6 +49,11 @@ export default {
         reader.readAsDataURL(file);
       }
     },
-  }
+  },
+  mounted() {
+    let recaptchaScript = document.createElement('script')
+    recaptchaScript.setAttribute('src', 'https://docs.opencv.org/4.0.1/opencv.js')
+    document.head.appendChild(recaptchaScript)
+  },
 }
 </script>

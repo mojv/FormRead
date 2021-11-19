@@ -14,7 +14,6 @@
 
 import ButtonAreaType from './ButtonAreaType.vue'
 import {fabric} from "fabric";
-import helpers from "../helpers"
 
 export default {
   name: 'FormToolbar',
@@ -26,7 +25,7 @@ export default {
     addField(color, type) {
       let area = this.getFabricRect(this.canvasWidth / 2, this.canvasHeight / 2, color)
       let name = `${type}-${Math.random().toString(36).slice(7)}`
-      this.addArea(area, name)
+      this.addArea(area, name, false)
     },
 
     addAnchor() {
@@ -41,20 +40,22 @@ export default {
         if (this.anchors.filter(anchor => anchor.name == 'anchor-' + i).length == 0) {
           let area = this.getFabricRect(positions[i][0], positions[i][1], color)
           let name = 'anchor-' + i
-          this.addArea(area, name)
+          this.addArea(area, name, true)
         }
       }
     },
 
-    addArea(area, name) {
+    addArea(area, name, isAnchor) {
       area.toObject = (function (toObject) {
         return function () {
           return fabric.util.object.extend(toObject.call(this), {
-            name: this.name
+            name: this.name,
+            isAnchor: this.isAnchor
           });
         };
       })(area.toObject);
       area.name = name;
+      area.isAnchor = isAnchor;
       this.$globals.canvas.add(area);
       this.$store.commit('updateFormReadArea', area)
       this.$globals.canvas.setActiveObject(area)
