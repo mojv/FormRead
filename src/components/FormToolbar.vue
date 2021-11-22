@@ -1,25 +1,29 @@
 <template>
   <div class="h-full bg-white shadow" data-rich-editor-target="toolbar">
     <div class="relative z-20 flex justify-center flex-wrap flex-row sm:flex-row">
-      <button-area-type v-if="anchors.length < 4" v-on:click="addAnchor()" :buttonType="'anchor'"/>
-      <button-area-type v-on:click="addField('rgb(110,214,36,0.3)','QR')" :buttonType="'QR'"/>
-      <button-area-type v-on:click="addField('rgb(158,68,226,0.3)','OCR')" :buttonType="'OCR'"/>
-      <button-area-type v-on:click="addField('rgb(33,239,160,0.3)','OMR')" :buttonType="'OMR'"/>
-      <button-area-type v-on:click="addField('rgb(255,117,140,0.3)','cuts')" :buttonType="'cuts'"/>
+      <anchor-icon v-if="anchors.length < 4" v-on:click="addAnchor()" class=""></anchor-icon>
+      <qr-icon v-on:click="addField('rgb(110,214,36,0.3)','QR')"></qr-icon>
+      <ocr-icon v-on:click="addField('rgb(158,68,226,0.3)','OCR')"></ocr-icon>
+      <omr-icon v-on:click="addField('rgb(33,239,160,0.3)','OMR')"></omr-icon>
+      <cut-icon v-on:click="addField('rgb(255,117,140,0.3)','cuts')"></cut-icon>
     </div>
   </div>
 </template>
 
 <script>
 
-import ButtonAreaType from './ButtonAreaType.vue'
+import qrIcon from  './Icons/qrIcon.vue'
+import ocrIcon from  './Icons/ocrIcon.vue'
+import omrIcon from  './Icons/omrIcon.vue'
+import cutIcon from  './Icons/cutIcon.vue'
+import anchorIcon from  './Icons/anchorIcon.vue'
 import {fabric} from "fabric";
 
 export default {
   name: 'FormToolbar',
   inject: ['$globals'],
 
-  components: {ButtonAreaType},
+  components: {qrIcon, ocrIcon, omrIcon, cutIcon, anchorIcon},
 
   methods: {
     addField(color, type) {

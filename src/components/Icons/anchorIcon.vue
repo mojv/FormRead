@@ -1,0 +1,7 @@
+<template>
+  <svg xmlns="http://www.w3.org/2000/svg" height="48"  width="48">
+    <path d="M0 0h48v48h-48z" fill="none"/>
+    <path
+        d="M44 36v-4h-28v-24h4l-6-6-6 6h4v4h-8v4h8v16c0 2.21 1.79 4 4 4h16v4h-4l6 6 6-6h-4v-4h8zm-24-20h12v12h4v-12c0-2.21-1.79-4-4-4h-12v4z"/>
+  </svg>
+</template>
