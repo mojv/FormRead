@@ -1,11 +1,11 @@
 <template>
   <div class="h-full bg-white shadow" data-rich-editor-target="toolbar">
-    <div class="relative z-20 flex justify-center flex-wrap flex-row sm:flex-row">
-      <anchor-icon v-if="anchors.length < 4" v-on:click="addAnchor()" class=""></anchor-icon>
-      <qr-icon v-on:click="addField('rgb(110,214,36,0.3)','QR')"></qr-icon>
-      <ocr-icon v-on:click="addField('rgb(158,68,226,0.3)','OCR')"></ocr-icon>
-      <omr-icon v-on:click="addField('rgb(33,239,160,0.3)','OMR')"></omr-icon>
-      <cut-icon v-on:click="addField('rgb(255,117,140,0.3)','cuts')"></cut-icon>
+    <div class="h-full relative z-20 flex justify-center flex-wrap flex-row sm:flex-row items-center	">
+      <anchor-icon class="mx-1 fill-current text-black hover:text-gray-500 cursor-pointer" v-if="anchors.length < 4" v-on:click="addAnchor()" ></anchor-icon>
+      <qr-icon     class="mx-1 fill-current text-black hover:text-gray-500 cursor-pointer" v-on:click="addField('rgb(110,214,36,0.3)','QR')"></qr-icon>
+      <ocr-icon    class="mx-1 fill-current text-black hover:text-gray-500 cursor-pointer" v-on:click="addField('rgb(158,68,226,0.3)','OCR')"></ocr-icon>
+      <omr-icon    class="mx-1 fill-current text-black hover:text-gray-500 cursor-pointer" v-on:click="addField('rgb(33,239,160,0.3)','OMR')"></omr-icon>
+      <cut-icon    class="mx-1 fill-current text-black hover:text-gray-500 cursor-pointer" v-on:click="addField('rgb(255,117,140,0.3)','cuts')"></cut-icon>
     </div>
   </div>
 </template>
@@ -41,7 +41,7 @@ export default {
         [this.canvasWidth - 100, this.canvasHeight - 100]
       ]
       for (let i in positions) {
-        if (this.anchors.filter(anchor => anchor.name == 'anchor-' + i).length == 0) {
+        if (this.anchors.filter(anchor => anchor.name === 'anchor-' + i).length === 0) {
           let area = this.getFabricRect(positions[i][0], positions[i][1], color)
           let name = 'anchor-' + i
           this.addArea(area, name, true)
@@ -98,7 +98,3 @@ export default {
 
 }
 </script>
-
-<style scope>
-
-</style>
