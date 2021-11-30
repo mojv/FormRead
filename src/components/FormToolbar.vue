@@ -1,11 +1,13 @@
 <template>
   <div class="h-full bg-white shadow" data-rich-editor-target="toolbar">
     <div class="h-full relative z-20 flex justify-center flex-wrap flex-row sm:flex-row items-center	">
-      <anchor-icon class="mx-1 fill-current text-black hover:text-gray-500 cursor-pointer" v-if="anchors.length < 4" v-on:click="addAnchor()" ></anchor-icon>
-      <qr-icon     class="mx-1 fill-current text-black hover:text-gray-500 cursor-pointer" v-on:click="addField('rgb(110,214,36,0.3)','QR')"></qr-icon>
-      <ocr-icon    class="mx-1 fill-current text-black hover:text-gray-500 cursor-pointer" v-on:click="addField('rgb(158,68,226,0.3)','OCR')"></ocr-icon>
-      <omr-icon    class="mx-1 fill-current text-black hover:text-gray-500 cursor-pointer" v-on:click="addField('rgb(33,239,160,0.3)','OMR')"></omr-icon>
-      <cut-icon    class="mx-1 fill-current text-black hover:text-gray-500 cursor-pointer" v-on:click="addField('rgb(255,117,140,0.3)','cuts')"></cut-icon>
+      <anchor-icon v-if="!isAnchorModeOn" v-on:click="addAnchor()" class="mx-1 fill-current text-black hover:text-gray-500 cursor-pointer" />
+      <read-anchor-icon v-if="$store.getters.selectedFormAnchorsCount === 4 && isAnchorModeOn" v-on:click="processAnchors" />
+      <cancelIcon v-if="isAnchorModeOn" v-on:click="deleteAllObjects" class="mx-1 fill-current text-black hover:text-gray-500 cursor-pointer" />
+      <qr-icon v-if="!isAnchorModeOn" v-on:click="addField('rgb(110,214,36,0.3)','QR')" class="mx-1 fill-current text-black hover:text-gray-500 cursor-pointer" />
+      <ocr-icon v-if="!isAnchorModeOn" v-on:click="addField('rgb(158,68,226,0.3)','OCR')" class="mx-1 fill-current text-black hover:text-gray-500 cursor-pointer" />
+      <omr-icon v-if="!isAnchorModeOn" v-on:click="addField('rgb(33,239,160,0.3)','OMR')" class="mx-1 fill-current text-black hover:text-gray-500 cursor-pointer" />
+      <cut-icon v-if="!isAnchorModeOn" v-on:click="addField('rgb(255,117,140,0.3)','cuts')" class="mx-1 fill-current text-black hover:text-gray-500 cursor-pointer" />
     </div>
   </div>
 </template>
@@ -17,13 +19,22 @@ import ocrIcon from  './Icons/ocrIcon.vue'
 import omrIcon from  './Icons/omrIcon.vue'
 import cutIcon from  './Icons/cutIcon.vue'
 import anchorIcon from  './Icons/anchorIcon.vue'
+import readAnchorIcon from './Icons/readAnchorIcon.vue'
+import cancelIcon from './Icons/canelIcon.vue'
 import {fabric} from "fabric";
+import helpers from "../helpers";
 
 export default {
   name: 'FormToolbar',
   inject: ['$globals'],
 
-  components: {qrIcon, ocrIcon, omrIcon, cutIcon, anchorIcon},
+  components: {qrIcon, ocrIcon, omrIcon, cutIcon, anchorIcon, cancelIcon, readAnchorIcon},
+
+  data: function () {
+    return {
+      isAnchorModeOn: false,
+    }
+  },
 
   methods: {
     addField(color, type) {
@@ -33,6 +44,7 @@ export default {
     },
 
     addAnchor() {
+      this.isAnchorModeOn = true
       let color = 'rgb(0,198,251,0.3)'
       let positions = [
         [50, 50],
@@ -78,6 +90,17 @@ export default {
         cornerSize: 6,
         transparentCorners: false
       })
+    },
+
+    deleteAllObjects(){
+      helpers.deleteAllObjects.call(this, false)
+      this.$store.dispatch('deleteAllAnchors')
+    },
+
+    processAnchors(){
+      this.$store.dispatch('processAllFormAnchors')
+      helpers.deleteAllObjects.call(this, true)
+      this.isAnchorModeOn = false
     }
   },
 

@@ -2,7 +2,9 @@
   <div class="w-full py-1 overflow-y-auto h-full shadow-md bg-white overflow-y-auto h-full">  
     <section class="shadow row">
       <div class="tabs">
-        <field-drop-down-otion v-for="(area, index) in formReadAreas" :key="index" :FieldName="area.name" v-on:click="selectArea(index)" />
+        <template v-for="(area, index) in formReadAreas" :key="index" >
+          <field-drop-down-otion v-if="!area.isAnchor"  :FieldName="area.name" v-on:click="selectArea(index)" />
+        </template>
       </div>
     </section>
   </div>

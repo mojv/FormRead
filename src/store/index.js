@@ -13,7 +13,9 @@ export const store = createStore({
             canvasHeight: 0,
             canvasWidth: 0,
             sheetAspectRatio: null,
-            fabricActiveObject: ''
+            fabricActiveObject: '',
+            showLoadingModal: false,
+            totalForms: 0
         }
     },
 
@@ -73,13 +75,47 @@ export const store = createStore({
             } catch (e) {
                 state.fabricActiveObject = ''
             }
+        },
+        showLoadingModal(state, show){
+            state.showLoadingModal = show
+        },
+        mutateProperty(state, [prop, val]){
+            state[prop] = val
+        }
+    },
+
+    actions: {
+        processAllFormAnchors({ commit, state }) {
+            for (let form in state.forms){
+                commit('updateFormProp', [form, 'src', ''])
+            }
+            for (let form in state.forms){
+                setTimeout(() => {
+                    state.forms[form].processAnchors()
+                }, 0)
+            }
+        },
+        deleteAllAnchors({ state }){
+            for (let form in state.forms){
+                state.forms[form].anchors = {}
+            }
         }
     },
 
     getters: {
-        get_forms(state) {
+        c_forms(state) {
             return state.forms
-        }
+        },
+        selectedFormAnchorsCount(state) {
+            return Object.keys(state.forms[state.selectedFormId].anchors).length
+        },
+        countImageSrc(state) {
+            let count = 0
+            for (let form in state.forms){
+                count = state.forms[form].src !== '' ? count + 1 : count;
+            }
+            return count
+        },
     },
 
     modules: {

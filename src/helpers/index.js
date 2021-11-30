@@ -16,4 +16,12 @@ export default {
             });
         });
     },
+    deleteAllObjects(onlyCanvas){
+        this.$globals.canvas.getObjects().forEach((obj) => {
+            this.$globals.canvas.remove(obj)
+            if(!onlyCanvas){
+                this.$store.commit('deleteFormReadArea', obj.name)
+            }
+        });
+    }
 }

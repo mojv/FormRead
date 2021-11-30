@@ -4,34 +4,43 @@ import {store} from "./index";
 export default class formClass {
     constructor(formId, src, fromCam) {
         this.id = formId
-        this.src = src
+        this.src_original = src;
+        this.src = '';
         this.canvas = null
         this.anchors = {}
-        this.edgesTransformation(fromCam)
+        this.hasError = false
+        if(fromCam){
+            this.edgesTransformation(src)
+        }else{
+            this.src = src
+            this.setCanvasFromSrc(src)
+        }
     }
 
-    get area() {
-        return this.calcArea();
-    }
-
-    async edgesTransformation(fromCam) {
+    async setCanvasFromSrc(src){
         this.canvas = await document.createElement('canvas')
         let image = new Image()
-        image.src = this.src
+        image.src = src
+        await image.decode();
+        this.canvas.height = image.height; this.canvas.width = image.width
+        let ctx = this.canvas.getContext('2d');
+        ctx.drawImage(image,0,0);
+    }
+
+
+    async edgesTransformation(src) {
+        this.canvas = await document.createElement('canvas')
+        let image = new Image()
+        image.src = src
         await image.decode();
         let imgArea = image.height * this.canvas.width
-
-        if(fromCam){
-            let src = cv.imread(image)
-            let [contours] = this.getContours(src, imgArea, false)
-            let dst = this.fourPointsTransform(src, contours)
+        let cv_src = cv.imread(image)
+        let [contours] = this.getContours(cv_src, imgArea, false)
+        let cornerArray = this.findExternalSheetCorners(contours)
+        if(cornerArray){
+            let dst = this.fourPointsTransform(cv_src, cornerArray)
             this.updateSrc(dst)
-        }else{
-            this.canvas.height = image.height; this.canvas.width = image.width
-            let ctx = this.canvas.getContext('2d');
-            ctx.drawImage(image,0,0);
         }
-
     }
 
     async updateSrc(dst) {
@@ -64,7 +73,7 @@ export default class formClass {
         return [contours, hierarchy, src, boundingRects]
     }
 
-    fourPointsTransform(src, contours) {
+    findExternalSheetCorners(contours) {
         let foundContour = new cv.MatVector();
 
         //Get area for all contours so we can find the biggest
@@ -88,11 +97,11 @@ export default class formClass {
         cv.approxPolyDP(sortableContours[0].contour, approx, .05 * sortableContours[0].perimiterSize, true);
 
         if (approx.rows === 4) {
-            console.log('Found a 4-corner approx');
             foundContour = approx;
         } else {
-            console.log('No 4-corner large contour!');
-            return;
+            store.commit('updateFormProp', [this.id, 'hasError', true])
+            store.commit('updateFormProp', [this.id, 'src', this.src_original])
+            return false;
         }
 
         //Find the corners
@@ -109,6 +118,10 @@ export default class formClass {
             return (item1.corner.y < item2.corner.y) ? -1 : (item1.corner.y > item2.corner.y) ? 1 : 0;
         }).slice(0, 5);
 
+        return cornerArray
+    }
+
+    fourPointsTransform(src, cornerArray) {
         //Determine left/right based on x position of top and bottom 2
         let tl = cornerArray[0].corner.x < cornerArray[1].corner.x ? cornerArray[0] : cornerArray[1];
         let tr = cornerArray[0].corner.x > cornerArray[1].corner.x ? cornerArray[0] : cornerArray[1];
@@ -155,9 +168,32 @@ export default class formClass {
         }else {
             delete this.anchors[areaName]
         }
-
         // override anchor so it is reactive
         store.commit('updateFormProp', [this.id, 'anchors', this.anchors])
+    }
+
+    async processAnchors(){
+        if(Object.keys(this.anchors).length === 0){
+            await this.findAnchors('anchor-0')
+            await this.findAnchors('anchor-1')
+            await this.findAnchors('anchor-3')
+            await this.findAnchors('anchor-2')
+        }
+        if(Object.keys(this.anchors).length === 4){
+            let corner1 = new cv.Point(this.anchors['anchor-0'][0]*this.canvas.width, this.anchors['anchor-0'][1]*this.canvas.height);
+            let corner2 = new cv.Point(this.anchors['anchor-1'][0]*this.canvas.width, this.anchors['anchor-1'][1]*this.canvas.height);
+            let corner3 = new cv.Point(this.anchors['anchor-3'][0]*this.canvas.width, this.anchors['anchor-3'][1]*this.canvas.height);
+            let corner4 = new cv.Point(this.anchors['anchor-2'][0]*this.canvas.width, this.anchors['anchor-2'][1]*this.canvas.height);
+
+            let cornerArray = [{corner: corner1}, {corner: corner2}, {corner: corner3}, {corner: corner4}];
+            let cv_src = await cv.imread(this.canvas)
+            let dst = this.fourPointsTransform(cv_src, cornerArray)
+            this.updateSrc(dst)
+        }else {
+            store.commit('updateFormProp', [this.id, 'hasError', true])
+            store.commit('updateFormProp', [this.id, 'src', this.src_original])
+        }
+
     }
 
     getAreaCanvas(area) {

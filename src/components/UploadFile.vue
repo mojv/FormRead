@@ -33,6 +33,7 @@ export default {
     uploadImagesFiles: function (evt, fromCam) {
       var files = evt.target.files;
       let context = this
+      this.$store.commit('mutateProperty', ['totalForms',  files.length])
 
       for (let file of files) {
         var reader = new FileReader();
