@@ -1,5 +1,5 @@
 <template>
-  <div class="h-full bg-white shadow" data-rich-editor-target="toolbar">
+  <div class="h-full bg-white shadow" data-rich-editor-target="toolbar" id="FormToolbar">
     <div class="h-full relative z-20 flex justify-center flex-wrap flex-row sm:flex-row items-center	">
       <anchor-icon v-if="!isAnchorModeOn" v-on:click="addAnchor()" class="mx-1 fill-current text-black hover:text-gray-500 cursor-pointer" />
       <read-anchor-icon v-if="$store.getters.selectedFormAnchorsCount === 4 && isAnchorModeOn" v-on:click="processAnchors" />
@@ -95,6 +95,7 @@ export default {
     deleteAllObjects(){
       helpers.deleteAllObjects.call(this, false)
       this.$store.dispatch('deleteAllAnchors')
+      this.isAnchorModeOn = false
     },
 
     processAnchors(){

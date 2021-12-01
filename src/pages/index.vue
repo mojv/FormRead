@@ -1,18 +1,18 @@
 <template>
   <!--  <script src="https://badge.dimensions.ai/badge.js"></script>-->
-  <div @click="setActiveObject" class="bg-gray-50 h-screen">
-    <app-header/>
+  <div @click="setActiveObject" class="bg-gray-50 h-screen" >
+    <app-header  v-if="formsCant === 0" />
     <div class="h-body" :class="{'form-grid-display': formsCant > 0}">
       <upload-file
           :description='"Multiple sheets OMR (optical mark recognition) OCR (Optical Character Recognition) and BCR (Bar Code Recognition)"'
           :tittle='"FREE OMR, OCR & BCR"'
-          v-if="formsCant == 0"
+          v-if="formsCant === 0"
       />
       <template v-if="formsCant > 0">
-        <scrollable-forms-list class="scrollable-forms-list"/>
-        <form-toolbar class="form-toolbar"/>
-        <form-editor-area class="form-editor-area"/>
-        <form-options-panel class="form-options-panel"/>
+        <scrollable-forms-list />
+        <form-toolbar />
+        <form-editor-area />
+        <form-options-panel />
       </template>
 
     </div>
@@ -60,12 +60,22 @@ export default {
 }
 </script>
 
-<style scope>
+<style lang="scss">
 .h-body {
-  height: 93%;
+  height: 100%;
 }
 
 .form-grid-display {
+  @media (max-width: 768px) {
+    grid-template-areas:
+      'FormToolbar'
+      'workarea';
+    grid-template-columns: 100%;
+    grid-template-rows: 2.5rem auto;
+  }
+  @media (max-width: 1025px) {
+    grid-template-columns: 12% 65% 23%;
+  }
   display: grid;
   grid-template-areas:
       'ScrollableFormsList FormToolbar FormOptionsPanel'
@@ -74,19 +84,32 @@ export default {
   grid-template-rows: 2.5rem auto;
 }
 
-.scrollable-forms-list {
-  grid-area: ScrollableFormsList;
-}
-
-.form-toolbar {
+#FormToolbar {
   grid-area: FormToolbar;
 }
 
-.form-editor-area {
+#ScrollableFormsList {
+  @media (max-width: 768px){
+    grid-area: workarea;
+
+
+  }
+  grid-area: ScrollableFormsList;
+}
+
+#FormEditorArea {
+  @media (max-width: 768px){
+    grid-area: workarea;
+    visibility: hidden;
+  }
   grid-area: FormEditorArea;
 }
 
-.form-options-panel {
+#FormOptionsPanel {
+  @media (max-width: 768px){
+    grid-area: workarea;
+    display: none;
+  }
   grid-area: FormOptionsPanel;
 }
 </style>

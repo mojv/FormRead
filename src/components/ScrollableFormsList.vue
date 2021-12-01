@@ -1,5 +1,5 @@
 <template>
-  <div class="w-full py-1 shadow-md overflow-y-auto h-full pr-6" >
+  <div class="w-full py-1 shadow-md overflow-y-auto h-full flex flex-wrap justify-center content-start md:pr-1" id="ScrollableFormsList">
     <template v-for="(form, id) in forms" >
       <img
           v-if="form.src !== ''"
@@ -7,7 +7,7 @@
           @click='selectForm(id)'
           :src="form.src" :key="id"
           :class="{'border-green-400': selectedFormId === id}"
-          class="w-full thumb m-3 shadow border-4 rounded-lg border-transparent hover:border-green-400"
+          class="self-start	shadow border-4 rounded-lg border-transparent hover:border-green-400 w-24 h-auto m-1"
           alt="id"/>
     </template >
   </div>

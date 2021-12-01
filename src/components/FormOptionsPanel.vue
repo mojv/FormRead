@@ -1,5 +1,5 @@
 <template>
-  <div class="w-full py-1 overflow-y-auto h-full shadow-md bg-white overflow-y-auto h-full">  
+  <div class="w-full py-1 overflow-y-auto h-full shadow-md bg-white overflow-y-auto h-full" id='FormOptionsPanel'>
     <section class="shadow row">
       <div class="tabs">
         <template v-for="(area, index) in formReadAreas" :key="index" >

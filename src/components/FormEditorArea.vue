@@ -1,5 +1,5 @@
 <template>
-  <div @click="setActiveObject" class="w-full overflow-y-auto py-1 overflow-y-auto h-full pr-6" id='FormEditorArea'
+  <div @click="setActiveObject" class="w-full overflow-y-auto py-2 overflow-y-auto h-full pr-6 bg-gray-200" id='FormEditorArea'
        @keydown.delete="deleteObjects()" tabindex="0">
     <canvas class="shadow-lg rounded-lg" id="formCanvas"></canvas>
   </div>
@@ -118,9 +118,31 @@ export default {
 }
 </script>
 
-<style>
+<style >
 .canvas-container, .upper-canvas, #formCanvas {
   margin: auto;
 }
+/* width */
+::-webkit-scrollbar {
+  width: 16px;
+  height: 16px;
+}
 
+/* Track */
+::-webkit-scrollbar-track {
+  border-radius: 100vh;
+  background: #edf2f7;
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+  background: #cbd5e0;
+  border-radius: 100vh;
+  border: 3px solid #edf2f7;
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+  background: #a0aec0;
+}
 </style>
