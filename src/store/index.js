@@ -35,6 +35,14 @@ export const store = createStore({
                 }
             }
         },
+        deleteForm(state, formId) {
+            delete state.forms[formId]
+            state.totalForms--
+            if(state.totalForms === 0){
+                location.reload();
+            }
+            this.commit('selectForm', Object.keys(state.forms)[0])
+        },
         updateFormReadArea(state, area) {
             state.formReadAreas[area.name] = {
                 width: area.getScaledWidth() / state.canvasWidth,

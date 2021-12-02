@@ -52,9 +52,12 @@ export default {
 
   computed: {
     formsCant: function () {
-
       return Object.keys(this.$store.state.forms).length
     },
+  },
+
+  mounted() {
+
   }
 
 }
@@ -68,20 +71,10 @@ export default {
 .form-grid-display {
   display: grid;
   grid-template-areas:
-      'ScrollableFormsList FormToolbar FormOptionsPanel'
+      'FormToolbar FormToolbar FormToolbar'
       'ScrollableFormsList FormEditorArea FormOptionsPanel';
-  grid-template-columns: 8% 65% 27%;
+  grid-template-columns: 120px 2fr 0fr;
   grid-template-rows: 2.5rem auto;
-  @media only screen and (max-width: 1025px) {
-    grid-template-columns: 12% 65% 23%;
-  }
-  @media only screen and (max-width: 768px) {
-    grid-template-areas:
-      'FormToolbar'
-      'workarea';
-    grid-template-columns: 100%;
-    grid-template-rows: 2.5rem auto;
-  }
 }
 
 #FormToolbar {
@@ -89,25 +82,14 @@ export default {
 }
 
 #ScrollableFormsList {
-  @media (max-width: 768px){
-    grid-area: workarea;
-  }
   grid-area: ScrollableFormsList;
 }
 
 #FormEditorArea {
-  @media (max-width: 768px){
-    grid-area: workarea;
-    visibility: hidden;
-  }
   grid-area: FormEditorArea;
 }
 
 #FormOptionsPanel {
-  @media (max-width: 768px){
-    grid-area: workarea;
-    visibility: hidden;
-  }
   grid-area: FormOptionsPanel;
 }
 </style>
