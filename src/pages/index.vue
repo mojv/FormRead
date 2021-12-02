@@ -66,22 +66,22 @@ export default {
 }
 
 .form-grid-display {
-  @media (max-width: 768px) {
-    grid-template-areas:
-      'FormToolbar'
-      'workarea';
-    grid-template-columns: 100%;
-    grid-template-rows: 2.5rem auto;
-  }
-  @media (max-width: 1025px) {
-    grid-template-columns: 12% 65% 23%;
-  }
   display: grid;
   grid-template-areas:
       'ScrollableFormsList FormToolbar FormOptionsPanel'
       'ScrollableFormsList FormEditorArea FormOptionsPanel';
   grid-template-columns: 8% 65% 27%;
   grid-template-rows: 2.5rem auto;
+  @media only screen and (max-width: 1025px) {
+    grid-template-columns: 12% 65% 23%;
+  }
+  @media only screen and (max-width: 768px) {
+    grid-template-areas:
+      'FormToolbar'
+      'workarea';
+    grid-template-columns: 100%;
+    grid-template-rows: 2.5rem auto;
+  }
 }
 
 #FormToolbar {
@@ -91,8 +91,6 @@ export default {
 #ScrollableFormsList {
   @media (max-width: 768px){
     grid-area: workarea;
-
-
   }
   grid-area: ScrollableFormsList;
 }
@@ -108,7 +106,7 @@ export default {
 #FormOptionsPanel {
   @media (max-width: 768px){
     grid-area: workarea;
-    display: none;
+    visibility: hidden;
   }
   grid-area: FormOptionsPanel;
 }
