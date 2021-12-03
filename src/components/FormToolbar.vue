@@ -1,6 +1,9 @@
 <template>
-  <div class="h-full bg-white shadow" data-rich-editor-target="toolbar" id="FormToolbar">
-    <div class="h-full relative z-20 flex justify-center flex-wrap flex-row sm:flex-row items-center	">
+  <div class="h-full bg-white shadow flex flex-row" data-rich-editor-target="toolbar" id="FormToolbar">
+    <div class="h-full relative z-20 flex justify-center flex-wrap flex-row sm:flex-row items-center">
+      <menu-icon v-on:click="collapsePanel()" class="mx-1 fill-current text-black hover:text-gray-500 cursor-pointer" />
+    </div>
+    <div class="w-5/6 h-full relative z-20 flex justify-center flex-wrap flex-row sm:flex-row items-center">
       <anchor-icon v-if="!isAnchorModeOn" v-on:click="addAnchor()" class="mx-1 fill-current text-black hover:text-gray-500 cursor-pointer" />
       <read-anchor-icon v-if="$store.getters.selectedFormAnchorsCount === 4 && isAnchorModeOn" v-on:click="processAnchors" />
       <cancelIcon v-if="isAnchorModeOn" v-on:click="deleteAllObjects" class="mx-1 fill-current text-black hover:text-gray-500 cursor-pointer" />
@@ -21,6 +24,7 @@ import cutIcon from  './Icons/cutIcon.vue'
 import anchorIcon from  './Icons/anchorIcon.vue'
 import readAnchorIcon from './Icons/readAnchorIcon.vue'
 import cancelIcon from './Icons/canelIcon.vue'
+import menuIcon from './Icons/MenuIcon.vue'
 import {fabric} from "fabric";
 import helpers from "../helpers";
 
@@ -28,11 +32,12 @@ export default {
   name: 'FormToolbar',
   inject: ['$globals'],
 
-  components: {qrIcon, ocrIcon, omrIcon, cutIcon, anchorIcon, cancelIcon, readAnchorIcon},
+  components: {qrIcon, ocrIcon, omrIcon, cutIcon, anchorIcon, cancelIcon, readAnchorIcon, menuIcon},
 
   data: function () {
     return {
       isAnchorModeOn: false,
+      isPanelCollapsed: false
     }
   },
 
@@ -102,7 +107,13 @@ export default {
       this.$store.dispatch('processAllFormAnchors')
       helpers.deleteAllObjects.call(this, true)
       this.isAnchorModeOn = false
-    }
+    },
+
+    collapsePanel(){
+      let collapsePanel = this.isPanelCollapsed ? '120px 1fr 0px' : '0px 1fr 0px'
+      this.$emit('form-columns',  collapsePanel)
+      this.isPanelCollapsed = !this.isPanelCollapsed
+    },
   },
 
   computed: {

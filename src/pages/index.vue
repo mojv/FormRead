@@ -2,19 +2,18 @@
   <!--  <script src="https://badge.dimensions.ai/badge.js"></script>-->
   <div @click="setActiveObject" class="bg-gray-50 h-screen" >
     <app-header  v-if="formsCant === 0" />
-    <div class="h-body" :class="{'form-grid-display': formsCant > 0}">
+    <div class="h-body" v-bind:style="{gridTemplateColumns: formColumns}" :class="{'form-grid-display': formsCant > 0}">
       <upload-file
           :description='"Multiple sheets OMR (optical mark recognition) OCR (Optical Character Recognition) and BCR (Bar Code Recognition)"'
           :tittle='"FREE OMR, OCR & BCR"'
           v-if="formsCant === 0"
       />
       <template v-if="formsCant > 0">
-        <scrollable-forms-list />
-        <form-toolbar />
+        <scrollable-forms-list v-if="formColumns.substring(0,3) !== '0px'"/>
+        <form-toolbar @form-columns="setGridColumns" />
         <form-editor-area />
         <form-options-panel />
       </template>
-
     </div>
   </div>
 </template>
@@ -41,12 +40,17 @@ export default {
   },
 
   data() {
-    return {}
+    return {
+      formColumns: '120px 2fr 0px'
+    }
   },
 
   methods: {
     setActiveObject() {
       this.$store.commit('setFabricActiveObject', this.$globals.canvas)
+    },
+    setGridColumns(columns) {
+      this.formColumns = columns
     }
   },
 
@@ -71,9 +75,8 @@ export default {
 .form-grid-display {
   display: grid;
   grid-template-areas:
-      'FormToolbar FormToolbar FormToolbar'
+      'ScrollableFormsList FormToolbar FormOptionsPanel'
       'ScrollableFormsList FormEditorArea FormOptionsPanel';
-  grid-template-columns: 120px 2fr 0fr;
   grid-template-rows: 2.5rem auto;
 }
 

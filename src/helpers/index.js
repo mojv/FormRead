@@ -23,5 +23,24 @@ export default {
                 this.$store.commit('deleteFormReadArea', obj.name)
             }
         });
+    },
+    uploadImagesFiles: function (evt, fromCam) {
+        let files = evt.target.files;
+        let context = this
+
+        for (let file of files) {
+            var reader = new FileReader();
+
+            //IIFE to set closure
+            reader.onload = (function (theFile, VueContext) {
+                return function (e) {
+                    let src = e.target.result
+                    VueContext.$store.commit('addForm', [theFile.name, src, fromCam])
+                    VueContext.pages--
+                };
+            })(file, context);
+
+            reader.readAsDataURL(file);
+        }
     }
 }

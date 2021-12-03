@@ -15,7 +15,8 @@ export const store = createStore({
             sheetAspectRatio: null,
             fabricActiveObject: '',
             showLoadingModal: false,
-            totalForms: 0
+            totalForms: 0,
+            isFromCamMode: false
         }
     },
 
@@ -25,6 +26,7 @@ export const store = createStore({
             if (Object.keys(state.forms).length === 1) {
                 state.selectedFormId = formId
             }
+            state.totalForms = Object.keys(state.forms).length
         },
         selectForm(state, formId) {
             state.selectedFormId = formId

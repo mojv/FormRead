@@ -24,6 +24,9 @@
 </template>
 
 <script>
+import helpers from "../helpers"
+
+
 export default {
 
   name: 'UploadFile',
@@ -31,24 +34,8 @@ export default {
 
   methods: {
     uploadImagesFiles: function (evt, fromCam) {
-      var files = evt.target.files;
-      let context = this
-      this.$store.commit('mutateProperty', ['totalForms',  files.length])
-
-      for (let file of files) {
-        var reader = new FileReader();
-
-        //IIFE to set closure 
-        reader.onload = (function (theFile, VueContext) {
-          return function (e) {
-            let src = e.target.result
-            VueContext.$store.commit('addForm', [theFile.name, src, fromCam])
-            VueContext.pages--
-          };
-        })(file, context);
-
-        reader.readAsDataURL(file);
-      }
+      this.$store.commit('mutateProperty', ['isFromCamMode', fromCam])
+      helpers.uploadImagesFiles.call(this, evt, fromCam)
     },
   },
   mounted() {
