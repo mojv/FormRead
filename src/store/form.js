@@ -39,14 +39,16 @@ export default class formClass {
         let cornerArray = this.findExternalSheetCorners(contours)
         if(cornerArray){
             let dst = this.fourPointsTransform(cv_src, cornerArray)
-            this.updateSrc(dst)
+            await this.updateSrc(dst)
+            dst.delete()
         }
+        cv_src.delete(); contours.delete()
     }
 
     async updateSrc(dst) {
         // display images in canvas
         await cv.imshow(this.canvas, dst);
-        let new_src = this.canvas.toDataURL()
+        let new_src = await this.canvas.toDataURL()
         store.commit('updateFormProp', [this.id, 'src', new_src])
     }
 
