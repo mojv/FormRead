@@ -34,7 +34,6 @@ export const store = createStore({
         },
         selectForm(state, formId) {
             state.selectedFormId = formId
-            state.canvasWidth;
 
             if(state.forms[state.selectedFormId].isAnchorProcessed){
                 return

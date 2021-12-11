@@ -2,7 +2,7 @@
   <div class="w-full py-1 shadow-md overflow-y-auto h-full flex flex-wrap justify-center content-start md:pr-1" id="ScrollableFormsList">
     <label class="m-2 shadow border-4 rounded-lg border-transparent hover:border-green-400 w-10 h-10 m-1 bg-white cursor-pointer">
       <add-icon class="m-auto mt-1"/>
-      <input type='file' class="hidden" multiple @change="uploadImagesFiles($event, $store.state.isFromCamMode)"/>
+      <input type='file' class="hidden" multiple @change="uploadFiles($event, $store.state.isFromCamMode)"/>
     </label>
     <template v-for="(form, id) in forms">
       <div
@@ -24,13 +24,14 @@
 
 <script>
 import addIcon from './Icons/AddIcon.vue'
-import helpers from "../helpers"
+import helpers from "../mixins"
 
 export default {
   
   name: 'ScrollableFormsList',
   emits: ['form-columns'],
   components: {addIcon},
+  mixins: [helpers],
   methods: {
     selectForm(formId){
       this.$store.commit('selectForm', formId)
@@ -40,19 +41,10 @@ export default {
         this.$store.commit('deleteForm', formId)
       }
     },
-    uploadImagesFiles: function (evt, fromCam) {
-      helpers.uploadImagesFiles.call(this, evt, fromCam)
+    uploadFiles: function (evt, fromCam) {
+      this.uploadImagesFiles(evt, fromCam)
     },
   },
-
-  computed: {
-    forms: function () {
-      return this.$store.state.forms
-    },
-    selectedFormId: function () {
-      return this.$store.state.selectedFormId
-    },
-  }
 }
 </script>
 

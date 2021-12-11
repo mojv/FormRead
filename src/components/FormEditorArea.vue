@@ -13,20 +13,22 @@
 
 <script>
 import {fabric} from "fabric";
-import helpers from "../helpers"
 import loadingModal from "./loadingModal.vue";
+import helpers from "../mixins"
 
 export default {
   name: 'FormEditorArea',
   inject: ['$globals'],
   components: {loadingModal},
   inheritAttrs: false,
+  mixins: [helpers],
+
 
   methods: {
     deleteObjects() {
       this.$globals.canvas.getActiveObjects().forEach((obj) => {
         if(obj.isAnchor){
-          helpers.deleteAllObjects.call(this)
+          this.deleteAllObjects()
           this.$store.dispatch('deleteAllAnchors')
         }else{
           this.$globals.canvas.remove(obj)
@@ -46,43 +48,12 @@ export default {
     },
   },
 
-  computed: {
-    forms: function () {
-      return this.$store.state.forms
-    },
-    selectedFormId: function () {
-      return this.$store.state.selectedFormId
-    },
-    selectedFormSrc: function () {
-      return this.$store.state.forms[this.selectedFormId].src
-    },
-    selectedFormAnchors: function () {
-      return this.$store.state.forms[this.selectedFormId].anchors
-    },
-    selectedForm: function () {
-      return this.$store.state.forms[this.selectedFormId]
-    },
-    formReadAreas: function () {
-      return this.$store.state.formReadAreas
-    },
-    canvasHeight: function () {
-      return this.$store.state.canvasHeight
-    },
-    canvasWidth: function () {
-      return this.$store.state.canvasWidth
-    },
-    showLoadingModal: function () {
-      return this.$store.state.showLoadingModal
-
-    }
-  },
-
   watch: {
     selectedFormId: function () {
-      helpers.updateCanvas.call(this)
+      this.updateCanvas()
     },
     selectedFormSrc: function () {
-      helpers.updateCanvas.call(this)
+      this.updateCanvas()
     },
     'selectedFormAnchors': {
       handler: function () {
@@ -113,7 +84,7 @@ export default {
     delete fabric.Object.prototype.controls.mtr
     this.$globals.canvas = new fabric.Canvas('formCanvas')
     this.$globals.canvas.uniformScaling = false
-    helpers.updateCanvas.call(this)
+    this.updateCanvas()
     this.$store.commit('mutateProperty', ['canvasHeight', document.getElementById('FormEditorArea').offsetHeight])
     this.$globals.canvas.on("object:modified", () => {
       this.$globals.canvas.getActiveObjects().forEach((area) => {

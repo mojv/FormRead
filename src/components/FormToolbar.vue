@@ -7,7 +7,7 @@
       <anchor-icon v-if="!showAnchorsToolbar" v-on:click="addAnchor()" class="mx-1 fill-current text-black hover:text-gray-500 cursor-pointer" />
       <read-anchor-icon v-if="$store.getters.selectedFormAnchorsCount === 4 && showAnchorsToolbar" v-on:click="processAnchors" />
       <anchor-icon v-if="!showAnchorsToolbar" v-on:click="detectSheetCorners" />
-      <cancelIcon v-if="showAnchorsToolbar" v-on:click="deleteAllObjects" class="mx-1 fill-current text-black hover:text-gray-500 cursor-pointer" />
+      <cancelIcon v-if="showAnchorsToolbar" v-on:click="deleteObjects" class="mx-1 fill-current text-black hover:text-gray-500 cursor-pointer" />
       <qr-icon v-if="!showAnchorsToolbar" v-on:click="addField('rgb(110,214,36,0.3)','QR')" class="mx-1 fill-current text-black hover:text-gray-500 cursor-pointer" />
       <ocr-icon v-if="!showAnchorsToolbar" v-on:click="addField('rgb(158,68,226,0.3)','OCR')" class="mx-1 fill-current text-black hover:text-gray-500 cursor-pointer" />
       <omr-icon v-if="!showAnchorsToolbar" v-on:click="addField('rgb(33,239,160,0.3)','OMR')" class="mx-1 fill-current text-black hover:text-gray-500 cursor-pointer" />
@@ -27,12 +27,12 @@ import readAnchorIcon from './Icons/readAnchorIcon.vue'
 import cancelIcon from './Icons/canelIcon.vue'
 import menuIcon from './Icons/MenuIcon.vue'
 import {fabric} from "fabric";
-import helpers from "../helpers";
+import helpers from "../mixins"
 
 export default {
   name: 'FormToolbar',
   inject: ['$globals'],
-
+  mixins: [helpers],
   components: {qrIcon, ocrIcon, omrIcon, cutIcon, anchorIcon, cancelIcon, readAnchorIcon, menuIcon},
 
   data: function () {
@@ -49,6 +49,9 @@ export default {
     },
 
     addAnchor() {
+      if(this.$store.state.anchors.areAnchorsRead){
+          return this.$store.commit('updateFormProp', [this.$store.state.forms[this.$store.state.selectedFormId]])
+      }
       this.$store.commit('mutateProperty', ['anchors', {hasAnchors: true, anchorType: 'object', areAnchorsRead: false}])
       let color = 'rgb(0,198,251,0.3)'
       let positions = [
@@ -97,15 +100,15 @@ export default {
       })
     },
 
-    deleteAllObjects(){
-      helpers.deleteAllObjects.call(this, false)
+    deleteObjects(){
+      this.deleteAllObjects(false)
       this.$store.dispatch('deleteAllAnchors')
       this.$store.commit('mutateProperty', ['anchors', {hasAnchors: false, anchorType: '', areAnchorsRead: false}])
     },
 
     processAnchors(){
       this.$store.dispatch('processAllFormAnchors')
-      helpers.deleteAllObjects.call(this, true)
+      this.deleteAllObjects(true)
       this.$store.state.anchors.areAnchorsRead = true
     },
 
@@ -120,24 +123,6 @@ export default {
       this.$store.state.forms[this.$store.state.selectedFormId].detectSheetCorners()
     }
 
-  },
-
-  computed: {
-    formReadAreas: function () {
-      return this.$store.state.formReadAreas
-    },
-    canvasHeight: function () {
-      return this.$store.state.canvasHeight
-    },
-    canvasWidth: function () {
-      return this.$store.state.canvasWidth
-    },
-    anchors: function () {
-      return Object.keys(this.formReadAreas).filter(area => area.includes('anchor'))
-    },
-    showAnchorsToolbar: function () {
-      return this.$store.state.anchors.hasAnchors && !this.$store.state.anchors.areAnchorsRead
-    }
   },
 
 }

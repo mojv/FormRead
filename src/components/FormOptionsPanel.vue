@@ -13,32 +13,18 @@
 <script>
 
 import FieldDropDownOtion from './FieldDropDownOtion.vue'
+import helpers from "../mixins"
 
 export default {  
   name: 'FormOptionsPanel',
   inject: ['$globals'],
-
+  mixins: [helpers],
   components: {FieldDropDownOtion},
 
   methods: {    
     selectArea(index){
         this.$globals.canvas.setActiveObject(this.$globals.canvas.item(index))
         this.$globals.canvas.requestRenderAll()
-    }
-  },
-
-  computed: {
-    formReadAreas: function() {
-      return this.$store.state.formReadAreas
-    },
-    canvasHeight: function() {
-      return this.$store.state.canvasHeight
-    },
-    canvasWidth: function() {
-      return this.$store.state.canvasWidth
-    },
-    anchors: function() {
-      return this.formReadAreas.filter(area => area.name.includes('anchor'))  
     }
   },
 
