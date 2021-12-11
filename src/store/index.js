@@ -16,11 +16,15 @@ export const store = createStore({
             fabricActiveObject: '',
             showLoadingModal: false,
             totalForms: 0,
-            isFromCamMode: false
+            isFromCamMode: false,
+            anchors: {hasAnchors: false, anchorType: '', areAnchorsRead: false},
         }
     },
 
     mutations: {
+        mutateProperty(state, [prop, val]){
+            state[prop] = val
+        },
         addForm(state, [formId, imgSrc, fromCam]) {
             state.forms[formId] = new formClass(formId, imgSrc, fromCam)
             if (Object.keys(state.forms).length === 1) {
@@ -30,10 +34,20 @@ export const store = createStore({
         },
         selectForm(state, formId) {
             state.selectedFormId = formId
+            state.canvasWidth;
 
-            for(let areaName in state.formReadAreas){
-                if(state.formReadAreas[areaName].isAnchor){
-                    state.forms[state.selectedFormId].findAnchors(areaName)
+            if(state.forms[state.selectedFormId].isAnchorProcessed){
+                return
+            }
+            if(state.anchors.hasAnchors){
+                if(state.anchors.anchorType === 'object'){
+                    for(let areaName in state.formReadAreas){
+                        if(state.formReadAreas[areaName].isAnchor){
+                            state.forms[state.selectedFormId].findAnchors(areaName)
+                        }
+                    }
+                }else{
+                    state.forms[state.selectedFormId].detectSheetCorners()
                 }
             }
         },
@@ -64,20 +78,8 @@ export const store = createStore({
         deleteFormReadArea(state, areaName) {
             delete state.formReadAreas[areaName]
         },
-        setCanvasHeight(state, height) {
-            state.canvasHeight = height
-        },
-        setCanvasWidth(state, width) {
-            state.canvasWidth = width
-        },
-        addCanvas(state, canvas) {
-            state.canvas = canvas
-        },
         updateFormProp(state, [formId, propName, value]) {
             state.forms[formId][propName] = value
-        },
-        setSheetAspectRatio(state, ratio) {
-            state.sheetAspectRatio = ratio
         },
         setFabricActiveObject(state, canvas) {
             try {
@@ -85,24 +87,19 @@ export const store = createStore({
             } catch (e) {
                 state.fabricActiveObject = ''
             }
-        },
-        showLoadingModal(state, show){
-            state.showLoadingModal = show
-        },
-        mutateProperty(state, [prop, val]){
-            state[prop] = val
         }
     },
 
     actions: {
         processAllFormAnchors({ commit, state }) {
-            for (let form in state.forms){
-                commit('updateFormProp', [form, 'src', ''])
-            }
-            for (let form in state.forms){
-                setTimeout(() => {
-                    state.forms[form].processAnchors()
-                }, 0)
+            for (let [formId, form] of Object.entries(state.forms)){
+                if(!form.isAnchorProcessed){
+                    commit('updateFormProp', [formId, 'src', '']) // just for triggering the loading modal
+                    console.log('adfad')
+                    setTimeout(() => {
+                        form.processAnchors()
+                    }, 0)
+                }
             }
         },
         deleteAllAnchors({ state }){

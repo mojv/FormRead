@@ -8,6 +8,7 @@ export default class formClass {
         this.src = '';
         this.canvas = null
         this.anchors = {}
+        this.isAnchorProcessed = false
         this.hasError = false
         if(fromCam){
             this.edgesTransformation(src)
@@ -25,6 +26,9 @@ export default class formClass {
         this.canvas.height = image.height; this.canvas.width = image.width
         let ctx = this.canvas.getContext('2d');
         ctx.drawImage(image,0,0);
+        if(store.state.anchors.hasAnchors){
+            this.processAnchors()
+        }
     }
 
 
@@ -45,11 +49,20 @@ export default class formClass {
         cv_src.delete(); contours.delete()
     }
 
+    async detectSheetCorners() {
+        let cv_src = cv.imread(this.canvas)
+        let imgArea = this.canvas.height * this.canvas.width
+        let [contours] = this.getContours(cv_src, imgArea, false)
+        this.findExternalSheetCorners(contours)
+        cv_src.delete(); contours.delete()
+    }
+
     async updateSrc(dst) {
         // display images in canvas
         await cv.imshow(this.canvas, dst);
         let new_src = await this.canvas.toDataURL()
         store.commit('updateFormProp', [this.id, 'src', new_src])
+        store.commit('updateFormProp', [this.id, 'isAnchorProcessed', true])
     }
 
     getContours(src, imgArea, draw) {
@@ -120,6 +133,13 @@ export default class formClass {
             return (item1.corner.y < item2.corner.y) ? -1 : (item1.corner.y > item2.corner.y) ? 1 : 0;
         }).slice(0, 5);
 
+        for(let [index, item] of cornerArray.entries()){
+            let left = item.corner.x / this.canvas.width
+            let top =  item.corner.y / this.canvas.height
+            this.anchors['anchor-' + index] = [left , top]
+        }
+        store.commit('updateFormProp', [this.id, 'anchors', this.anchors])
+
         return cornerArray
     }
 
@@ -140,8 +160,8 @@ export default class formClass {
             let heightRight = Math.hypot(tr.corner.x - br.corner.x, tr.corner.y - br.corner.y);
             let heightLeft = Math.hypot(tl.corner.x - bl.corner.x, tr.corner.y - bl.corner.y);
             theHeight = (heightRight > heightLeft) ? heightRight : heightLeft;
-            store.commit('setSheetAspectRatio', theWidth / theHeight)
-            store.commit('setCanvasWidth', store.state.canvasHeight * theWidth / theHeight)
+            store.commit('mutateProperty', ['sheetAspectRatio', theWidth / theHeight])
+            store.commit('mutateProperty', ['canvasWidth', store.state.canvasHeight * theWidth / theHeight])
         } else {
             theHeight = theWidth / store.state.sheetAspectRatio;
         }
@@ -176,10 +196,14 @@ export default class formClass {
 
     async processAnchors(){
         if(Object.keys(this.anchors).length === 0){
-            await this.findAnchors('anchor-0')
-            await this.findAnchors('anchor-1')
-            await this.findAnchors('anchor-3')
-            await this.findAnchors('anchor-2')
+            if(store.state.anchors.anchorType === 'corners'){
+                await this.detectSheetCorners()
+            }else{
+                await this.findAnchors('anchor-0')
+                await this.findAnchors('anchor-1')
+                await this.findAnchors('anchor-3')
+                await this.findAnchors('anchor-2')
+            }
         }
         if(Object.keys(this.anchors).length === 4){
             let corner1 = new cv.Point(this.anchors['anchor-0'][0]*this.canvas.width, this.anchors['anchor-0'][1]*this.canvas.height);

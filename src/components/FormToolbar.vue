@@ -4,13 +4,14 @@
       <menu-icon v-on:click="collapsePanel()" class="mx-1 fill-current text-black hover:text-gray-500 cursor-pointer" />
     </div>
     <div class="w-5/6 h-full relative z-20 flex justify-center flex-wrap flex-row sm:flex-row items-center">
-      <anchor-icon v-if="!isAnchorModeOn" v-on:click="addAnchor()" class="mx-1 fill-current text-black hover:text-gray-500 cursor-pointer" />
-      <read-anchor-icon v-if="$store.getters.selectedFormAnchorsCount === 4 && isAnchorModeOn" v-on:click="processAnchors" />
-      <cancelIcon v-if="isAnchorModeOn" v-on:click="deleteAllObjects" class="mx-1 fill-current text-black hover:text-gray-500 cursor-pointer" />
-      <qr-icon v-if="!isAnchorModeOn" v-on:click="addField('rgb(110,214,36,0.3)','QR')" class="mx-1 fill-current text-black hover:text-gray-500 cursor-pointer" />
-      <ocr-icon v-if="!isAnchorModeOn" v-on:click="addField('rgb(158,68,226,0.3)','OCR')" class="mx-1 fill-current text-black hover:text-gray-500 cursor-pointer" />
-      <omr-icon v-if="!isAnchorModeOn" v-on:click="addField('rgb(33,239,160,0.3)','OMR')" class="mx-1 fill-current text-black hover:text-gray-500 cursor-pointer" />
-      <cut-icon v-if="!isAnchorModeOn" v-on:click="addField('rgb(255,117,140,0.3)','cuts')" class="mx-1 fill-current text-black hover:text-gray-500 cursor-pointer" />
+      <anchor-icon v-if="!showAnchorsToolbar" v-on:click="addAnchor()" class="mx-1 fill-current text-black hover:text-gray-500 cursor-pointer" />
+      <read-anchor-icon v-if="$store.getters.selectedFormAnchorsCount === 4 && showAnchorsToolbar" v-on:click="processAnchors" />
+      <anchor-icon v-if="!showAnchorsToolbar" v-on:click="detectSheetCorners" />
+      <cancelIcon v-if="showAnchorsToolbar" v-on:click="deleteAllObjects" class="mx-1 fill-current text-black hover:text-gray-500 cursor-pointer" />
+      <qr-icon v-if="!showAnchorsToolbar" v-on:click="addField('rgb(110,214,36,0.3)','QR')" class="mx-1 fill-current text-black hover:text-gray-500 cursor-pointer" />
+      <ocr-icon v-if="!showAnchorsToolbar" v-on:click="addField('rgb(158,68,226,0.3)','OCR')" class="mx-1 fill-current text-black hover:text-gray-500 cursor-pointer" />
+      <omr-icon v-if="!showAnchorsToolbar" v-on:click="addField('rgb(33,239,160,0.3)','OMR')" class="mx-1 fill-current text-black hover:text-gray-500 cursor-pointer" />
+      <cut-icon v-if="!showAnchorsToolbar" v-on:click="addField('rgb(255,117,140,0.3)','cuts')" class="mx-1 fill-current text-black hover:text-gray-500 cursor-pointer" />
     </div>
   </div>
 </template>
@@ -36,8 +37,7 @@ export default {
 
   data: function () {
     return {
-      isAnchorModeOn: false,
-      isPanelCollapsed: false
+      isPanelCollapsed: false,
     }
   },
 
@@ -49,7 +49,7 @@ export default {
     },
 
     addAnchor() {
-      this.isAnchorModeOn = true
+      this.$store.commit('mutateProperty', ['anchors', {hasAnchors: true, anchorType: 'object', areAnchorsRead: false}])
       let color = 'rgb(0,198,251,0.3)'
       let positions = [
         [50, 50],
@@ -100,13 +100,13 @@ export default {
     deleteAllObjects(){
       helpers.deleteAllObjects.call(this, false)
       this.$store.dispatch('deleteAllAnchors')
-      this.isAnchorModeOn = false
+      this.$store.commit('mutateProperty', ['anchors', {hasAnchors: false, anchorType: '', areAnchorsRead: false}])
     },
 
     processAnchors(){
       this.$store.dispatch('processAllFormAnchors')
       helpers.deleteAllObjects.call(this, true)
-      this.isAnchorModeOn = false
+      this.$store.state.anchors.areAnchorsRead = true
     },
 
     collapsePanel(){
@@ -114,6 +114,12 @@ export default {
       this.$emit('form-columns',  collapsePanel)
       this.isPanelCollapsed = !this.isPanelCollapsed
     },
+
+    detectSheetCorners(){
+      this.$store.commit('mutateProperty', ['anchors', {hasAnchors: true, anchorType: 'corners', areAnchorsRead: false}])
+      this.$store.state.forms[this.$store.state.selectedFormId].detectSheetCorners()
+    }
+
   },
 
   computed: {
@@ -128,6 +134,9 @@ export default {
     },
     anchors: function () {
       return Object.keys(this.formReadAreas).filter(area => area.includes('anchor'))
+    },
+    showAnchorsToolbar: function () {
+      return this.$store.state.anchors.hasAnchors && !this.$store.state.anchors.areAnchorsRead
     }
   },
 

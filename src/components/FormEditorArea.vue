@@ -59,6 +59,9 @@ export default {
     selectedFormAnchors: function () {
       return this.$store.state.forms[this.selectedFormId].anchors
     },
+    selectedForm: function () {
+      return this.$store.state.forms[this.selectedFormId]
+    },
     formReadAreas: function () {
       return this.$store.state.formReadAreas
     },
@@ -83,6 +86,9 @@ export default {
     },
     'selectedFormAnchors': {
       handler: function () {
+        if(this.selectedForm.isAnchorProcessed){
+          return
+        }
         this.$globals.canvas.getObjects().forEach((obj) => {
           if(obj.get('type') === 'line'){
             this.$globals.canvas.remove(obj)
@@ -108,7 +114,7 @@ export default {
     this.$globals.canvas = new fabric.Canvas('formCanvas')
     this.$globals.canvas.uniformScaling = false
     helpers.updateCanvas.call(this)
-    this.$store.commit('setCanvasHeight', document.getElementById('FormEditorArea').offsetHeight)
+    this.$store.commit('mutateProperty', ['canvasHeight', document.getElementById('FormEditorArea').offsetHeight])
     this.$globals.canvas.on("object:modified", () => {
       this.$globals.canvas.getActiveObjects().forEach((area) => {
         this.$store.commit('updateFormReadArea', area)
