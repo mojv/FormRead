@@ -83,6 +83,7 @@ export default class formClass {
                     let color = new cv.Scalar(255, 0, 0, 255);
                     cv.drawContours(src, contours, i, color, 2, cv.LINE_8, hierarchy, 100);
                 }
+                // console.log(this.getSrcFromCvObject(src))
             }
         }
         return [contours, hierarchy, src, boundingRects]
@@ -90,22 +91,7 @@ export default class formClass {
 
     findExternalSheetCorners(contours) {
         let foundContour = new cv.MatVector();
-
-        //Get area for all contours so we can find the biggest
-        let sortableContours = [];
-
-        for (let i = 0; i < contours.size(); i++) {
-            let cnt = contours.get(i);
-            let area = cv.contourArea(cnt, false);
-            let perim = cv.arcLength(cnt, false);
-
-            sortableContours.push(new SortableContour({areaSize: area, perimiterSize: perim, contour: cnt}));
-        }
-
-        //Sort 'em
-        sortableContours = sortableContours.sort((item1, item2) => {
-            return (item1.areaSize > item2.areaSize) ? -1 : (item1.areaSize < item2.areaSize) ? 1 : 0;
-        }).slice(0, 5);
+        let sortableContours = this.sortContours(contours);
 
         //Ensure the top area contour has 4 corners (NOTE: This is not a perfect science and likely needs more attention)
         let approx = new cv.Mat();
@@ -141,6 +127,24 @@ export default class formClass {
         store.commit('updateFormProp', [this.id, 'anchors', this.anchors])
 
         return cornerArray
+    }
+
+    sortContours(contours){
+        //Get area for all contours so we can find the biggest
+        let sortableContours = [];
+
+        for (let i = 0; i < contours.size(); i++) {
+            let cnt = contours.get(i);
+            let area = cv.contourArea(cnt, false);
+            let perim = cv.arcLength(cnt, false);
+
+            sortableContours.push(new SortableContour({areaSize: area, perimiterSize: perim, contour: cnt}));
+        }
+
+        //Sort 'em
+        return sortableContours.sort((item1, item2) => {
+            return (item1.areaSize > item2.areaSize) ? -1 : (item1.areaSize < item2.areaSize) ? 1 : 0;
+        }).slice(0, 5);
     }
 
     fourPointsTransform(src, cornerArray) {
@@ -183,7 +187,10 @@ export default class formClass {
         let cv_src = await cv.imread(areaCanvas)
         let [,,, boundingRects] = this.getContours(cv_src, imgArea, true)
 
-        if(boundingRects.length === 1){
+        boundingRects.sort((item1, item2) => {
+            return (item1.width * item1.height > item2.width * item2.height) ? -1 : (item1.width * item1.height < item2.width * item2.height) ? 1 : 0;
+        })
+        if(boundingRects.length > 0){
             let left = area.left + (boundingRects[0].x + boundingRects[0].width/2) / this.canvas.width
             let top =  area.top  + (boundingRects[0].y + boundingRects[0].height/2)/ this.canvas.height
             this.anchors[areaName] = [left , top]
@@ -239,7 +246,14 @@ export default class formClass {
 
         let imgArea = width * height
         return [canvasArea, imgArea]
-    };
+    }
+
+    async getSrcFromCvObject(dst) {
+        // display images in canvas
+        let canvas = await document.createElement('canvas')
+        await cv.imshow(canvas, dst);
+        console.log(canvas.toDataURL())
+    }
 
 }
 
