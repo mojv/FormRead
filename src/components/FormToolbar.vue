@@ -6,7 +6,7 @@
     <div class="w-5/6 h-full relative z-20 flex justify-center flex-wrap flex-row sm:flex-row items-center">
       <anchor-icon v-if="!showAnchorsToolbar" v-on:click="addAnchor()" class="mx-1 fill-current text-black hover:text-gray-500 cursor-pointer" />
       <read-anchor-icon v-if="$store.getters.selectedFormAnchorsCount === 4 && showAnchorsToolbar" v-on:click="processAnchors" />
-      <anchor-icon v-if="!showAnchorsToolbar" v-on:click="detectSheetCorners" />
+      <anchor-icon v-if="!showAnchorsToolbar" v-on:click="detectCorners" />
       <cancelIcon v-if="showAnchorsToolbar" v-on:click="deleteObjects" class="mx-1 fill-current text-black hover:text-gray-500 cursor-pointer" />
       <qr-icon v-if="!showAnchorsToolbar" v-on:click="addField('rgb(110,214,36,0.3)','QR')" class="mx-1 fill-current text-black hover:text-gray-500 cursor-pointer" />
       <ocr-icon v-if="!showAnchorsToolbar" v-on:click="addField('rgb(158,68,226,0.3)','OCR')" class="mx-1 fill-current text-black hover:text-gray-500 cursor-pointer" />
@@ -49,10 +49,12 @@ export default {
     },
 
     addAnchor() {
-      if(this.$store.state.anchors.areAnchorsRead){
-          return this.$store.commit('updateFormProp', [this.$store.state.forms[this.$store.state.selectedFormId]])
+      if(this.isFormAnchorProcessed){
+        this.$store.commit('updateFormProp', [this.selectedFormId, 'isAnchorProcessed', false])
+        this.selectedForm.updateFormSrc(this.selectedForm.src_original)
+        return
       }
-      this.$store.commit('mutateProperty', ['anchors', {hasAnchors: true, anchorType: 'object', areAnchorsRead: false}])
+      this.$store.commit('mutateProperty', ['anchors', {hasAnchors: true, anchorType: 'object'}])
       let color = 'rgb(0,198,251,0.3)'
       let positions = [
         [50, 50],
@@ -103,13 +105,12 @@ export default {
     deleteObjects(){
       this.deleteAllObjects(false)
       this.$store.dispatch('deleteAllAnchors')
-      this.$store.commit('mutateProperty', ['anchors', {hasAnchors: false, anchorType: '', areAnchorsRead: false}])
+      this.$store.commit('mutateProperty', ['anchors', {hasAnchors: false, anchorType: ''}])
     },
 
     processAnchors(){
       this.$store.dispatch('processAllFormAnchors')
       this.deleteAllObjects(true)
-      this.$store.state.anchors.areAnchorsRead = true
     },
 
     collapsePanel(){
@@ -118,9 +119,14 @@ export default {
       this.isPanelCollapsed = !this.isPanelCollapsed
     },
 
-    detectSheetCorners(){
-      this.$store.commit('mutateProperty', ['anchors', {hasAnchors: true, anchorType: 'corners', areAnchorsRead: false}])
-      this.$store.state.forms[this.$store.state.selectedFormId].detectSheetCorners()
+    detectCorners(){
+      if(this.isFormAnchorProcessed){
+        this.$store.commit('updateFormProp', [this.selectedFormId, 'isAnchorProcessed', false])
+        this.selectedForm.updateFormSrc(this.selectedForm.src_original)
+        return
+      }
+      this.$store.commit('mutateProperty', ['anchors', {hasAnchors: true, anchorType: 'corners'}])
+      this.selectedForm.detectSheetCorners()
     }
 
   },

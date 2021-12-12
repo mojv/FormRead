@@ -70,9 +70,6 @@ export const store = createStore({
                 name: area.name,
                 isAnchor: area.isAnchor
             }
-            if(area.isAnchor){
-                state.forms[state.selectedFormId].findAnchors(area.name)
-            }
         },
         deleteFormReadArea(state, areaName) {
             delete state.formReadAreas[areaName]
@@ -94,7 +91,6 @@ export const store = createStore({
             for (let [formId, form] of Object.entries(state.forms)){
                 if(!form.isAnchorProcessed){
                     commit('updateFormProp', [formId, 'src', '']) // just for triggering the loading modal
-                    console.log('adfad')
                     setTimeout(() => {
                         form.processAnchors()
                     }, 0)

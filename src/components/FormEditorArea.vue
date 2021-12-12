@@ -15,6 +15,7 @@
 import {fabric} from "fabric";
 import loadingModal from "./loadingModal.vue";
 import helpers from "../mixins"
+import {store} from "../store";
 
 export default {
   name: 'FormEditorArea',
@@ -46,6 +47,30 @@ export default {
        evented: false,
      });
     },
+    makeCornerControl(left, top, line1, line2, name) {
+      var cornerControl = new fabric.Circle({
+        left: left-12,
+        top: top-12,
+        strokeWidth: 5,
+        radius: 12,
+        fill: '#fff',
+        stroke: '#666'
+      });
+      cornerControl.toObject = (function (toObject) {
+        return function () {
+          return fabric.util.object.extend(toObject.call(this), {
+            name: this.name,
+            isCornerControl: this.isAnchor
+          });
+        };
+      })(cornerControl.toObject);
+      cornerControl.name = name;
+      cornerControl.isCornerControl = true
+      cornerControl.hasControls = cornerControl.hasBorders = false
+      cornerControl.line1 = line1
+      cornerControl.line2 = line2
+      return cornerControl
+    }
   },
 
   watch: {
@@ -56,23 +81,7 @@ export default {
       this.updateCanvas()
     },
     'selectedFormAnchors': {
-      handler: function () {
-        if(this.selectedForm.isAnchorProcessed){
-          return
-        }
-        this.$globals.canvas.getObjects().forEach((obj) => {
-          if(obj.get('type') === 'line'){
-            this.$globals.canvas.remove(obj)
-          }
-        });
-        if (this.$store.getters.selectedFormAnchorsCount === 4) {
-          let line1 = this.makeLine([this.selectedFormAnchors['anchor-0'][0]*this.canvasWidth, this.selectedFormAnchors['anchor-0'][1]*this.canvasHeight, this.selectedFormAnchors['anchor-1'][0]*this.canvasWidth, this.selectedFormAnchors['anchor-1'][1]*this.canvasHeight])
-          let line2 = this.makeLine([this.selectedFormAnchors['anchor-1'][0]*this.canvasWidth, this.selectedFormAnchors['anchor-1'][1]*this.canvasHeight, this.selectedFormAnchors['anchor-3'][0]*this.canvasWidth, this.selectedFormAnchors['anchor-3'][1]*this.canvasHeight])
-          let line3 = this.makeLine([this.selectedFormAnchors['anchor-3'][0]*this.canvasWidth, this.selectedFormAnchors['anchor-3'][1]*this.canvasHeight, this.selectedFormAnchors['anchor-2'][0]*this.canvasWidth, this.selectedFormAnchors['anchor-2'][1]*this.canvasHeight])
-          let line4 = this.makeLine([this.selectedFormAnchors['anchor-2'][0]*this.canvasWidth, this.selectedFormAnchors['anchor-2'][1]*this.canvasHeight, this.selectedFormAnchors['anchor-0'][0]*this.canvasWidth, this.selectedFormAnchors['anchor-0'][1]*this.canvasHeight])
-          this.$globals.canvas.add(line1, line2, line3, line4);
-        }
-      },
+      handler: function () {this.drawAnchorLines()},
       deep: true
     },
   },
@@ -89,8 +98,28 @@ export default {
     this.$globals.canvas.on("object:modified", () => {
       this.$globals.canvas.getActiveObjects().forEach((area) => {
         this.$store.commit('updateFormReadArea', area)
+        if(area.isAnchor){
+          this.selectedForm.findAnchors(area.name)
+        }
+        if(area.isCornerControl){
+          let left = (area.left+12) / this.canvasWidth
+          let top =  (area.top+12) / this.canvasHeight
+          this.selectedForm.anchors[area.name] = [left , top]
+          store.commit('updateFormProp', [this.selectedFormId, 'anchors',  this.selectedForm.anchors])
+        }
       });
     });
+    this.$globals.canvas.on('object:moving', (e) => {
+      let p = e.target;
+      if(p.name === 'anchor-2' || p.name === 'anchor-3'){
+        p.line1 && p.line1.set({ 'x2': p.left+12, 'y2': p.top+12 });
+        p.line2 && p.line2.set({ 'x1': p.left+12, 'y1': p.top+12 });
+      }else{
+        p.line1 && p.line1.set({ 'x1': p.left+12, 'y1': p.top+12 });
+        p.line2 && p.line2.set({ 'x2': p.left+12, 'y2': p.top+12 });
+      }
+      this.$globals.canvas.renderAll();
+    })
   }
 }
 </script>

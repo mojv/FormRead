@@ -13,12 +13,15 @@ export default class formClass {
         if(fromCam){
             this.edgesTransformation(src)
         }else{
-            this.src = src
             this.setCanvasFromSrc(src)
+            if(store.state.anchors.hasAnchors && !this.isAnchorProcessed){
+                this.processAnchors()
+            }
         }
     }
 
     async setCanvasFromSrc(src){
+        this.src = src
         this.canvas = await document.createElement('canvas')
         let image = new Image()
         image.src = src
@@ -26,9 +29,6 @@ export default class formClass {
         this.canvas.height = image.height; this.canvas.width = image.width
         let ctx = this.canvas.getContext('2d');
         ctx.drawImage(image,0,0);
-        if(store.state.anchors.hasAnchors){
-            this.processAnchors()
-        }
     }
 
 
@@ -83,7 +83,7 @@ export default class formClass {
                     let color = new cv.Scalar(255, 0, 0, 255);
                     cv.drawContours(src, contours, i, color, 2, cv.LINE_8, hierarchy, 100);
                 }
-                // console.log(this.getSrcFromCvObject(src))
+                // this.getSrcFromCvObject(src)
             }
         }
         return [contours, hierarchy, src, boundingRects]
@@ -101,7 +101,7 @@ export default class formClass {
             foundContour = approx;
         } else {
             store.commit('updateFormProp', [this.id, 'hasError', true])
-            store.commit('updateFormProp', [this.id, 'src', this.src_original])
+            this.updateFormSrc(this.src_original)
             return false;
         }
 
@@ -190,6 +190,7 @@ export default class formClass {
         boundingRects.sort((item1, item2) => {
             return (item1.width * item1.height > item2.width * item2.height) ? -1 : (item1.width * item1.height < item2.width * item2.height) ? 1 : 0;
         })
+
         if(boundingRects.length > 0){
             let left = area.left + (boundingRects[0].x + boundingRects[0].width/2) / this.canvas.width
             let top =  area.top  + (boundingRects[0].y + boundingRects[0].height/2)/ this.canvas.height
@@ -224,7 +225,7 @@ export default class formClass {
             this.updateSrc(dst)
         }else {
             store.commit('updateFormProp', [this.id, 'hasError', true])
-            store.commit('updateFormProp', [this.id, 'src', this.src_original])
+            this.updateFormSrc(this.src_original)
         }
 
     }
@@ -253,6 +254,11 @@ export default class formClass {
         let canvas = await document.createElement('canvas')
         await cv.imshow(canvas, dst);
         console.log(canvas.toDataURL())
+    }
+
+    async updateFormSrc(src){
+        await this.setCanvasFromSrc(src)
+        store.commit('updateFormProp', [this.id, 'src', src])
     }
 
 }
