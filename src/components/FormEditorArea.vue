@@ -24,6 +24,11 @@ export default {
   inheritAttrs: false,
   mixins: [helpers],
 
+  data: function () {
+    return {
+      cornerControlRadius: 5,
+    }
+  },
 
   methods: {
     deleteObjects() {
@@ -49,12 +54,12 @@ export default {
     },
     makeCornerControl(left, top, line1, line2, name) {
       var cornerControl = new fabric.Circle({
-        left: left-12,
-        top: top-12,
-        strokeWidth: 5,
-        radius: 12,
-        fill: '#fff',
-        stroke: '#666'
+        left: left-this.cornerControlRadius,
+        top: top-this.cornerControlRadius,
+        strokeWidth: 1,
+        radius: this.cornerControlRadius,
+        fill: 'gray',
+        stroke: 'red'
       });
       cornerControl.toObject = (function (toObject) {
         return function () {
@@ -66,7 +71,7 @@ export default {
       })(cornerControl.toObject);
       cornerControl.name = name;
       cornerControl.isCornerControl = true
-      cornerControl.hasControls = cornerControl.hasBorders = false
+      cornerControl.hasControls = false
       cornerControl.line1 = line1
       cornerControl.line2 = line2
       return cornerControl
@@ -102,8 +107,8 @@ export default {
           this.selectedForm.findAnchors(area.name)
         }
         if(area.isCornerControl){
-          let left = (area.left+12) / this.canvasWidth
-          let top =  (area.top+12) / this.canvasHeight
+          let left = (area.left+this.cornerControlRadius) / this.canvasWidth
+          let top =  (area.top+this.cornerControlRadius) / this.canvasHeight
           this.selectedForm.anchors[area.name] = [left , top]
           store.commit('updateFormProp', [this.selectedFormId, 'anchors',  this.selectedForm.anchors])
         }
@@ -112,11 +117,11 @@ export default {
     this.$globals.canvas.on('object:moving', (e) => {
       let p = e.target;
       if(p.name === 'anchor-2' || p.name === 'anchor-3'){
-        p.line1 && p.line1.set({ 'x2': p.left+12, 'y2': p.top+12 });
-        p.line2 && p.line2.set({ 'x1': p.left+12, 'y1': p.top+12 });
+        p.line1 && p.line1.set({ 'x2': p.left+this.cornerControlRadius, 'y2': p.top+this.cornerControlRadius });
+        p.line2 && p.line2.set({ 'x1': p.left+this.cornerControlRadius, 'y1': p.top+this.cornerControlRadius });
       }else{
-        p.line1 && p.line1.set({ 'x1': p.left+12, 'y1': p.top+12 });
-        p.line2 && p.line2.set({ 'x2': p.left+12, 'y2': p.top+12 });
+        p.line1 && p.line1.set({ 'x1': p.left+this.cornerControlRadius, 'y1': p.top+this.cornerControlRadius });
+        p.line2 && p.line2.set({ 'x2': p.left+this.cornerControlRadius, 'y2': p.top+this.cornerControlRadius });
       }
       this.$globals.canvas.renderAll();
     })

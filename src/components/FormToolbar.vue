@@ -1,17 +1,23 @@
 <template>
   <div class="h-full bg-white shadow flex flex-row" data-rich-editor-target="toolbar" id="FormToolbar">
     <div class="h-full relative z-20 flex justify-center flex-wrap flex-row sm:flex-row items-center">
-      <menu-icon v-on:click="collapsePanel()" class="mx-1 fill-current text-black hover:text-gray-500 cursor-pointer" />
+      <menu-icon @click="collapsePanel()" class="mx-1 fill-current text-black hover:text-gray-500 cursor-pointer" />
     </div>
     <div class="w-5/6 h-full relative z-20 flex justify-center flex-wrap flex-row sm:flex-row items-center">
-      <anchor-icon v-if="!showAnchorsToolbar" v-on:click="addAnchor()" class="mx-1 fill-current text-black hover:text-gray-500 cursor-pointer" />
+      <div class="dropdown" v-if="!showAnchorsToolbar" >
+        <anchor-icon @click="" class="mx-1 fill-current text-black hover:text-gray-500 cursor-pointer" />
+        <ul class="dropdown-menu absolute hidden text-gray-700 pt-1">
+          <li @click="addAnchor"><a class="rounded-t bg-gray-200 hover:bg-gray-400 py-2 px-4 block whitespace-no-wrap" href="#">Object</a></li>
+          <li @click="detectCorners" class=""><a class="bg-gray-200 hover:bg-gray-400 py-2 px-4 block whitespace-no-wrap" href="#">Corners</a></li>>
+        </ul>
+      </div>
       <read-anchor-icon v-if="$store.getters.selectedFormAnchorsCount === 4 && showAnchorsToolbar" v-on:click="processAnchors" />
-      <anchor-icon v-if="!showAnchorsToolbar" v-on:click="detectCorners" />
-      <cancelIcon v-if="showAnchorsToolbar" v-on:click="deleteObjects" class="mx-1 fill-current text-black hover:text-gray-500 cursor-pointer" />
-      <qr-icon v-if="!showAnchorsToolbar" v-on:click="addField('rgb(110,214,36,0.3)','QR')" class="mx-1 fill-current text-black hover:text-gray-500 cursor-pointer" />
-      <ocr-icon v-if="!showAnchorsToolbar" v-on:click="addField('rgb(158,68,226,0.3)','OCR')" class="mx-1 fill-current text-black hover:text-gray-500 cursor-pointer" />
-      <omr-icon v-if="!showAnchorsToolbar" v-on:click="addField('rgb(33,239,160,0.3)','OMR')" class="mx-1 fill-current text-black hover:text-gray-500 cursor-pointer" />
-      <cut-icon v-if="!showAnchorsToolbar" v-on:click="addField('rgb(255,117,140,0.3)','cuts')" class="mx-1 fill-current text-black hover:text-gray-500 cursor-pointer" />
+      <cancelIcon v-if="showAnchorsToolbar" @click="deleteObjects" class="mx-1 fill-current text-black hover:text-gray-500 cursor-pointer" />
+      <qr-icon v-if="!showAnchorsToolbar" @click="addField('rgb(110,214,36,0.3)','QR')" class="mx-1 fill-current text-black hover:text-gray-500 cursor-pointer" />
+      <ocr-icon v-if="!showAnchorsToolbar" @click="addField('rgb(158,68,226,0.3)','OCR')" class="mx-1 fill-current text-black hover:text-gray-500 cursor-pointer" />
+      <omr-icon v-if="!showAnchorsToolbar" @click="addField('rgb(33,239,160,0.3)','OMR')" class="mx-1 fill-current text-black hover:text-gray-500 cursor-pointer" />
+      <cut-icon v-if="!showAnchorsToolbar" @click="addField('rgb(255,117,140,0.3)','cuts')" class="mx-1 fill-current text-black hover:text-gray-500 cursor-pointer" />
+
     </div>
   </div>
 </template>
@@ -133,3 +139,10 @@ export default {
 
 }
 </script>
+
+<style scoped>
+.dropdown:hover .dropdown-menu {
+  display: block;
+}
+
+</style>
