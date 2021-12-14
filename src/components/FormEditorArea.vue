@@ -1,5 +1,6 @@
 <template>
-  <div @click="setActiveObject" class="w-full overflow-y-auto py-2 overflow-y-auto h-full pr-6 bg-gray-200" id='FormEditorArea'
+  <div @click="setActiveObject" class="w-full overflow-y-auto py-2 overflow-y-auto h-full pr-6 bg-gray-200"
+       id='FormEditorArea'
        @keydown.delete="deleteObjects()" tabindex="0">
     <canvas class="shadow-lg rounded-lg" id="formCanvas"></canvas>
   </div>
@@ -8,7 +9,8 @@
         $store.getters.countImageSrc < $store.state.totalForms ||
         showLoadingModal
       "
-  ></loading-modal>
+  />
+  <anchor-zoom-window v-if="anchorZoomShow" :src="anchorZoomSrc"/>
 </template>
 
 <script>
@@ -16,27 +18,30 @@ import {fabric} from "fabric";
 import loadingModal from "./loadingModal.vue";
 import helpers from "../mixins"
 import {store} from "../store";
+import AnchorZoomWindow from "../components/AnchorZoomWindow.vue"
 
 export default {
   name: 'FormEditorArea',
   inject: ['$globals'],
-  components: {loadingModal},
+  components: {loadingModal, AnchorZoomWindow},
   inheritAttrs: false,
   mixins: [helpers],
 
   data: function () {
     return {
-      cornerControlRadius: 5,
+      cornerControlRadius: 6,
+      anchorZoomSrc: '',
+      anchorZoomShow: false,
     }
   },
 
   methods: {
     deleteObjects() {
       this.$globals.canvas.getActiveObjects().forEach((obj) => {
-        if(obj.isAnchor){
+        if (obj.isAnchor) {
           this.deleteAllObjects()
           this.$store.dispatch('deleteAllAnchors')
-        }else{
+        } else {
           this.$globals.canvas.remove(obj)
           this.$store.commit('deleteFormReadArea', obj.name)
         }
@@ -44,18 +49,18 @@ export default {
       this.$globals.canvas.discardActiveObject().renderAll()
     },
     makeLine(coords) {
-     return new fabric.Line(coords, {
-       fill: 'red',
-       stroke: 'red',
-       strokeWidth: 2,
-       selectable: false,
-       evented: false,
-     });
+      return new fabric.Line(coords, {
+        fill: 'red',
+        stroke: 'red',
+        strokeWidth: 2,
+        selectable: false,
+        evented: false,
+      });
     },
     makeCornerControl(left, top, line1, line2, name) {
       var cornerControl = new fabric.Circle({
-        left: left-this.cornerControlRadius,
-        top: top-this.cornerControlRadius,
+        left: left - this.cornerControlRadius,
+        top: top - this.cornerControlRadius,
         strokeWidth: 1,
         radius: this.cornerControlRadius,
         fill: 'gray',
@@ -72,6 +77,7 @@ export default {
       cornerControl.name = name;
       cornerControl.isCornerControl = true
       cornerControl.hasControls = false
+      cornerControl.hasBorders = false
       cornerControl.line1 = line1
       cornerControl.line2 = line2
       return cornerControl
@@ -86,7 +92,9 @@ export default {
       this.updateCanvas()
     },
     'selectedFormAnchors': {
-      handler: function () {this.drawAnchorLines()},
+      handler: function () {
+        this.drawAnchorLines()
+      },
       deep: true
     },
   },
@@ -101,27 +109,34 @@ export default {
     this.updateCanvas()
     this.$store.commit('mutateProperty', ['canvasHeight', document.getElementById('FormEditorArea').offsetHeight])
     this.$globals.canvas.on("object:modified", () => {
+      this.anchorZoomShow = false
       this.$globals.canvas.getActiveObjects().forEach((area) => {
         this.$store.commit('updateFormReadArea', area)
-        if(area.isAnchor){
+        if (area.isAnchor) {
           this.selectedForm.findAnchors(area.name)
         }
-        if(area.isCornerControl){
-          let left = (area.left+this.cornerControlRadius) / this.canvasWidth
-          let top =  (area.top+this.cornerControlRadius) / this.canvasHeight
-          this.selectedForm.anchors[area.name] = [left , top]
-          store.commit('updateFormProp', [this.selectedFormId, 'anchors',  this.selectedForm.anchors])
+        if (area.isCornerControl) {
+          let left = (area.left + this.cornerControlRadius) / this.canvasWidth
+          let top = (area.top + this.cornerControlRadius) / this.canvasHeight
+          this.selectedForm.anchors[area.name] = [left, top]
+          store.commit('updateFormProp', [this.selectedFormId, 'anchors', this.selectedForm.anchors])
         }
       });
     });
     this.$globals.canvas.on('object:moving', (e) => {
       let p = e.target;
-      if(p.name === 'anchor-2' || p.name === 'anchor-3'){
-        p.line1 && p.line1.set({ 'x2': p.left+this.cornerControlRadius, 'y2': p.top+this.cornerControlRadius });
-        p.line2 && p.line2.set({ 'x1': p.left+this.cornerControlRadius, 'y1': p.top+this.cornerControlRadius });
-      }else{
-        p.line1 && p.line1.set({ 'x1': p.left+this.cornerControlRadius, 'y1': p.top+this.cornerControlRadius });
-        p.line2 && p.line2.set({ 'x2': p.left+this.cornerControlRadius, 'y2': p.top+this.cornerControlRadius });
+      if (p.isCornerControl) {
+        this.anchorZoomShow = true
+        let left = p.left + this.cornerControlRadius
+        let top = p.top + this.cornerControlRadius
+        this.anchorZoomSrc = this.selectedForm.getAnchorZoomSrc(left / this.canvasWidth, top / this.canvasHeight)
+        if (p.name === 'anchor-2' || p.name === 'anchor-3') {
+          p.line1 && p.line1.set({'x2': left, 'y2': top});
+          p.line2 && p.line2.set({'x1': left, 'y1': top});
+        } else {
+          p.line1 && p.line1.set({'x1': left, 'y1': top});
+          p.line2 && p.line2.set({'x2': left, 'y2': top});
+        }
       }
       this.$globals.canvas.renderAll();
     })
@@ -129,10 +144,11 @@ export default {
 }
 </script>
 
-<style >
+<style>
 .canvas-container, .upper-canvas, #formCanvas {
   margin: auto;
 }
+
 /* width */
 ::-webkit-scrollbar {
   width: 16px;

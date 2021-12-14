@@ -8,7 +8,7 @@
         <anchor-icon @click="" class="mx-1 fill-current text-black hover:text-gray-500 cursor-pointer" />
         <ul class="dropdown-menu absolute hidden text-gray-700 pt-1">
           <li @click="addAnchor"><a class="rounded-t bg-gray-200 hover:bg-gray-400 py-2 px-4 block whitespace-no-wrap" href="#">Object</a></li>
-          <li @click="detectCorners" class=""><a class="bg-gray-200 hover:bg-gray-400 py-2 px-4 block whitespace-no-wrap" href="#">Corners</a></li>>
+          <li @click="detectCorners" class=""><a class="bg-gray-200 hover:bg-gray-400 py-2 px-4 block whitespace-no-wrap" href="#">Corners</a></li>
         </ul>
       </div>
       <read-anchor-icon v-if="$store.getters.selectedFormAnchorsCount === 4 && showAnchorsToolbar" v-on:click="processAnchors" />
@@ -57,7 +57,7 @@ export default {
     addAnchor() {
       if(this.isFormAnchorProcessed){
         this.$store.commit('updateFormProp', [this.selectedFormId, 'isAnchorProcessed', false])
-        this.selectedForm.updateFormSrc(this.selectedForm.src_original)
+        this.selectedForm.updateFormSrc(this.selectedForm.src_original, true)
         return
       }
       this.$store.commit('mutateProperty', ['anchors', {hasAnchors: true, anchorType: 'object'}])
@@ -128,7 +128,7 @@ export default {
     detectCorners(){
       if(this.isFormAnchorProcessed){
         this.$store.commit('updateFormProp', [this.selectedFormId, 'isAnchorProcessed', false])
-        this.selectedForm.updateFormSrc(this.selectedForm.src_original)
+        this.selectedForm.updateFormSrc(this.selectedForm.src_original, true)
         return
       }
       this.$store.commit('mutateProperty', ['anchors', {hasAnchors: true, anchorType: 'corners'}])

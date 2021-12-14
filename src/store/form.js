@@ -13,14 +13,11 @@ export default class formClass {
         if(fromCam){
             this.edgesTransformation(src)
         }else{
-            this.setCanvasFromSrc(src)
-            if(store.state.anchors.hasAnchors && !this.isAnchorProcessed){
-                this.processAnchors()
-            }
+            this.setCanvasFromSrc(src, false)
         }
     }
 
-    async setCanvasFromSrc(src){
+    async setCanvasFromSrc(src, isAnchorError){
         this.src = src
         this.canvas = await document.createElement('canvas')
         let image = new Image()
@@ -28,7 +25,10 @@ export default class formClass {
         await image.decode();
         this.canvas.height = image.height; this.canvas.width = image.width
         let ctx = this.canvas.getContext('2d');
-        ctx.drawImage(image,0,0);
+        await ctx.drawImage(image,0,0);
+        if(store.state.anchors.hasAnchors && !this.isAnchorProcessed && !isAnchorError){
+            this.processAnchors()
+        }
     }
 
 
@@ -101,7 +101,12 @@ export default class formClass {
             foundContour = approx;
         } else {
             store.commit('updateFormProp', [this.id, 'hasError', true])
-            this.updateFormSrc(this.src_original)
+            this.updateFormSrc(this.src_original, true)
+            this.anchors['anchor-0'] = [0.05 , 0.05]
+            this.anchors['anchor-1'] = [0.95 , 0.05]
+            this.anchors['anchor-2'] = [0.05 , 0.95]
+            this.anchors['anchor-3'] = [0.95 , 0.95]
+            store.commit('updateFormProp', [this.id, 'anchors', this.anchors])
             return false;
         }
 
@@ -182,6 +187,9 @@ export default class formClass {
     }
 
     async findAnchors(areaName) {
+        if(this.hasError){
+            return
+        }
         let area = store.state.formReadAreas[areaName]
         let [areaCanvas, imgArea] = this.getAreaCanvas(area)
         let cv_src = await cv.imread(areaCanvas)
@@ -224,19 +232,32 @@ export default class formClass {
             let dst = this.fourPointsTransform(cv_src, cornerArray)
             this.updateSrc(dst)
         }else {
+            for(let name of ['anchor-0','anchor-1','anchor-3','anchor-2']){
+                if(this.anchors[name] === undefined){
+                    this.anchors[name] = [store.state.formReadAreas[name].left, store.state.formReadAreas[name].top]
+                }
+            }
+            store.commit('updateFormProp', [this.id, 'anchors', this.anchors])
             store.commit('updateFormProp', [this.id, 'hasError', true])
-            this.updateFormSrc(this.src_original)
+            this.updateFormSrc(this.src_original, true)
         }
 
     }
 
     getAreaCanvas(area) {
-        let ctx = this.canvas.getContext('2d');
-
         let width = area.width * this.canvas.width
         let height = area.height * this.canvas.height
         let left = area.left * this.canvas.width
         let top =  area.top * this.canvas.height
+
+        let canvasArea = this.getCanvasCut(left, top, width, height)
+
+        let imgArea = width * height
+        return [canvasArea, imgArea]
+    }
+
+    getCanvasCut(left, top, width, height){
+        let ctx = this.canvas.getContext('2d');
 
         let areaImgData = ctx.getImageData(left, top, width, height);
         let canvasArea = document.createElement('canvas');
@@ -245,8 +266,7 @@ export default class formClass {
         canvasArea.height = height;
         ctx_area.putImageData(areaImgData, 0, 0);
 
-        let imgArea = width * height
-        return [canvasArea, imgArea]
+        return canvasArea
     }
 
     async getSrcFromCvObject(dst) {
@@ -256,9 +276,27 @@ export default class formClass {
         console.log(canvas.toDataURL())
     }
 
-    async updateFormSrc(src){
-        await this.setCanvasFromSrc(src)
+    async updateFormSrc(src, isAnchorError){
+        await this.setCanvasFromSrc(src, isAnchorError)
         store.commit('updateFormProp', [this.id, 'src', src])
+    }
+
+    getAnchorZoomSrc(centerLeft, centerTop){
+        let width = this.canvas.width * 0.05
+        let left = centerLeft * this.canvas.width - (width/2)
+        let top =  centerTop * this.canvas.height - (width/2)
+
+        let canvasArea = this.getCanvasCut(left, top, width, width)
+        let ctx_area = canvasArea.getContext('2d');
+        ctx_area.beginPath();
+        ctx_area.strokeStyle = "red"; // Green path
+        ctx_area.moveTo((width / 2) - (0.1 * width), width / 2);
+        ctx_area.lineTo((width / 2) + (0.1 * width), width / 2);
+        ctx_area.moveTo(width / 2, (width / 2) - (0.1 * width));
+        ctx_area.lineTo(width / 2, (width / 2) + (0.1 * width));
+        ctx_area.closePath();
+        ctx_area.stroke();
+        return canvasArea.toDataURL()
     }
 
 }
