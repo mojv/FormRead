@@ -17,3 +17,8 @@ app.use(store);
 app.provide('$globals', globals)
 
 app.mount('#app');
+
+// Enable navigation prompt
+window.onbeforeunload = function() {
+    return true;
+};
