@@ -3,7 +3,7 @@
     <div class="h-full relative z-20 flex justify-center flex-wrap flex-row sm:flex-row items-center">
       <menu-icon @click="collapsePanel()" class="mx-1 fill-current text-black hover:text-gray-500 cursor-pointer" />
     </div>
-    <div class="w-5/6 h-full relative z-20 flex justify-center flex-wrap flex-row sm:flex-row items-center">
+    <div v-if="!isMoveActivated"  class="w-5/6 h-full relative z-20 flex justify-center flex-wrap flex-row sm:flex-row items-center">
       <div class="dropdown" v-if="!showAnchorsToolbar" >
         <anchor-icon @click="" class="mx-1 fill-current text-black hover:text-gray-500 cursor-pointer" />
         <ul class="dropdown-menu absolute hidden text-gray-700 pt-1">
@@ -17,8 +17,12 @@
       <ocr-icon v-if="!showAnchorsToolbar" @click="addField('rgb(158,68,226,0.3)','OCR')" class="mx-1 fill-current text-black hover:text-gray-500 cursor-pointer" />
       <omr-icon v-if="!showAnchorsToolbar" @click="addField('rgb(33,239,160,0.3)','OMR')" class="mx-1 fill-current text-black hover:text-gray-500 cursor-pointer" />
       <cut-icon v-if="!showAnchorsToolbar" @click="addField('rgb(255,117,140,0.3)','cuts')" class="mx-1 fill-current text-black hover:text-gray-500 cursor-pointer" />
-
+      <move-icon @click="enableScroll" class="mx-1 fill-current text-black hover:text-gray-500 cursor-pointer" />
     </div>
+    <div v-if="isMoveActivated" class="w-5/6 h-full relative z-20 flex justify-center flex-wrap flex-row sm:flex-row items-center">
+      <move-icon @click="disableScroll" class="mx-1 fill-current text-black hover:text-gray-500 cursor-pointer" />
+    </div>
+
   </div>
 </template>
 
@@ -32,6 +36,8 @@ import anchorIcon from  './Icons/anchorIcon.vue'
 import readAnchorIcon from './Icons/readAnchorIcon.vue'
 import cancelIcon from './Icons/canelIcon.vue'
 import menuIcon from './Icons/MenuIcon.vue'
+import MoveIcon from './Icons/MoveIcon.vue'
+
 import {fabric} from "fabric";
 import helpers from "../mixins"
 
@@ -39,11 +45,12 @@ export default {
   name: 'FormToolbar',
   inject: ['$globals'],
   mixins: [helpers],
-  components: {qrIcon, ocrIcon, omrIcon, cutIcon, anchorIcon, cancelIcon, readAnchorIcon, menuIcon},
+  components: {qrIcon, ocrIcon, omrIcon, cutIcon, anchorIcon, cancelIcon, readAnchorIcon, menuIcon, MoveIcon},
 
   data: function () {
     return {
       isPanelCollapsed: false,
+      isMoveActivated: false
     }
   },
 
@@ -133,6 +140,17 @@ export default {
       }
       this.$store.commit('mutateProperty', ['anchors', {hasAnchors: true, anchorType: 'corners'}])
       this.selectedForm.detectSheetCorners()
+    },
+
+    disableScroll(){
+      this.isMoveActivated = false
+      document.getElementsByClassName("upper-canvas")[0].classList.remove("enableScroll");
+      document.getElementsByClassName("lower-canvas")[0].classList.remove("enableScroll");
+    },
+    enableScroll(){
+      this.isMoveActivated = true
+      document.getElementsByClassName("upper-canvas")[0].classList.add("enableScroll");
+      document.getElementsByClassName("lower-canvas")[0].classList.add("enableScroll");
     }
 
   },

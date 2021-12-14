@@ -149,27 +149,9 @@ export default {
   margin: auto;
 }
 
-/* width */
-::-webkit-scrollbar {
-  width: 16px;
-  height: 16px;
+.enableScroll{
+  pointer-events: none;
+  touch-action: manipulation !important;
 }
 
-/* Track */
-::-webkit-scrollbar-track {
-  border-radius: 100vh;
-  background: #edf2f7;
-}
-
-/* Handle */
-::-webkit-scrollbar-thumb {
-  background: #cbd5e0;
-  border-radius: 100vh;
-  border: 3px solid #edf2f7;
-}
-
-/* Handle on hover */
-::-webkit-scrollbar-thumb:hover {
-  background: #a0aec0;
-}
 </style>
