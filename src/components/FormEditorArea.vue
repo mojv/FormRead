@@ -29,7 +29,7 @@ export default {
 
   data: function () {
     return {
-      cornerControlRadius: 6,
+      cornerControlRadius: 10,
       anchorZoomSrc: '',
       anchorZoomShow: false,
     }
