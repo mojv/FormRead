@@ -17,7 +17,6 @@
 import {fabric} from "fabric";
 import loadingModal from "./loadingModal.vue";
 import helpers from "../mixins"
-import {store} from "../store";
 import AnchorZoomWindow from "../components/AnchorZoomWindow.vue"
 
 export default {
@@ -119,7 +118,7 @@ export default {
           let left = (area.left + this.cornerControlRadius) / this.canvasWidth
           let top = (area.top + this.cornerControlRadius) / this.canvasHeight
           this.selectedForm.anchors[area.name] = [left, top]
-          store.commit('updateFormProp', [this.selectedFormId, 'anchors', this.selectedForm.anchors])
+          this.store.commit('updateFormProp', [this.selectedFormId, 'anchors', this.selectedForm.anchors])
         }
       });
     });

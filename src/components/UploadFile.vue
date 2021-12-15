@@ -10,7 +10,7 @@
             class="w-52 h-28 flex flex-col items-center px-4 py-6 bg-white text-blue rounded-lg shadow-lg tracking-wide uppercase border border-blue cursor-pointer hover:bg-blue-300 hover:text-white">
           <svg class="w-8 h-8" style="" viewBox="0 0 1024 1024"  xmlns="http://www.w3.org/2000/svg"><path d="M268.939 186.181c5.725 0 10.333-4.143 10.333-9.309l0-27.927c0-5.167-4.608-9.309-10.333-9.309l-72.425 0c-5.725 0-10.333 4.143-10.333 9.309l0 27.927c0 5.12 4.608 9.309 10.333 9.309L268.939 186.181zM372.363 535.271c0 89.972 72.937 162.909 162.909 162.909S698.18 625.243 698.18 535.271s-72.937-162.909-162.909-162.909S372.363 445.299 372.363 535.271zM0 325.817l0 465.453c0 93.091 93.091 93.091 93.091 93.091l837.816 0c0 0 93.091 0 93.091-93.091L1023.998 325.817c0-93.091-93.091-93.091-93.091-93.091L744.725 232.726l-46.545-93.091L372.363 139.635l-46.545 93.091L93.091 232.726C93.091 232.727 0 232.727 0 325.817zM791.271 325.817c25.693 0 46.545 20.852 46.545 46.545 0 25.693-20.852 46.545-46.545 46.545-25.693 0-46.545-20.852-46.545-46.545C744.725 346.67 765.578 325.817 791.271 325.817zM535.271 325.817c115.665 0 209.454 93.789 209.454 209.454s-93.789 209.454-209.454 209.454-209.454-93.789-209.454-209.454S419.606 325.817 535.271 325.817z"  /></svg>
           <span class="mt-2 text-base leading-normal">From Camera</span>
-          <input type='file' class="hidden" multiple @change="uploadFiles($event, true)"/>
+          <input type='button' class="hidden" multiple @click="activateCam"/>
         </label>
         <label
             class="mt-2 md:mt-0 md:ml-2 w-52 h-28 flex flex-col items-center px-4 py-6 bg-white text-blue rounded-lg shadow-lg tracking-wide uppercase border border-blue cursor-pointer hover:bg-blue-300 hover:text-white">
@@ -38,11 +38,10 @@ export default {
       this.$store.commit('mutateProperty', ['isFromCamMode', fromCam])
       this.uploadImagesFiles(evt, fromCam)
     },
+    activateCam(){
+      this.$emit('activateCam',  true)
+    }
   },
-  mounted() {
-    let recaptchaScript = document.createElement('script')
-    recaptchaScript.setAttribute('src', 'https://docs.opencv.org/4.0.1/opencv.js')
-    document.head.appendChild(recaptchaScript)
-  },
+
 }
 </script>

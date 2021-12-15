@@ -113,5 +113,8 @@ export default {
         isFormAnchorProcessed: function () {
             return this.selectedForm.isAnchorProcessed
         },
+        formsCant: function () {
+            return Object.keys(this.$store.state.forms).length
+        },
     }
 }
