@@ -40,22 +40,23 @@ export default class formClass {
         await image.decode();
         let imgArea = image.height * this.canvas.width
         let cv_src = cv.imread(image)
-        let [contours] = this.getContours(cv_src, imgArea, false)
+        let [contours, hierarchy, boundingRects] = this.getContours(cv_src, imgArea, false)
         let cornerArray = this.findExternalSheetCorners(contours)
         if(cornerArray){
             let dst = this.fourPointsTransform(cv_src, cornerArray)
             await this.updateSrc(dst)
-            dst.delete()
         }
-        cv_src.delete(); contours.delete()
+        cv_src.delete(); contours.delete(); hierarchy.delete();
     }
 
     async detectSheetCorners() {
         let cv_src = cv.imread(this.canvas)
         let imgArea = this.canvas.height * this.canvas.width
-        let [contours] = this.getContours(cv_src, imgArea, false)
+        let [contours, hierarchy, boundingRects] = this.getContours(cv_src, imgArea, false)
         this.findExternalSheetCorners(contours)
-        cv_src.delete(); contours.delete()
+        cv_src.delete();
+        contours.delete();
+        hierarchy.delete();
     }
 
     async updateSrc(dst) {
@@ -64,6 +65,7 @@ export default class formClass {
         let new_src = await this.canvas.toDataURL()
         store.commit('updateFormProp', [this.id, 'src', new_src])
         store.commit('updateFormProp', [this.id, 'isAnchorProcessed', true])
+        dst.delete()
     }
 
     getContours(src, imgArea, draw) {
@@ -87,7 +89,8 @@ export default class formClass {
                 // this.getSrcFromCvObject(src)
             }
         }
-        return [contours, hierarchy, src, boundingRects]
+        dst.delete();
+        return [contours, hierarchy, boundingRects]
     }
 
     findExternalSheetCorners(contours) {
@@ -132,6 +135,7 @@ export default class formClass {
         }
         store.commit('updateFormProp', [this.id, 'anchors', this.anchors])
 
+        approx.delete();
         return cornerArray
     }
 
@@ -184,6 +188,7 @@ export default class formClass {
 
         let transformed = new cv.Mat();
         cv.warpPerspective(src, transformed, M, dsize, cv.INTER_LINEAR, cv.BORDER_CONSTANT, new cv.Scalar());
+        src.delete(); srcCoords.delete(); finalDestCoords.delete(); M.delete();
         return transformed;
     }
 
@@ -194,7 +199,7 @@ export default class formClass {
         let area = store.state.formReadAreas[areaName]
         let [areaCanvas, imgArea] = this.getAreaCanvas(area)
         let cv_src = await cv.imread(areaCanvas)
-        let [,,, boundingRects] = this.getContours(cv_src, imgArea, true)
+        let [contours, hierarchy, boundingRects]  = this.getContours(cv_src, imgArea, true)
 
         boundingRects.sort((item1, item2) => {
             return (item1.width * item1.height > item2.width * item2.height) ? -1 : (item1.width * item1.height < item2.width * item2.height) ? 1 : 0;
@@ -209,6 +214,7 @@ export default class formClass {
         }
         // override anchor so it is reactive
         store.commit('updateFormProp', [this.id, 'anchors', this.anchors])
+        cv_src.delete(); contours.delete(); hierarchy.delete();
     }
 
     async processAnchors(){
@@ -231,7 +237,7 @@ export default class formClass {
             let cornerArray = [{corner: corner1}, {corner: corner2}, {corner: corner3}, {corner: corner4}];
             let cv_src = await cv.imread(this.canvas)
             let dst = this.fourPointsTransform(cv_src, cornerArray)
-            this.updateSrc(dst)
+            await this.updateSrc(dst)
         }else {
             for(let name of ['anchor-0','anchor-1','anchor-3','anchor-2']){
                 if(this.anchors[name] === undefined){
