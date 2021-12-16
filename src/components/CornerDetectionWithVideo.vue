@@ -59,7 +59,7 @@ export default {
       for (let i = 0; i < contours.size(); ++i) {
         let cnt = contours.get(i);
         let cntArea = cv.contourArea(cnt, false)
-        if (cntArea/imgArea < 0.95 && cntArea/imgArea > 0.3 ){
+        if (cntArea/imgArea < 0.95 && cntArea/imgArea > 0.05 ){
           let color = new cv.Scalar(255, 0, 0, 255);
           cv.drawContours(src, contours, i, color, 2, cv.LINE_8, hierarchy, 100);
         }
