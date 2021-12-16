@@ -25,7 +25,7 @@ export default {
                 }
             });
         },
-        uploadImagesFiles: function (evt, fromCam) {
+        uploadImagesFiles: function (evt) {
             let files = evt.target.files;
             let context = this
 
@@ -36,7 +36,7 @@ export default {
                 reader.onload = (function (theFile, VueContext) {
                     return function (e) {
                         let src = e.target.result
-                        VueContext.$store.commit('addForm', [theFile.name, src, fromCam])
+                        VueContext.$store.commit('addForm', [theFile.name, src, false])
                         VueContext.pages--
                     };
                 })(file, context);
@@ -74,6 +74,10 @@ export default {
                 }
             });
         },
+        activateCam() {
+            this.$store.commit('mutateProperty', ['isFromCamMode', true])
+            this.$emit('activateCam', true)
+        }
     },
 
     computed: {

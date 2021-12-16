@@ -36,7 +36,6 @@ export default {
       }
 
       this.canvas = document.getElementById("videoCanvas");
-      console.log(this.video.videoHeight)
       this.canvas.width = this.video.videoWidth;
       this.canvas.height = this.video.videoHeight;
       let context = this.canvas.getContext('2d');
@@ -67,9 +66,17 @@ export default {
       cv.imshow(canvas, src);
       dst.delete(); hierarchy.delete(); contours.delete(); src.delete()
     },
-    takePicture(){
+
+    async takePicture(){
       clearInterval(this.interval)
-      this.$store.commit('addForm', [this.formsCant, this.canvas.toDataURL(), true])
+      let canvas = await document.createElement('canvas')
+      canvas.width = this.video.videoWidth;
+      canvas.height = this.video.videoHeight;
+      console.log(this.video.videoWidth)
+      let context = await canvas.getContext('2d');
+      await context.drawImage(this.video, 0, 0, canvas.width, canvas.height)
+      let src = canvas.toDataURL()
+      this.$store.commit('addForm', [this.formsCant, src , true])
       this.video = null
       this.canvas = null
       this.stream.getTracks().forEach(function(track) {

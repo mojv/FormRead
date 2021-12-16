@@ -16,7 +16,7 @@
             class="mt-2 md:mt-0 md:ml-2 w-52 h-28 flex flex-col items-center px-4 py-6 bg-white text-blue rounded-lg shadow-lg tracking-wide uppercase border border-blue cursor-pointer hover:bg-blue-300 hover:text-white">
           <svg class="w-9 h-10" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg"><path d="M74.787822 497.105778l145.738245-51.79669-120.714316-59.022255 1.594311-31.175023 80.302931-19.23611 288.529369-21.851681L920.690588 531.088754l-347.449293 23.099091L213.489814 375.612727l-58.815547 5.5279 407.267681 199.024869 368.833323-27.951609 7.140631 20.708648 14.798031 7.226588L533.765211 749.540068 74.787822 497.105778 74.787822 497.105778zM287.069623 466.780099l-93.889367 33.376155 337.950965 185.906084 267.181155-108.029412-237.96474 22.283516-35.07382-17.119913-85.11861 34.71157-25.647123-15.944134 82.658581-32.508391L287.069623 466.780099 287.069623 466.780099zM63.836399 513.168616l0.901533 86.923722L531.928377 861.606423l425.325965-179.426509 0-84.132142L533.730419 774.717494 63.836399 513.168616 63.836399 513.168616zM554.595632 697.013761l21.175275 12.892635 34.935674-15.112186-21.24486-12.942777L554.595632 697.013761 554.595632 697.013761zM654.894989 655.459343l21.175275 12.928451 34.936697-15.129582L689.763125 640.330784 654.894989 655.459343 654.894989 655.459343zM606.305341 675.80267l21.141506 12.910031 34.969443-15.127536-21.24486-12.927427L606.305341 675.80267z"  /></svg>
           <span class="mt-2 text-base leading-normal">From Scanner</span>
-          <input type='file' class="hidden" multiple @change="uploadFiles($event, false)"/>
+          <input type='file' class="hidden" multiple @change="uploadFiles($event)"/>
         </label>
       </div>
     </article>
@@ -34,12 +34,9 @@ export default {
   mixins: [helpers],
 
   methods: {
-    uploadFiles: function (evt, fromCam) {
-      this.$store.commit('mutateProperty', ['isFromCamMode', fromCam])
-      this.uploadImagesFiles(evt, fromCam)
-    },
-    activateCam(){
-      this.$emit('activateCam',  true)
+    uploadFiles: function (evt) {
+      this.$store.commit('mutateProperty', ['isFromCamMode', false])
+      this.uploadImagesFiles(evt)
     }
   },
 

@@ -2,7 +2,8 @@
   <div class="w-full py-1 shadow-md overflow-y-auto h-full flex flex-wrap justify-center content-start md:pr-1" id="ScrollableFormsList">
     <label class="m-2 shadow border-4 rounded-lg border-transparent hover:border-green-400 w-10 h-10 m-1 bg-white cursor-pointer">
       <add-icon class="m-auto mt-1"/>
-      <input type='file' class="hidden" multiple @change="uploadFiles($event, $store.state.isFromCamMode)"/>
+      <input v-if="!$store.state.isFromCamMode" type='file' class="hidden" multiple @change="uploadImagesFiles($event)"/>
+      <input v-if="$store.state.isFromCamMode" type='button' class="hidden" multiple @click="activateCam"/>
     </label>
     <template v-for="(form, id) in forms">
       <div
@@ -40,9 +41,6 @@ export default {
       if(confirm(`Do you really want to delete form ${formId}?`)){
         this.$store.commit('deleteForm', formId)
       }
-    },
-    uploadFiles: function (evt, fromCam) {
-      this.uploadImagesFiles(evt, fromCam)
     },
   },
 }

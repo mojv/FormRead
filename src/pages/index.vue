@@ -9,14 +9,14 @@
           v-if="formsCant === 0"
       />
       <template v-if="formsCant > 0">
-        <scrollable-forms-list v-if="formColumns.substring(0,3) !== '0px'"/>
-        <form-toolbar @form-columns="setGridColumns" />
+        <scrollable-forms-list v-if="formColumns.substring(0,3) !== '0px'" @activateCam="setActivateCam"/>
+        <form-toolbar @form-columns="setGridColumns"/>
         <form-editor-area />
         <form-options-panel />
       </template>
     </div>
   </div>
-  <CornerDetectionWithVideo v-if="activateCam" @activateCam="setActivateCam"/>
+  <upload-img-web-cam v-if="activateCam" @activateCam="setActivateCam"/>
 </template>
 
 <script>
@@ -26,7 +26,7 @@ import FormEditorArea from '../components/FormEditorArea.vue'
 import FormOptionsPanel from '../components/FormOptionsPanel.vue'
 import AppHeader from "../components/AppHeader.vue"
 import FormToolbar from "../components/FormToolbar.vue"
-import CornerDetectionWithVideo from "../components/CornerDetectionWithVideo.vue"
+import UploadImgWebCam from "../components/UploadImgWebCam.vue"
 import helpers from "../mixins"
 
 
@@ -41,7 +41,7 @@ export default {
     FormOptionsPanel,
     AppHeader,
     FormToolbar,
-    CornerDetectionWithVideo
+    UploadImgWebCam
   },
 
   data() {

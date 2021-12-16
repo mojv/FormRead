@@ -12,7 +12,8 @@ export default class formClass {
         this.isAnchorProcessed = false
         this.hasError = false
         if(fromCam){
-            this.edgesTransformation(src)
+            store.commit('mutateProperty', ['anchors', {hasAnchors: true, anchorType: 'corners'}])
+            this.setCanvasFromSrc(src, false).then(() => this.processAnchors)
         }else{
             this.setCanvasFromSrc(src, false)
         }
@@ -30,23 +31,6 @@ export default class formClass {
         if(store.state.anchors.hasAnchors && !this.isAnchorProcessed && !isAnchorError){
             this.processAnchors()
         }
-    }
-
-
-    async edgesTransformation(src) {
-        this.canvas = await document.createElement('canvas')
-        let image = new Image()
-        image.src = src
-        await image.decode();
-        let imgArea = image.height * this.canvas.width
-        let cv_src = cv.imread(image)
-        let [contours, hierarchy, boundingRects] = this.getContours(cv_src, imgArea, false)
-        let cornerArray = this.findExternalSheetCorners(contours)
-        if(cornerArray){
-            let dst = this.fourPointsTransform(cv_src, cornerArray)
-            await this.updateSrc(dst)
-        }
-        cv_src.delete(); contours.delete(); hierarchy.delete();
     }
 
     async detectSheetCorners() {
@@ -93,25 +77,34 @@ export default class formClass {
         return [contours, hierarchy, boundingRects]
     }
 
+    setDefaultAnchors(){
+        store.commit('updateFormProp', [this.id, 'hasError', true])
+        this.updateFormSrc(this.src_original, true)
+        this.anchors['anchor-0'] = [0.05 , 0.05]
+        this.anchors['anchor-1'] = [0.95 , 0.05]
+        this.anchors['anchor-2'] = [0.05 , 0.95]
+        this.anchors['anchor-3'] = [0.95 , 0.95]
+        store.commit('updateFormProp', [this.id, 'anchors', this.anchors])
+        return false;
+    }
+
     findExternalSheetCorners(contours) {
         let foundContour = new cv.MatVector();
         let sortableContours = this.sortContours(contours);
 
         //Ensure the top area contour has 4 corners (NOTE: This is not a perfect science and likely needs more attention)
         let approx = new cv.Mat();
+
+        if(sortableContours.length === 0){
+            return this.setDefaultAnchors()
+        }
+
         cv.approxPolyDP(sortableContours[0].contour, approx, .05 * sortableContours[0].perimiterSize, true);
 
         if (approx.rows === 4) {
             foundContour = approx;
         } else {
-            store.commit('updateFormProp', [this.id, 'hasError', true])
-            this.updateFormSrc(this.src_original, true)
-            this.anchors['anchor-0'] = [0.05 , 0.05]
-            this.anchors['anchor-1'] = [0.95 , 0.05]
-            this.anchors['anchor-2'] = [0.05 , 0.95]
-            this.anchors['anchor-3'] = [0.95 , 0.95]
-            store.commit('updateFormProp', [this.id, 'anchors', this.anchors])
-            return false;
+            return this.setDefaultAnchors()
         }
 
         //Find the corners

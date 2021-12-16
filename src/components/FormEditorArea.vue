@@ -118,7 +118,7 @@ export default {
           let left = (area.left + this.cornerControlRadius) / this.canvasWidth
           let top = (area.top + this.cornerControlRadius) / this.canvasHeight
           this.selectedForm.anchors[area.name] = [left, top]
-          this.store.commit('updateFormProp', [this.selectedFormId, 'anchors', this.selectedForm.anchors])
+          this.$store.commit('updateFormProp', [this.selectedFormId, 'anchors', this.selectedForm.anchors])
         }
       });
     });
