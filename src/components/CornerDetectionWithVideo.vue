@@ -25,9 +25,14 @@ export default {
       this.canvas = document.createElement('canvas')
       // Get access to the camera!
       if(navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-        this.stream = await navigator.mediaDevices.getUserMedia({ video: true, audio:false })
-          this.video.srcObject = this.stream;
-          this.video.play();
+        this.stream = await navigator.mediaDevices.getUserMedia({
+          audio: false,
+          video: {
+            facingMode: 'environment'
+          }
+        })
+        this.video.srcObject = this.stream;
+        this.video.play();
       }
 
       this.canvas = document.getElementById("videoCanvas");
