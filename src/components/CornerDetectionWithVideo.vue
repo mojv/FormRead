@@ -32,12 +32,13 @@ export default {
           }
         })
         this.video.srcObject = this.stream;
-        this.video.play();
+        await this.video.play();
       }
 
       this.canvas = document.getElementById("videoCanvas");
-      this.canvas.width = window.screen.width; //document.width is obsolete
-      this.canvas.height = window.screen.height;
+      console.log(this.video.videoHeight)
+      this.canvas.width = this.video.videoWidth;
+      this.canvas.height = this.video.videoHeight;
       let context = this.canvas.getContext('2d');
 
       this.interval = setInterval(() => {
@@ -51,11 +52,18 @@ export default {
       let dst = src.clone();
       let contours = new cv.MatVector();
       let hierarchy = new cv.Mat();
+      let imgArea = canvas.height * canvas.width
       cv.cvtColor(src, dst, cv.COLOR_RGBA2GRAY, 0);
       cv.threshold(dst, dst, 120, 200, cv.THRESH_BINARY);
-      cv.findContours(dst, contours, hierarchy, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE);
-      let color = new cv.Scalar(255, 0, 0, 255);
-      cv.drawContours(src, contours, 0, color, 2, cv.LINE_8, hierarchy, 100);
+      cv.findContours(dst, contours, hierarchy, cv.RETR_LIST, cv.CHAIN_APPROX_SIMPLE);
+      for (let i = 0; i < contours.size(); ++i) {
+        let cnt = contours.get(i);
+        let cntArea = cv.contourArea(cnt, false)
+        if (cntArea/imgArea < 0.95 && cntArea/imgArea > 0.5 ){
+          let color = new cv.Scalar(255, 0, 0, 255);
+          cv.drawContours(src, contours, i, color, 2, cv.LINE_8, hierarchy, 100);
+        }
+      }
       cv.imshow(canvas, src);
       dst.delete(); hierarchy.delete(); contours.delete(); src.delete()
     },
