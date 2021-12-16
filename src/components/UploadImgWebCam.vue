@@ -1,5 +1,6 @@
 <template>
   <canvas id="videoCanvas" class="" ></canvas>
+  <video id="video" autoplay muted playsinline hidden />
   <div class="absolute top-0 left-0 w-full h-full flex justify-center items-end text-red-600">
     <button @click="takePicture" class="w-12 h-12 rounded-full border-gray-400 border-4 shadow-2xl mb-5 bg-white"></button>
   </div>
@@ -21,7 +22,7 @@ export default {
   methods:{
 
     async setUpCanvas(){
-      this.video = document.createElement('video')
+      this.video = document.getElementById('video')
       this.canvas = document.createElement('canvas')
       // Get access to the camera!
       if(navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
