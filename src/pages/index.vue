@@ -9,10 +9,10 @@
           v-if="formsCant === 0"
       />
       <template v-if="formsCant > 0">
-        <scrollable-forms-list v-if="layoutItemsDisplay['scrollList']" @activateCam="setActivateCam" @collapse-columns="setGridColumns"/>
+        <scrollable-forms-list v-show="layoutItemsDisplay['scrollList']" @activateCam="setActivateCam" @collapse-columns="setGridColumns"/>
         <form-toolbar @collapse-columns="setGridColumns"/>
-        <form-editor-area  v-if="layoutItemsDisplay['editorArea']" />
-        <form-options-panel v-if="layoutItemsDisplay['optionPanel']"/>
+        <form-editor-area  v-show="layoutItemsDisplay['editorArea']" />
+        <form-options-panel v-show="layoutItemsDisplay['optionPanel']"/>
       </template>
     </div>
   </div>
