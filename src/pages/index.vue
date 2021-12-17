@@ -2,17 +2,17 @@
   <!--  <script src="https://badge.dimensions.ai/badge.js"></script>-->
   <div @click="setActiveObject" class="bg-gray-50 h-screen" v-if="!activateCam">
     <app-header  v-if="formsCant === 0" />
-    <div class="h-body" v-bind:style="{gridTemplateColumns: formColumns}" :class="{'form-grid-display': formsCant > 0}">
+    <div class="h-body" :class='layoutItemsDisplay'>
       <upload-file @activateCam="setActivateCam"
           :description='"Multiple sheets OMR (optical mark recognition) OCR (Optical Character Recognition) and BCR (Bar Code Recognition)"'
           :tittle='"FREE OMR, OCR & BCR"'
           v-if="formsCant === 0"
       />
       <template v-if="formsCant > 0">
-        <scrollable-forms-list v-if="formColumns.substring(0,3) !== '0px'" @activateCam="setActivateCam"/>
-        <form-toolbar @form-columns="setGridColumns"/>
-        <form-editor-area />
-        <form-options-panel />
+        <scrollable-forms-list v-if="layoutItemsDisplay['scrollList']" @activateCam="setActivateCam" @collapse-columns="setGridColumns"/>
+        <form-toolbar @collapse-columns="setGridColumns"/>
+        <form-editor-area  v-if="layoutItemsDisplay['editorArea']" />
+        <form-options-panel v-if="layoutItemsDisplay['optionPanel']"/>
       </template>
     </div>
   </div>
@@ -46,8 +46,13 @@ export default {
 
   data() {
     return {
-      formColumns: '120px 2fr 0px',
-      activateCam: false
+      activateCam: false,
+      layoutItems: {
+        formGridDisplay: false,
+        scrollList: true,
+        editorArea: true,
+        optionPanel: true
+      }
     }
   },
 
@@ -55,19 +60,41 @@ export default {
     setActiveObject() {
       this.$store.commit('setFabricActiveObject', this.$globals.canvas)
     },
-    setGridColumns(columns) {
-      this.formColumns = columns
+    setGridColumns(panel) {
+      this.layoutItems[panel] = !this.layoutItems[panel]
+
+      // I'm to leasy to refactor this ¯\_(ツ)_/¯
+      if(document.body.offsetWidth < 700){
+        if (panel === 'scrollList' && this.layoutItems['optionPanel'] === true){
+          this.layoutItems['optionPanel'] = !this.layoutItems[panel]
+        }
+        if (panel === 'optionPanel' && this.layoutItems['scrollList'] === true){
+          this.layoutItems['scrollList'] = !this.layoutItems[panel]
+        }
+        this.layoutItems['editorArea'] = !(this.layoutItems['scrollList'] === true || this.layoutItems['optionPanel'] === true);
+      }
     },
     setActivateCam(activateCam){
       this.activateCam= activateCam
     }
   },
 
+  computed: {
+    layoutItemsDisplay: function () {
+      this.layoutItems['formGridDisplay'] = this.formsCant > 0
+      return this.layoutItems
+    },
+  },
+
   mounted() {
-    let recaptchaScript = document.createElement('script')
-    recaptchaScript.setAttribute('src', 'https://docs.opencv.org/4.0.1/opencv.js')
-    document.head.appendChild(recaptchaScript)
-  }
+    if(document.body.offsetWidth < 700){
+      this.layoutItems['optionPanel'] = false;
+      this.layoutItems['editorArea'] = false;
+    }
+    let opencv = document.createElement('script')
+    opencv.setAttribute('src', 'https://docs.opencv.org/4.0.1/opencv.js')
+    document.head.appendChild(opencv)
+  },
 
 }
 </script>
@@ -77,12 +104,30 @@ export default {
   height: 100%;
 }
 
-.form-grid-display {
+.formGridDisplay {
   display: grid;
   grid-template-areas:
-      'ScrollableFormsList FormToolbar FormOptionsPanel'
+      'FormToolbar FormToolbar FormToolbar'
       'ScrollableFormsList FormEditorArea FormOptionsPanel';
   grid-template-rows: 2.5rem auto;
+  &.scrollList.editorArea.optionPanel{
+    grid-template-columns: 120px 2fr 1fr;
+  }
+  &.scrollList.editorArea{
+    grid-template-columns: 120px 2fr 0;
+  }
+  &.editorArea.optionPanel{
+    grid-template-columns: 0 3fr 1fr;
+  }
+  &.editorArea{
+    grid-template-columns: 0 1fr 0;
+  }
+  &.scrollList{
+    grid-template-columns: 1fr 0 0;
+  }
+  &.optionPanel{
+    grid-template-columns: 0 0 1fr;
+  }
 }
 
 #FormToolbar {

@@ -1,9 +1,9 @@
 <template>
   <div class="h-full bg-white shadow flex flex-row" data-rich-editor-target="toolbar" id="FormToolbar">
     <div class="h-full relative z-20 flex justify-center flex-wrap flex-row sm:flex-row items-center">
-      <menu-icon @click="collapsePanel()" class="mx-1 fill-current text-black hover:text-gray-500 cursor-pointer" />
+      <menu-icon @click="$emit('collapse-columns', 'scrollList')" class="mx-1 fill-current text-black hover:text-gray-500 cursor-pointer" />
     </div>
-    <div v-if="!isMoveActivated"  class="w-5/6 h-full relative z-20 flex justify-center flex-wrap flex-row sm:flex-row items-center">
+    <div v-if="!isMoveActivated"  class="w-full h-full relative z-20 flex justify-center flex-wrap flex-row sm:flex-row items-center">
       <div class="dropdown" v-if="!showAnchorsToolbar" >
         <anchor-icon @click="" class="mx-1 fill-current text-black hover:text-gray-500 cursor-pointer" />
         <ul class="dropdown-menu absolute hidden text-gray-700 pt-1">
@@ -19,10 +19,12 @@
       <cut-icon v-if="!showAnchorsToolbar" @click="addField('rgb(255,117,140,0.3)','cuts')" class="mx-1 fill-current text-black hover:text-gray-500 cursor-pointer" />
       <move-icon @click="enableScroll" class="mx-1 fill-current text-black hover:text-gray-500 cursor-pointer" />
     </div>
-    <div v-if="isMoveActivated" class="w-5/6 h-full relative z-20 flex justify-center flex-wrap flex-row sm:flex-row items-center">
+    <div v-if="isMoveActivated" class="w-full h-full relative z-20 flex justify-center flex-wrap flex-row sm:flex-row items-center">
       <move-icon @click="disableScroll" class="mx-1 fill-current text-black hover:text-gray-500 cursor-pointer" />
     </div>
-
+    <div class="h-full relative z-20 flex justify-center flex-wrap flex-row sm:flex-row items-center">
+      <menu-icon @click="$emit('collapse-columns', 'optionPanel')" class="mx-1 fill-current text-black hover:text-gray-500 cursor-pointer" />
+    </div>
   </div>
 </template>
 
@@ -124,12 +126,6 @@ export default {
     processAnchors(){
       this.$store.dispatch('processAllFormAnchors')
       this.deleteAllObjects(true)
-    },
-
-    collapsePanel(){
-      let collapsePanel = this.isPanelCollapsed ? '120px 1fr 0px' : '0px 1fr 0px'
-      this.$emit('form-columns',  collapsePanel)
-      this.isPanelCollapsed = !this.isPanelCollapsed
     },
 
     detectCorners(){
