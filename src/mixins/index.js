@@ -4,18 +4,28 @@ import {fabric} from "fabric";
 
 export default {
     methods: {
-         updateCanvas() {
-             fabric.Image.fromURL(this.selectedFormSrc, img => {
-                let width = img.width * this.canvasHeight / img.height
-                this.$store.commit('mutateProperty', ['canvasWidth', width])
+        updateCanvas() {
+            fabric.Image.fromURL(this.selectedFormSrc, img => {
+                let height = document.getElementById('FormEditorArea').offsetHeight
+                let width  = document.body.offsetWidth
+                if(img.height/img.width <  height/width){
+                    height = img.height * width / img.width
+                    this.$store.commit('mutateProperty', ['canvasWidth', width])
+                    this.$store.commit('mutateProperty', ['canvasHeight', height])
+                }else{
+                    width = img.width * height / img.height
+                    this.$store.commit('mutateProperty', ['canvasWidth', width])
+                    this.$store.commit('mutateProperty', ['canvasHeight', height])
+                }
+
                 this.$globals.canvas.setDimensions({width: width, height: this.canvasHeight});
                 let canvas = this.$globals.canvas
                 this.$globals.canvas.setBackgroundImage(img, this.$globals.canvas.renderAll.bind(canvas), {
                     scaleX: canvas.width / img.width,
                     scaleY: canvas.height / img.height
                 });
-                 this.drawAnchorLines()
-             });
+                this.drawAnchorLines()
+            });
         },
         deleteAllObjects(onlyCanvas) {
             this.$globals.canvas.getObjects().forEach((obj) => {
@@ -67,7 +77,7 @@ export default {
                 );
             }
         },
-        deleteAnchorsLines(){
+        deleteAnchorsLines() {
             this.$globals.canvas.getObjects().forEach((obj) => {
                 if (obj.get('type') === 'line' || obj.get('type') === 'circle') {
                     this.$globals.canvas.remove(obj)

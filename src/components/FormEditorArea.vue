@@ -1,5 +1,5 @@
 <template>
-  <div @click="setActiveObject" class="w-full overflow-y-auto py-2 overflow-y-auto h-full pr-6 bg-gray-200"
+  <div @click="setActiveObject" class="w-full overflow-y-auto py-2 overflow-y-auto h-full pr-6 bg-gray-200 flex justify-center items-center"
        id='FormEditorArea'
        @keydown.delete="deleteObjects()" tabindex="0">
     <canvas class="shadow-lg rounded-lg" id="formCanvas"></canvas>
@@ -106,7 +106,6 @@ export default {
     this.$globals.canvas = new fabric.Canvas('formCanvas')
     this.$globals.canvas.uniformScaling = false
     this.updateCanvas()
-    this.$store.commit('mutateProperty', ['canvasHeight', document.getElementById('FormEditorArea').offsetHeight])
     this.$globals.canvas.on("object:modified", () => {
       this.anchorZoomShow = false
       this.$globals.canvas.getActiveObjects().forEach((area) => {
