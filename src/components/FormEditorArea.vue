@@ -38,7 +38,7 @@ export default {
     deleteObjects() {
       this.$globals.canvas.getActiveObjects().forEach((obj) => {
         if (obj.isAnchor) {
-          this.deleteAllObjects()
+          this.deleteAllAnchorObjects(false)
           this.$store.dispatch('deleteAllAnchors')
         } else {
           this.$globals.canvas.remove(obj)

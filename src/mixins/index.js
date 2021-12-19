@@ -27,11 +27,13 @@ export default {
                 this.drawAnchorLines()
             });
         },
-        deleteAllObjects(onlyCanvas) {
+        deleteAllAnchorObjects(onlyCanvas) {
             this.$globals.canvas.getObjects().forEach((obj) => {
-                this.$globals.canvas.remove(obj)
-                if (!onlyCanvas) {
-                    this.$store.commit('deleteFormReadArea', obj.name)
+                if(['anchor', 'cornerControl'].includes(obj.type)){
+                    this.$globals.canvas.remove(obj)
+                    if (!onlyCanvas) {
+                        this.$store.commit('deleteFormReadArea', obj.name)
+                    }
                 }
             });
         },

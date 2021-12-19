@@ -13,11 +13,12 @@
       </div>
       <read-anchor-icon v-if="$store.getters.selectedFormAnchorsCount === 4 && showAnchorsToolbar" v-on:click="processAnchors" />
       <cancelIcon v-if="showAnchorsToolbar" @click="deleteObjects" class="mx-1 fill-current text-black hover:text-gray-500 cursor-pointer" />
-      <qr-icon v-if="!showAnchorsToolbar" @click="addField('rgb(110,214,36,0.3)','QR')" class="mx-1 fill-current text-black hover:text-gray-500 cursor-pointer" />
+      <qr-icon v-if="!showAnchorsToolbar" @click="addField('rgb(110,214,36,0.3)','BCR')" class="mx-1 fill-current text-black hover:text-gray-500 cursor-pointer" />
       <ocr-icon v-if="!showAnchorsToolbar" @click="addField('rgb(158,68,226,0.3)','OCR')" class="mx-1 fill-current text-black hover:text-gray-500 cursor-pointer" />
       <omr-icon v-if="!showAnchorsToolbar" @click="addField('rgb(33,239,160,0.3)','OMR')" class="mx-1 fill-current text-black hover:text-gray-500 cursor-pointer" />
       <cut-icon v-if="!showAnchorsToolbar" @click="addField('rgb(255,117,140,0.3)','cuts')" class="mx-1 fill-current text-black hover:text-gray-500 cursor-pointer" />
       <move-icon @click="enableScroll" class="mx-1 fill-current text-black hover:text-gray-500 cursor-pointer" />
+      <move-icon @click="processAllForms" class="mx-1 fill-current text-black hover:text-gray-500 cursor-pointer" />
     </div>
     <div v-if="isMoveActivated" class="w-full h-full relative z-20 flex justify-center flex-wrap flex-row sm:flex-row items-center">
       <move-icon @click="disableScroll" class="mx-1 fill-current text-black hover:text-gray-500 cursor-pointer" />
@@ -60,7 +61,7 @@ export default {
     addField(color, type) {
       let area = this.getFabricRect(this.canvasWidth / 2, this.canvasHeight / 2, color)
       let name = `${type}-${Math.random().toString(36).slice(7)}`
-      this.addArea(area, name, false)
+      this.addArea(area, name, false, type)
     },
 
     addAnchor() {
@@ -81,21 +82,23 @@ export default {
         if (this.anchors.filter(anchor => anchor.name === 'anchor-' + i).length === 0) {
           let area = this.getFabricRect(positions[i][0], positions[i][1], color)
           let name = 'anchor-' + i
-          this.addArea(area, name, true)
+          this.addArea(area, name, true, 'anchor')
         }
       }
     },
 
-    addArea(area, name, isAnchor) {
+    addArea(area, name, isAnchor, type) {
       area.toObject = (function (toObject) {
         return function () {
           return fabric.util.object.extend(toObject.call(this), {
             name: this.name,
+            type: this.type,
             isAnchor: this.isAnchor
           });
         };
       })(area.toObject);
-      area.name = name;
+      area.name = name
+      area.type = type
       area.isAnchor = isAnchor;
       this.$globals.canvas.add(area);
       this.$store.commit('updateFormReadArea', area)
@@ -118,14 +121,14 @@ export default {
     },
 
     deleteObjects(){
-      this.deleteAllObjects(false)
+      this.deleteAllAnchorObjects(false)
       this.$store.dispatch('deleteAllAnchors')
       this.$store.commit('mutateProperty', ['anchors', {hasAnchors: false, anchorType: ''}])
     },
 
     processAnchors(){
       this.$store.dispatch('processAllFormAnchors')
-      this.deleteAllObjects(true)
+      this.deleteAllAnchorObjects(true)
     },
 
     detectCorners(){
@@ -147,6 +150,11 @@ export default {
       this.isMoveActivated = true
       document.getElementsByClassName("upper-canvas")[0].classList.add("enableScroll");
       document.getElementsByClassName("lower-canvas")[0].classList.add("enableScroll");
+    },
+    processAllForms(){
+      for (let form in this.forms){
+        this.forms[form].formRead()
+      }
     }
 
   },

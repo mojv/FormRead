@@ -68,7 +68,8 @@ export const store = createStore({
                 lockRotation: true,
                 hasRotatingPoint: false,
                 name: area.name,
-                isAnchor: area.isAnchor
+                type: area.type,
+                isAnchor: area.isAnchor || area.isCornerControl
             }
         },
         deleteFormReadArea(state, areaName) {
@@ -101,7 +102,7 @@ export const store = createStore({
             for (let form in state.forms){
                 state.forms[form].anchors = {}
             }
-        }
+        },
     },
 
     getters: {
