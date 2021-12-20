@@ -1,7 +1,7 @@
 <template>
   <div class="h-full bg-white shadow flex flex-row" data-rich-editor-target="toolbar" id="FormToolbar">
     <div class="h-full relative z-20 flex justify-center flex-wrap flex-row sm:flex-row items-center">
-      <menu-icon @click="$emit('collapse-columns', 'scrollList')" class="mx-1 fill-current text-black hover:text-gray-500 cursor-pointer" />
+      <menu-icon :orientation="'left'" @click="$emit('collapse-columns', 'scrollList')" class="mx-1 fill-current text-black hover:text-gray-500 cursor-pointer" />
     </div>
     <div v-if="!isMoveActivated"  class="w-full h-full relative z-20 flex justify-center flex-wrap flex-row sm:flex-row items-center">
       <div class="dropdown" v-if="!showAnchorsToolbar" >
@@ -18,13 +18,14 @@
       <omr-icon v-if="!showAnchorsToolbar" @click="addField('rgb(33,239,160,0.3)','OMR')" class="mx-1 fill-current text-black hover:text-gray-500 cursor-pointer" />
       <cut-icon v-if="!showAnchorsToolbar" @click="addField('rgb(255,117,140,0.3)','cuts')" class="mx-1 fill-current text-black hover:text-gray-500 cursor-pointer" />
       <move-icon @click="enableScroll" class="mx-1 fill-current text-black hover:text-gray-500 cursor-pointer" />
-      <move-icon @click="processAllForms" class="mx-1 fill-current text-black hover:text-gray-500 cursor-pointer" />
+      <table-icon @click="$emit('show-results', '')" />
+      <play-icon @click="processAllForms" class="mx-1 fill-current text-black hover:text-gray-500 cursor-pointer" />
     </div>
     <div v-if="isMoveActivated" class="w-full h-full relative z-20 flex justify-center flex-wrap flex-row sm:flex-row items-center">
       <move-icon @click="disableScroll" class="mx-1 fill-current text-black hover:text-gray-500 cursor-pointer" />
     </div>
     <div class="h-full relative z-20 flex justify-center flex-wrap flex-row sm:flex-row items-center">
-      <menu-icon @click="$emit('collapse-columns', 'optionPanel')" class="mx-1 fill-current text-black hover:text-gray-500 cursor-pointer" />
+      <menu-icon :orientation="'right'" @click="$emit('collapse-columns', 'optionPanel')" class="mx-1 fill-current text-black hover:text-gray-500 cursor-pointer" />
     </div>
   </div>
 </template>
@@ -40,6 +41,8 @@ import readAnchorIcon from './Icons/readAnchorIcon.vue'
 import cancelIcon from './Icons/canelIcon.vue'
 import menuIcon from './Icons/MenuIcon.vue'
 import MoveIcon from './Icons/MoveIcon.vue'
+import TableIcon from './Icons/TableIcon.vue'
+import PlayIcon from './Icons/PlayIcon.vue'
 
 import {fabric} from "fabric";
 import helpers from "../mixins"
@@ -48,7 +51,7 @@ export default {
   name: 'FormToolbar',
   inject: ['$globals'],
   mixins: [helpers],
-  components: {qrIcon, ocrIcon, omrIcon, cutIcon, anchorIcon, cancelIcon, readAnchorIcon, menuIcon, MoveIcon},
+  components: {TableIcon, qrIcon, ocrIcon, omrIcon, cutIcon, anchorIcon, cancelIcon, readAnchorIcon, menuIcon, MoveIcon, PlayIcon},
 
   data: function () {
     return {

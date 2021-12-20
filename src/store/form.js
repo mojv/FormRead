@@ -1,5 +1,5 @@
 import {store} from "./index";
-import Tesseract, {createWorker} from 'tesseract.js';
+import Tesseract from 'tesseract.js';
 import { BrowserQRCodeReader } from '@zxing/library';
 
 // import {imread, MatVector, Mat, cvtColor, COLOR_RGBA2GRAY, threshold, THRESH_BINARY, findContours, RETR_EXTERNAL, RETR_LIST, CHAIN_APPROX_SIMPLE, Scalar, drawContours, LINE_8, contourArea, arcLength, approxPolyDP, Point, matFromArray, Size, getPerspectiveTransform, warpPerspective, INTER_LINEAR, BORDER_CONSTANT, imshow, CV_32FC2, boundingRect} from 'opencv.js';
@@ -39,7 +39,7 @@ export default class formClass {
     async detectSheetCorners() {
         let cv_src = cv.imread(this.canvas)
         let imgArea = this.canvas.height * this.canvas.width
-        let [contours, hierarchy, boundingRects] = this.getContours(cv_src, imgArea, false)
+        let [contours, hierarchy, ] = this.getContours(cv_src, imgArea, false)
         this.findExternalSheetCorners(contours)
         cv_src.delete();
         contours.delete();
@@ -303,7 +303,7 @@ export default class formClass {
     }
 
     formRead(){
-        for(let [areaName, area] of Object.entries(store.state.formReadAreas)){
+        for(let [, area] of Object.entries(store.state.formReadAreas)){
             if (area.type === 'OCR'){
                 this.ocrRead(area)
             }else if(area.type === 'BCR'){
@@ -313,16 +313,15 @@ export default class formClass {
     }
 
     async ocrRead(area){
-        let [areaCanvas, _] = this.getAreaCanvas(area)
+        let [areaCanvas, ] = this.getAreaCanvas(area)
         var worker = Tesseract.createWorker();
-        var OEM = Tesseract.OEM;
         await worker.load();
         await worker.loadLanguage('eng');
         await worker.initialize('eng');
-        await worker.setParameters({
-            tessedit_char_whitelist: '-0123456789',
-            preserve_interword_spaces: '0',
-        });
+        // await worker.setParameters({
+        //     tessedit_char_whitelist: 'X-0123456789',
+        //     preserve_interword_spaces: '0',
+        // });
         const { data: { text } } = await worker.recognize(areaCanvas);
         this.results[area.name] = text
         store.commit('updateFormProp', [this.id, 'results', this.results])
@@ -330,7 +329,7 @@ export default class formClass {
     }
 
     async bcrRead(area){
-        let [areaCanvas, _] = this.getAreaCanvas(area)
+        let [areaCanvas, ] = this.getAreaCanvas(area)
         const codeReader = new BrowserQRCodeReader()
         let canvasZoom = document.createElement('canvas')
         canvasZoom.width = 220
@@ -342,6 +341,7 @@ export default class formClass {
             this.results[area.name] = result.text
             store.commit('updateFormProp', [this.id, 'results', this.results])
         }, (err)=> {
+            console.error(err);
             this.results[area.name] = 'Code not recognized'
             store.commit('updateFormProp', [this.id, 'results', this.results])
         }).catch((err)=> {

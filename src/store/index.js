@@ -59,6 +59,9 @@ export const store = createStore({
             this.commit('selectForm', Object.keys(state.forms)[0])
         },
         updateFormReadArea(state, area) {
+            if(area.isCornerControl){
+                return
+            }
             state.formReadAreas[area.name] = {
                 width: area.getScaledWidth() / state.canvasWidth,
                 height: area.getScaledHeight() / state.canvasHeight,
@@ -69,7 +72,7 @@ export const store = createStore({
                 hasRotatingPoint: false,
                 name: area.name,
                 type: area.type,
-                isAnchor: area.isAnchor || area.isCornerControl
+                isAnchor: area.isAnchor
             }
         },
         deleteFormReadArea(state, areaName) {

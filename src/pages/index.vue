@@ -10,9 +10,10 @@
       />
       <template v-if="formsCant > 0">
         <scrollable-forms-list v-show="layoutItemsDisplay['scrollList']" @activateCam="setActivateCam" @collapse-columns="setGridColumns"/>
-        <form-toolbar @collapse-columns="setGridColumns"/>
-        <form-editor-area  v-show="layoutItemsDisplay['editorArea']" />
-        <form-options-panel v-show="layoutItemsDisplay['optionPanel']"/>
+        <form-toolbar @collapse-columns="setGridColumns" @show-results="showResultsTable"/>
+        <form-editor-area v-show="layoutItemsDisplay['editorArea'] && !showResults" />
+        <results-table v-show="layoutItemsDisplay['editorArea'] && showResults" />
+        <form-options-panel v-show="layoutItemsDisplay['optionPanel']" />
       </template>
     </div>
   </div>
@@ -27,6 +28,8 @@ import FormOptionsPanel from '../components/FormOptionsPanel.vue'
 import AppHeader from "../components/AppHeader.vue"
 import FormToolbar from "../components/FormToolbar.vue"
 import UploadImgWebCam from "../components/UploadImgWebCam.vue"
+import ResultsTable from "../components/ResultsTable.vue"
+
 import helpers from "../mixins"
 
 
@@ -41,12 +44,14 @@ export default {
     FormOptionsPanel,
     AppHeader,
     FormToolbar,
-    UploadImgWebCam
+    UploadImgWebCam,
+    ResultsTable
   },
 
   data() {
     return {
       activateCam: false,
+      showResults: false,
       layoutItems: {
         formGridDisplay: false,
         scrollList: true,
@@ -76,6 +81,9 @@ export default {
     },
     setActivateCam(activateCam){
       this.activateCam= activateCam
+    },
+    showResultsTable(_){
+      this.showResults = !this.showResults
     }
   },
 
@@ -139,6 +147,10 @@ export default {
 }
 
 #FormEditorArea {
+  grid-area: FormEditorArea;
+}
+
+#ResultsTable {
   grid-area: FormEditorArea;
 }
 

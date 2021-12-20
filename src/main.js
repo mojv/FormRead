@@ -1,5 +1,5 @@
 // src/main.js
-import {createApp, reactive} from 'vue'
+import {createApp} from 'vue'
 import App from './App.vue'
 import router from "./router/index"
 import './index.css'
@@ -22,3 +22,9 @@ app.mount('#app');
 window.onbeforeunload = function() {
     return true;
 };
+
+//Global prototype function for filtering objects
+Object.filter = (obj, predicate) =>
+    Object.keys(obj)
+        .filter( key => predicate(obj[key]) )
+        .reduce( (res, key) => (res[key] = obj[key], res), {} );
