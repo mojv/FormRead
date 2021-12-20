@@ -314,18 +314,28 @@ export default class formClass {
 
     async ocrRead(area){
         let [areaCanvas, ] = this.getAreaCanvas(area)
-        var worker = Tesseract.createWorker();
-        await worker.load();
-        await worker.loadLanguage('eng');
-        await worker.initialize('eng');
+        // var worker = Tesseract.createWorker();
+        // await worker.load();
+        // await worker.loadLanguage('eng');
+        // await worker.initialize('eng');
         // await worker.setParameters({
         //     tessedit_char_whitelist: 'X-0123456789',
         //     preserve_interword_spaces: '0',
         // });
-        const { data: { text } } = await worker.recognize(areaCanvas);
+        // const { data: { text } } = await worker.recognize(areaCanvas);
+        // this.results[area.name] = text
+        // store.commit('updateFormProp', [this.id, 'results', this.results])
+        // await worker.terminate();
+
+        const { data: { text } } = await Tesseract.recognize(
+            areaCanvas,
+            'eng',
+            { logger: m => console.log(m) }
+        )
+
         this.results[area.name] = text
         store.commit('updateFormProp', [this.id, 'results', this.results])
-        await worker.terminate();
+
     }
 
     async bcrRead(area){
