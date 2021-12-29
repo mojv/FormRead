@@ -1,6 +1,6 @@
 <template>
   <!--  <script src="https://badge.dimensions.ai/badge.js"></script>-->
-  <div @click="setActiveObject" class="bg-gray-50 h-screen" v-if="!activateCam">
+  <div @click="setActiveObject" class="bg-gray-50 h-screen" v-show="!activateCam">
     <app-header  v-if="formsCant === 0" />
     <div class="h-body" :class='layoutItemsDisplay'>
       <upload-file @activateCam="setActivateCam"

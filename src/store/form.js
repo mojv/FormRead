@@ -308,6 +308,8 @@ export default class formClass {
                 this.ocrRead(area)
             }else if(area.type === 'BCR'){
                 this.bcrRead(area)
+            }else if(area.type === 'OMR'){
+                this.omrRead(area)
             }
         }
     }
@@ -357,6 +359,18 @@ export default class formClass {
         }).catch((err)=> {
             console.error(err);
         });
+    }
+
+    async omrRead(area){
+        let [areaCanvas, imgArea] = this.getAreaCanvas(area)
+        let cv_src = await cv.imread(areaCanvas)
+        let [contours, hierarchy, boundingRects]  = this.getContours(cv_src, imgArea, true)
+        cv.imshow(areaCanvas, cv_src);
+        let ctx = this.canvas.getContext('2d')
+        let left = area.left * this.canvas.width
+        let top =  area.top * this.canvas.height
+        await ctx.drawImage(areaCanvas,left,top);
+        await this.updateFormSrc(this.canvas.toDataURL(), true)
     }
 
 }
