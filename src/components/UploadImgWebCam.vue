@@ -1,5 +1,5 @@
 <template>
-  <div class="absolute top-0 left-0 w-full h-full flex justify-center items-center text-red-600">
+  <div id="videoContainer" class="absolute top-0 left-0 w-full h-full flex justify-center items-center text-red-600 bg-black">
     <canvas id="videoCanvas" class="" ></canvas>
     <video id="video" autoplay muted playsinline hidden />
   </div>
@@ -40,13 +40,21 @@ export default {
         await this.video.play();
       }
 
+      let height = document.getElementById('videoContainer').offsetHeight
+      let width  = document.body.offsetWidth
+      if(this.video.videoHeight/this.video.videoWidth <  height/width){
+        height = this.video.videoHeight * width / this.video.videoWidth
+      }else{
+        width = this.video.videoWidth * height / this.video.videoHeight
+      }
+
       this.canvas = document.getElementById("videoCanvas");
-      this.canvas.width = this.video.videoWidth;
-      this.canvas.height = this.video.videoHeight;
+      this.canvas.width = width;
+      this.canvas.height = height;
       let context = this.canvas.getContext('2d');
 
       this.interval = setInterval(() => {
-        context.drawImage(this.video, 0, 0, this.canvas.width, this.canvas.height);
+        context.drawImage(this.video, 0, 0, width, height);
         this.getImgWithSheetBorders(this.canvas)
       }, 100);
     },
