@@ -21,19 +21,42 @@ export default {
       interval: null
     }
   },
-  methods:{
 
+  methods:{
     async setUpCanvas(){
-      await this.setUpVideo('video', false)
+      this.video = document.getElementById('video')
+      this.canvas = document.createElement('canvas')
+      // Get access to the camera!
+      if(navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+        this.stream = await navigator.mediaDevices.getUserMedia({
+          audio: false,
+          video: {
+            facingMode: 'environment',
+            width: { ideal: 4096 },
+            height: { ideal: 2160 }
+          }
+        })
+        this.video.srcObject = this.stream;
+        await this.video.play();
+      }
+
+      let height = document.getElementById('videoContainer').offsetHeight
+      let width  = document.body.offsetWidth
+      if(this.video.videoHeight/this.video.videoWidth <  height/width){
+        height = this.video.videoHeight * width / this.video.videoWidth
+      }else{
+        width = this.video.videoWidth * height / this.video.videoHeight
+      }
+
       this.canvas = document.getElementById("videoCanvas");
-      this.canvas.width = this.video.videoWidth;
-      this.canvas.height = this.video.videoHeight;
+      this.canvas.width = width;
+      this.canvas.height = height;
       let context = this.canvas.getContext('2d');
 
       this.interval = setInterval(() => {
-        context.drawImage(this.video, 0, 0, this.canvas.width, this.canvas.height);
+        context.drawImage(this.video, 0, 0, width, height);
         this.getImgWithSheetBorders(this.canvas)
-      }, 100);
+      }, 300);
     },
 
     async getImgWithSheetBorders(canvas){
@@ -59,51 +82,23 @@ export default {
 
     async takePicture(){
       clearInterval(this.interval)
-      await this.shutDownVideo()
-      await this.setUpVideo('video', true)
       let canvas = await document.createElement('canvas')
       canvas.width = this.video.videoWidth;
       canvas.height = this.video.videoHeight;
+      console.log(this.video.videoWidth)
       let context = await canvas.getContext('2d');
       await context.drawImage(this.video, 0, 0, canvas.width, canvas.height)
       let src = canvas.toDataURL()
-
-      await this.shutDownVideo()
       this.$store.commit('addForm', [this.formsCant, src , true])
-      this.$emit('activateCam',  false)
-    },
-
-    async setUpVideo(videoTagId, isHQ){
-      this.video = document.getElementById(videoTagId)
-      this.canvas = document.createElement('canvas')
-      let settings = {facingMode: 'environment'}
-
-      if(isHQ){
-        settings['width'] = { ideal: 4096 }
-        settings['height'] = { ideal: 2160 }
-      }
-
-      // Get access to the camera!
-      if(navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-        this.stream = await navigator.mediaDevices.getUserMedia({
-          audio: false,
-          video: settings
-        })
-        this.video.srcObject = this.stream;
-        await this.video.play();
-      }
-    },
-
-    async shutDownVideo(){
       this.video = null
       this.canvas = null
-      for (const track of this.stream.getTracks()) {
-        await track.stop();
-      }
+      this.stream.getTracks().forEach(function(track) {
+        track.stop();
+      });
       this.stream = null
-    },
+      this.$emit('activateCam',  false)
+    }
   },
-
 
   mounted() {
     this.setUpCanvas()
