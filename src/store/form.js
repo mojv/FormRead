@@ -39,7 +39,8 @@ export default class formClass {
     async detectSheetCorners() {
         let cv_src = cv.imread(this.canvas)
         let imgArea = this.canvas.height * this.canvas.width
-        let [contours, hierarchy, ] = this.getContours(cv_src, imgArea, false)
+        let [contours, hierarchy] = this.getContours(cv_src)
+
         this.findExternalSheetCorners(contours)
         cv_src.delete();
         contours.delete();
@@ -55,29 +56,58 @@ export default class formClass {
         dst.delete()
     }
 
-    getContours(src, imgArea, draw) {
+    getContours(src, isCanny = false) {
         let dst = src.clone();
         let contours = new cv.MatVector();
         let hierarchy = new cv.Mat();
+        let retr_mode
         cv.cvtColor(src, dst, cv.COLOR_RGBA2GRAY, 0);
-        cv.threshold(dst, dst, 120, 200, cv.THRESH_BINARY);
-        cv.findContours(dst, contours, hierarchy, cv.RETR_LIST, cv.CHAIN_APPROX_SIMPLE);
-        let boundingRects = []
-        if (draw) {
-            for (let i = 0; i < contours.size(); ++i) {
-                let cnt = contours.get(i);
-                let cntArea = cv.contourArea(cnt, false)
 
-                if (cntArea/imgArea < 0.95){
-                    boundingRects.push(cv.boundingRect(cnt))
-                    let color = new cv.Scalar(255, 0, 0, 255);
-                    cv.drawContours(src, contours, i, color, 2, cv.LINE_8, hierarchy, 100);
-                }
-                // this.getSrcFromCvObject(src)
+        if(isCanny){
+            cv.cvtColor(src, dst, cv.COLOR_RGBA2GRAY, 0);
+            let ksize = new cv.Size(5, 5);
+            cv.GaussianBlur(dst, dst, ksize, 0, 0, cv.BORDER_DEFAULT);
+            cv.Canny(dst, dst, 75, 200, 3, false);
+            retr_mode = cv.RETR_EXTERNAL
+        }else{
+            cv.threshold(dst, dst, 120, 200, cv.THRESH_BINARY);
+            retr_mode = cv.RETR_LIST
+        }
+        cv.findContours(dst, contours, hierarchy, retr_mode, cv.CHAIN_APPROX_SIMPLE);
+        dst.delete();
+        return [contours, hierarchy]
+    }
+
+    filterContoursByArea(contours, LowerLimit, upperLimit){
+        let boundingRects = []
+
+        for (let i = 0; i < contours.size(); ++i) {
+            let cnt = contours.get(i);
+            let boundRect = cv.boundingRect(cnt)
+            let cntArea = boundRect.width * boundRect.height
+            if (cntArea > LowerLimit && cntArea < upperLimit){
+                boundingRects.push(boundRect)
             }
         }
-        dst.delete();
-        return [contours, hierarchy, boundingRects]
+
+        boundingRects.sort((item1, item2) => {
+            return (item1.width * item1.height > item2.width * item2.height) ? -1 : (item1.width * item1.height < item2.width * item2.height) ? 1 : 0;
+        })
+
+        return boundingRects
+    }
+
+    drawContours(src, contours, hierarchy, LowerLimit, upperLimit, color){
+        for (let i = 0; i < contours.size(); ++i) {
+            let cnt = contours.get(i);
+            let boundRect = cv.boundingRect(cnt)
+
+            let cntArea = boundRect.width * boundRect.height
+            if (cntArea > LowerLimit && cntArea < upperLimit){
+                cv.drawContours(src, contours, i, color, 2, cv.LINE_8, hierarchy, 100)
+            }
+        }
+        this.getSrcFromCvObject(src)
     }
 
     setDefaultAnchors(){
@@ -195,11 +225,8 @@ export default class formClass {
         let area = store.state.formReadAreas[areaName]
         let [areaCanvas, imgArea] = this.getAreaCanvas(area)
         let cv_src = await cv.imread(areaCanvas)
-        let [contours, hierarchy, boundingRects]  = this.getContours(cv_src, imgArea, true)
-
-        boundingRects.sort((item1, item2) => {
-            return (item1.width * item1.height > item2.width * item2.height) ? -1 : (item1.width * item1.height < item2.width * item2.height) ? 1 : 0;
-        })
+        let [contours, hierarchy]  = this.getContours(cv_src)
+        let boundingRects = this.filterContoursByArea(contours,0, imgArea * 0.95)
 
         if(boundingRects.length > 0){
             let left = area.left + (boundingRects[0].x + boundingRects[0].width/2) / this.canvas.width
@@ -332,7 +359,6 @@ export default class formClass {
         const { data: { text } } = await Tesseract.recognize(
             areaCanvas,
             'eng',
-            { logger: m => console.log(m) }
         )
 
         this.results[area.name] = text
@@ -364,13 +390,27 @@ export default class formClass {
     async omrRead(area){
         let [areaCanvas, imgArea] = this.getAreaCanvas(area)
         let cv_src = await cv.imread(areaCanvas)
-        let [contours, hierarchy, boundingRects]  = this.getContours(cv_src, imgArea, true)
-        cv.imshow(areaCanvas, cv_src);
+        let color = new cv.Scalar(255, 0, 0, 255)
+        let dst = cv_src.clone();
+        let [contours, hierarchy] = this.getContours(cv_src, true)
+        let boundingRects = this.filterContoursByArea(contours, 0, imgArea*0.95)
+
+        area = boundingRects[1].width * boundingRects[1].height
+        this.drawContours(dst, contours, hierarchy, area*0.8, area*1.2, color)
+
+        await cv.imshow(areaCanvas, dst);
         let ctx = this.canvas.getContext('2d')
         let left = area.left * this.canvas.width
         let top =  area.top * this.canvas.height
         await ctx.drawImage(areaCanvas,left,top);
+        console.log(areaCanvas.toDataURL())
         await this.updateFormSrc(this.canvas.toDataURL(), true)
+
+        cv_src.delete();
+        contours.delete();
+        hierarchy.delete();
+        contours2.delete();
+        hierarchy2.delete();
     }
 
 }

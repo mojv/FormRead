@@ -13,7 +13,7 @@
             </thead>
             <tbody class="bg-white divide-y divide-gray-200">
             <tr v-for="form in forms">
-              <td  v-for="area in formReadAreas"  class="px-6 py-4 whitespace-nowrap">
+              <td  v-for="area in columns"  class="px-6 py-4 whitespace-nowrap">
                 <div v-for="[resultAreaName, result] of Object.entries(form.results)" class="text-sm text-gray-900">
                   <p v-if="area.name === resultAreaName">{{result}}</p>
                 </div>

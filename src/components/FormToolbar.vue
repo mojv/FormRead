@@ -15,7 +15,7 @@
       <cancelIcon v-if="showAnchorsToolbar" @click="deleteObjects" class="mx-1 fill-current text-black hover:text-gray-500 cursor-pointer" />
       <qr-icon v-if="!showAnchorsToolbar" @click="addField('rgb(110,214,36,0.3)','BCR')" class="mx-1 fill-current text-black hover:text-gray-500 cursor-pointer" />
       <ocr-icon v-if="!showAnchorsToolbar" @click="addField('rgb(158,68,226,0.3)','OCR')" class="mx-1 fill-current text-black hover:text-gray-500 cursor-pointer" />
-      <omr-icon v-if="!showAnchorsToolbar" @click="addField('rgb(33,239,160,0.3)','OMR')" class="mx-1 fill-current text-black hover:text-gray-500 cursor-pointer" />
+      <omr-icon v-if="!showAnchorsToolbar" @click="addOmr('rgb(33,239,160,0.3)','OMR')" class="mx-1 fill-current text-black hover:text-gray-500 cursor-pointer" />
       <cut-icon v-if="!showAnchorsToolbar" @click="addField('rgb(255,117,140,0.3)','cuts')" class="mx-1 fill-current text-black hover:text-gray-500 cursor-pointer" />
       <move-icon @click="enableScroll" class="mx-1 fill-current text-black hover:text-gray-500 cursor-pointer" />
       <table-icon @click="$emit('show-results', '')" />
@@ -65,6 +65,7 @@ export default {
       let area = this.getFabricRect(this.canvasWidth / 2, this.canvasHeight / 2, color)
       let name = `${type}-${Math.random().toString(36).slice(7)}`
       this.addArea(area, name, false, type)
+      return name
     },
 
     addAnchor() {
@@ -107,6 +108,11 @@ export default {
       this.$store.commit('updateFormReadArea', area)
       this.$globals.canvas.setActiveObject(area)
       this.$globals.canvas.requestRenderAll()
+    },
+
+    addOmr(){
+      let areaName = this.addField('rgb(33,239,160,0.3)','OMR')
+      // this.selectedForm.getOmrPositions(areaName)
     },
 
     getFabricRect(left, top, color) {
