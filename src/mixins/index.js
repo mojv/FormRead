@@ -89,7 +89,46 @@ export default {
         activateCam() {
             this.$store.commit('mutateProperty', ['isFromCamMode', true])
             this.$emit('activateCam', true)
-        }
+        },
+        addFabricArea(area, name, isAnchor, type) {
+            area.toObject = (function (toObject) {
+                return function () {
+                    return fabric.util.object.extend(toObject.call(this), {
+                        name: this.name,
+                        type: this.type,
+                        isAnchor: this.isAnchor
+                    });
+                };
+            })(area.toObject);
+            area.name = name
+            area.type = type
+            area.isAnchor = isAnchor;
+            this.$globals.canvas.add(area);
+            this.$store.commit('updateFormReadArea', area)
+            if(type !== 'OmrBubble'){
+                this.$globals.canvas.setActiveObject(area)
+            }
+            this.$globals.canvas.requestRenderAll()
+        },
+        getFabricRect(left, top, width, height, color, hasStroke = false, evented = true) {
+            let props = {
+                width: width,
+                height: height,
+                left: left,
+                top: top,
+                fill: color,
+                borderColor: 'red',
+                cornerColor: 'green',
+                cornerSize: 6,
+                transparentCorners: false,
+                selectable: evented,
+                evented: evented
+            }
+            if(hasStroke){
+                props['stroke'] =  'red'
+            }
+            return new fabric.Rect(props)
+        },
     },
 
     computed: {
@@ -131,6 +170,13 @@ export default {
         },
         formsCant: function () {
             return Object.keys(this.$store.state.forms).length
+        },
+        omrBubbles: function () {
+            let omrBubbles = []
+            for(let omrField in this.selectedForm.omrBubbles){
+                omrBubbles = omrBubbles.concat(this.selectedForm.omrBubbles[omrField])
+            }
+            return omrBubbles
         },
     }
 }

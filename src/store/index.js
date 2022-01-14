@@ -59,7 +59,7 @@ export const store = createStore({
             this.commit('selectForm', Object.keys(state.forms)[0])
         },
         updateFormReadArea(state, area) {
-            if(area.isCornerControl){
+            if(area.isCornerControl || area.type === 'OmrBubble'){
                 return
             }
             state.formReadAreas[area.name] = {

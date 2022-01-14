@@ -62,9 +62,9 @@ export default {
 
   methods: {
     addField(color, type) {
-      let area = this.getFabricRect(this.canvasWidth / 2, this.canvasHeight / 2, color)
+      let area = this.getFabricRect(this.canvasWidth / 2, this.canvasHeight / 2, 50, 50, color)
       let name = `${type}-${Math.random().toString(36).slice(7)}`
-      this.addArea(area, name, false, type)
+      this.addFabricArea(area, name, false, type)
       return name
     },
 
@@ -84,49 +84,17 @@ export default {
       ]
       for (let i in positions) {
         if (this.anchors.filter(anchor => anchor.name === 'anchor-' + i).length === 0) {
-          let area = this.getFabricRect(positions[i][0], positions[i][1], color)
+          let area = this.getFabricRect(positions[i][0], positions[i][1], 50, 50, color)
           let name = 'anchor-' + i
-          this.addArea(area, name, true, 'anchor')
+          this.addFabricArea(area, name, true, 'anchor')
+          this.selectedForm.findAnchors(name)
         }
       }
     },
 
-    addArea(area, name, isAnchor, type) {
-      area.toObject = (function (toObject) {
-        return function () {
-          return fabric.util.object.extend(toObject.call(this), {
-            name: this.name,
-            type: this.type,
-            isAnchor: this.isAnchor
-          });
-        };
-      })(area.toObject);
-      area.name = name
-      area.type = type
-      area.isAnchor = isAnchor;
-      this.$globals.canvas.add(area);
-      this.$store.commit('updateFormReadArea', area)
-      this.$globals.canvas.setActiveObject(area)
-      this.$globals.canvas.requestRenderAll()
-    },
-
     addOmr(){
       let areaName = this.addField('rgb(33,239,160,0.3)','OMR')
-      // this.selectedForm.getOmrPositions(areaName)
-    },
-
-    getFabricRect(left, top, color) {
-      return new fabric.Rect({
-        width: 50,
-        height: 50,
-        left: left,
-        top: top,
-        fill: color,
-        borderColor: 'red',
-        cornerColor: 'green',
-        cornerSize: 6,
-        transparentCorners: false
-      })
+      this.selectedForm.findOmrbubbles(areaName)
     },
 
     deleteObjects(){

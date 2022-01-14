@@ -13,6 +13,8 @@ export default class formClass {
         this.anchors = {}
         this.isAnchorProcessed = false
         this.hasError = false
+        this.omrBubbles = {}
+        this.omrQuestions = {}
         this.results = {}
         if(fromCam){
             store.commit('mutateProperty', ['anchors', {hasAnchors: true, anchorType: 'corners'}])
@@ -329,6 +331,62 @@ export default class formClass {
         return canvasArea.toDataURL()
     }
 
+    async findOmrbubbles(areaName){
+        let omrArea = store.state.formReadAreas[areaName]
+        let [areaCanvas, imgArea] = this.getAreaCanvas(omrArea)
+        let cv_src = await cv.imread(areaCanvas)
+        let [contours, hierarchy] = this.getContours(cv_src, true)
+        let boundingRects = this.filterContoursByArea(contours, 0, imgArea*0.95)
+        boundingRects = boundingRects.filter((rect)=>{
+            return rect.width/rect.height > 0.25 && rect.width/rect.height < 4
+        })
+        boundingRects = boundingRects.filter((rect)=>{
+            return rect.width > boundingRects[0].width*0.8  && rect.height > boundingRects[0].height*0.8
+        })
+        this.omrQuestions[areaName] = {}
+        this.omrQuestions[areaName]['horizontal'] = this.groupBubblesByQuestion(boundingRects, false)
+        this.omrQuestions[areaName]['vertical'] = this.groupBubblesByQuestion(boundingRects, true)
+        this.omrBubbles[areaName] = boundingRects
+            .map((rect) => {
+                rect.x = omrArea.left + rect.x / this.canvas.width;
+                rect.y = omrArea.top + rect.y / this.canvas.height;
+                rect.width = rect.width / this.canvas.width;
+                rect.height = rect.height / this.canvas.height;
+                return rect
+            })
+        store.commit('updateFormProp', [this.id, 'omrBubbles', this.omrBubbles])
+        store.commit('updateFormProp', [this.id, 'omrQuestions', this.omrQuestions])
+        cv_src.delete(); contours.delete(); hierarchy.delete()
+    }
+
+    groupBubblesByQuestion(boundingRects, isVertical){
+        var axis_1 = 'x'; var axis_2 = 'y'
+        if(isVertical){
+            axis_1 = 'y'; axis_2 = 'x'
+        }
+        boundingRects = boundingRects.sort(function(a,b){
+            if(Math.abs(a[axis_2] - b[axis_2]) < a.width/2){
+                return a[axis_1] - b[axis_1]
+            }
+            return a[axis_2] - b[axis_2]
+        })
+        let question = []
+        let questions = []
+        let temp = 0
+        for(let i = 0; i < boundingRects.length; i++){
+            if(i !== 0 && boundingRects[i][axis_1] < boundingRects[i-1][axis_1]){
+                questions[temp] = question
+                temp++
+                question = []
+            }
+            question = question.concat(boundingRects[i])
+            if(i === boundingRects.length - 1){
+                questions[temp] = question
+            }
+        }
+        return questions
+    }
+
     formRead(){
         for(let [, area] of Object.entries(store.state.formReadAreas)){
             if (area.type === 'OCR'){
@@ -388,29 +446,10 @@ export default class formClass {
     }
 
     async omrRead(area){
-        let [areaCanvas, imgArea] = this.getAreaCanvas(area)
-        let cv_src = await cv.imread(areaCanvas)
-        let color = new cv.Scalar(255, 0, 0, 255)
-        let dst = cv_src.clone();
-        let [contours, hierarchy] = this.getContours(cv_src, true)
-        let boundingRects = this.filterContoursByArea(contours, 0, imgArea*0.95)
+        if(this.omrQuestions[area.name]){
+            await this.findOmrbubbles()
+        }
 
-        area = boundingRects[1].width * boundingRects[1].height
-        this.drawContours(dst, contours, hierarchy, area*0.8, area*1.2, color)
-
-        await cv.imshow(areaCanvas, dst);
-        let ctx = this.canvas.getContext('2d')
-        let left = area.left * this.canvas.width
-        let top =  area.top * this.canvas.height
-        await ctx.drawImage(areaCanvas,left,top);
-        console.log(areaCanvas.toDataURL())
-        await this.updateFormSrc(this.canvas.toDataURL(), true)
-
-        cv_src.delete();
-        contours.delete();
-        hierarchy.delete();
-        contours2.delete();
-        hierarchy2.delete();
     }
 
 }

@@ -80,12 +80,32 @@ export default {
       cornerControl.line1 = line1
       cornerControl.line2 = line2
       return cornerControl
+    },
+    updateOmrBubbles(recalculate){
+      this.$globals.canvas.getObjects().forEach((obj) => {
+        if (obj.type === 'OmrBubble') {
+          this.$globals.canvas.remove(obj)
+        }
+        if (obj.type === 'OMR' && recalculate) {
+          this.selectedForm.findOmrbubbles(obj.name)
+        }
+      });
+      let color = 'rgb(0, 0, 0, 0)'
+      for (let bubble of this.omrBubbles){
+        let left = bubble.x * this.canvasWidth
+        let top = bubble.y * this.canvasHeight
+        let width = bubble.width * this.canvasWidth
+        let height = bubble.height * this.canvasHeight
+        let area = this.getFabricRect(left,top, width, height, color, true, false)
+        this.addFabricArea(area, '', false, 'OmrBubble')
+      }
     }
   },
 
   watch: {
     selectedFormId: function () {
       this.updateCanvas()
+      this.updateOmrBubbles(true)
     },
     selectedFormSrc: function () {
       this.updateCanvas()
@@ -95,6 +115,9 @@ export default {
         this.drawAnchorLines()
       },
       deep: true
+    },
+    omrBubbles: function (){
+      this.updateOmrBubbles(false)
     },
   },
 
@@ -112,6 +135,9 @@ export default {
         this.$store.commit('updateFormReadArea', area)
         if (area.isAnchor) {
           this.selectedForm.findAnchors(area.name)
+        }
+        if (area.type === 'OMR') {
+          this.selectedForm.findOmrbubbles(area.name)
         }
         if (area.isCornerControl) {
           let left = (area.left + this.cornerControlRadius) / this.canvasWidth
