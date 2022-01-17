@@ -13,7 +13,6 @@ export default class formClass {
         this.anchors = {}
         this.isAnchorProcessed = false
         this.hasError = false
-        this.omrBubbles = {}
         this.omrQuestions = {}
         this.results = {}
         if(fromCam){
@@ -87,6 +86,8 @@ export default class formClass {
             let cnt = contours.get(i);
             let boundRect = cv.boundingRect(cnt)
             let cntArea = boundRect.width * boundRect.height
+            boundRect.left = boundRect.x; delete boundRect.x
+            boundRect.top = boundRect.y; delete boundRect.y
             if (cntArea > LowerLimit && cntArea < upperLimit){
                 boundingRects.push(boundRect)
             }
@@ -153,12 +154,12 @@ export default class formClass {
         let cornerArray = [{corner: corner1}, {corner: corner2}, {corner: corner3}, {corner: corner4}];
         //Sort by Y position (to get top-down)
         cornerArray.sort((item1, item2) => {
-            return (item1.corner.y < item2.corner.y) ? -1 : (item1.corner.y > item2.corner.y) ? 1 : 0;
+            return (item1.corner.top < item2.corner.top) ? -1 : (item1.corner.top > item2.corner.top) ? 1 : 0;
         }).slice(0, 5);
 
         for(let [index, item] of cornerArray.entries()){
-            let left = item.corner.x / this.canvas.width
-            let top =  item.corner.y / this.canvas.height
+            let left = item.corner.left / this.canvas.width
+            let top =  item.corner.top / this.canvas.height
             this.anchors['anchor-' + index] = [left , top]
         }
         store.commit('updateFormProp', [this.id, 'anchors', this.anchors])
@@ -231,8 +232,8 @@ export default class formClass {
         let boundingRects = this.filterContoursByArea(contours,0, imgArea * 0.95)
 
         if(boundingRects.length > 0){
-            let left = area.left + (boundingRects[0].x + boundingRects[0].width/2) / this.canvas.width
-            let top =  area.top  + (boundingRects[0].y + boundingRects[0].height/2)/ this.canvas.height
+            let left = area.left + (boundingRects[0].left + boundingRects[0].width/2) / this.canvas.width
+            let top =  area.top  + (boundingRects[0].top + boundingRects[0].height/2)/ this.canvas.height
             this.anchors[areaName] = [left , top]
         }else {
             delete this.anchors[areaName]
@@ -331,62 +332,6 @@ export default class formClass {
         return canvasArea.toDataURL()
     }
 
-    async findOmrbubbles(areaName){
-        let omrArea = store.state.formReadAreas[areaName]
-        let [areaCanvas, imgArea] = this.getAreaCanvas(omrArea)
-        let cv_src = await cv.imread(areaCanvas)
-        let [contours, hierarchy] = this.getContours(cv_src, true)
-        let boundingRects = this.filterContoursByArea(contours, 0, imgArea*0.95)
-        boundingRects = boundingRects.filter((rect)=>{
-            return rect.width/rect.height > 0.25 && rect.width/rect.height < 4
-        })
-        boundingRects = boundingRects.filter((rect)=>{
-            return rect.width > boundingRects[0].width*0.8  && rect.height > boundingRects[0].height*0.8
-        })
-        this.omrQuestions[areaName] = {}
-        this.omrQuestions[areaName]['horizontal'] = this.groupBubblesByQuestion(boundingRects, false)
-        this.omrQuestions[areaName]['vertical'] = this.groupBubblesByQuestion(boundingRects, true)
-        this.omrBubbles[areaName] = boundingRects
-            .map((rect) => {
-                rect.x = omrArea.left + rect.x / this.canvas.width;
-                rect.y = omrArea.top + rect.y / this.canvas.height;
-                rect.width = rect.width / this.canvas.width;
-                rect.height = rect.height / this.canvas.height;
-                return rect
-            })
-        store.commit('updateFormProp', [this.id, 'omrBubbles', this.omrBubbles])
-        store.commit('updateFormProp', [this.id, 'omrQuestions', this.omrQuestions])
-        cv_src.delete(); contours.delete(); hierarchy.delete()
-    }
-
-    groupBubblesByQuestion(boundingRects, isVertical){
-        var axis_1 = 'x'; var axis_2 = 'y'
-        if(isVertical){
-            axis_1 = 'y'; axis_2 = 'x'
-        }
-        boundingRects = boundingRects.sort(function(a,b){
-            if(Math.abs(a[axis_2] - b[axis_2]) < a.width/2){
-                return a[axis_1] - b[axis_1]
-            }
-            return a[axis_2] - b[axis_2]
-        })
-        let question = []
-        let questions = []
-        let temp = 0
-        for(let i = 0; i < boundingRects.length; i++){
-            if(i !== 0 && boundingRects[i][axis_1] < boundingRects[i-1][axis_1]){
-                questions[temp] = question
-                temp++
-                question = []
-            }
-            question = question.concat(boundingRects[i])
-            if(i === boundingRects.length - 1){
-                questions[temp] = question
-            }
-        }
-        return questions
-    }
-
     formRead(){
         for(let [, area] of Object.entries(store.state.formReadAreas)){
             if (area.type === 'OCR'){
@@ -394,7 +339,7 @@ export default class formClass {
             }else if(area.type === 'BCR'){
                 this.bcrRead(area)
             }else if(area.type === 'OMR'){
-                this.omrRead(area)
+                this.omrRead(area.name, false)
             }
         }
     }
@@ -445,13 +390,83 @@ export default class formClass {
         });
     }
 
-    async omrRead(area){
-        if(this.omrQuestions[area.name]){
-            await this.findOmrbubbles()
+    omrRead(areaName, isSetUp = true, orientation = 'horizontal'){
+        let area = store.state.formReadAreas[areaName]
+        this.findOMRBubbles(area, orientation)
+        for(let [i, question] of this.omrQuestions[area.name].entries()){
+            for(let [j, option] of question.entries()){
+                let [areaCanvas, imgArea] = this.getAreaCanvas(option)
+                let cv_src = cv.imread(areaCanvas)
+                this.omrQuestions[area.name][i][j]['blackPixelsRatio'] = this.getBlackPixelsRatio(cv_src, imgArea)
+                cv_src.delete()
+            }
         }
-
+        store.state.formReadAreas[areaName]['omrQuestions'] = this.omrQuestions[areaName]
+        if(isSetUp){
+            store.commit('mutateProperty', ['formReadAreas', store.state.formReadAreas])
+        }
     }
 
+    findOMRBubbles(area, orientation){
+        let [areaCanvas, imgArea] = this.getAreaCanvas(area)
+        let cv_src = cv.imread(areaCanvas)
+        let [contours, hierarchy] = this.getContours(cv_src, true)
+        let boundingRects = this.filterContoursByArea(contours, 0, imgArea*0.95)
+        boundingRects = boundingRects.filter((rect)=>{
+            return rect.width/rect.height > 0.25 && rect.width/rect.height < 4
+        })
+        boundingRects = boundingRects.filter((rect)=>{
+            return rect.width > boundingRects[0].width*0.8  && rect.height > boundingRects[0].height*0.8
+        })
+        this.omrQuestions[area.name] = {}
+        this.omrQuestions[area.name] = this.groupBubblesByQuestion(boundingRects, orientation)
+        boundingRects.map((rect) => {
+            rect.left = area.left + rect.left / this.canvas.width;
+            rect.top = area.top + rect.top / this.canvas.height;
+            rect.width = rect.width / this.canvas.width;
+            rect.height = rect.height / this.canvas.height;
+            return rect
+        })
+        store.commit('updateFormProp', [this.id, 'omrQuestions', this.omrQuestions])
+        cv_src.delete(); contours.delete(); hierarchy.delete()
+    }
+
+    groupBubblesByQuestion(boundingRects, orientation){
+        var axis_1 = 'left'; var axis_2 = 'top'
+        if(orientation === 'vertical'){
+            axis_1 = 'top'; axis_2 = 'left'
+        }
+        boundingRects = boundingRects.sort(function(a,b){
+            if(Math.abs(a[axis_2] - b[axis_2]) < a.width/2){
+                return a[axis_1] - b[axis_1]
+            }
+            return a[axis_2] - b[axis_2]
+        })
+        let question = []
+        let questions = []
+        let temp = 0
+        for(let i = 0; i < boundingRects.length; i++){
+            if(i !== 0 && boundingRects[i][axis_1] < boundingRects[i-1][axis_1]){
+                questions[temp] = question
+                temp++
+                question = []
+            }
+            question = question.concat(boundingRects[i])
+            if(i === boundingRects.length - 1){
+                questions[temp] = question
+            }
+        }
+        return questions
+    }
+
+    getBlackPixelsRatio(src, imgArea) {
+        let dst = src.clone();
+        cv.cvtColor(src, dst, cv.COLOR_RGBA2GRAY, 0);
+        cv.threshold(dst, dst, 0, 255, cv.THRESH_BINARY);
+        let blackPixelsRatio = 1 - (cv.countNonZero(dst) / imgArea)
+        dst.delete()
+        return blackPixelsRatio
+    }
 }
 
 class SortableContour {

@@ -87,16 +87,21 @@ export default {
           this.$globals.canvas.remove(obj)
         }
         if (obj.type === 'OMR' && recalculate) {
-          this.selectedForm.findOmrbubbles(obj.name)
+          this.selectedForm.omrRead(obj.name)
         }
       });
-      let color = 'rgb(0, 0, 0, 0)'
       for (let bubble of this.omrBubbles){
-        let left = bubble.x * this.canvasWidth
-        let top = bubble.y * this.canvasHeight
+        let left = bubble.left * this.canvasWidth
+        let top = bubble.top * this.canvasHeight
         let width = bubble.width * this.canvasWidth
         let height = bubble.height * this.canvasHeight
-        let area = this.getFabricRect(left,top, width, height, color, true, false)
+        let fillColor = 'rgb(0, 0, 0, 0)'
+        let strokeColor = 'red'
+        if(bubble.blackPixelsRatio > 0.2){
+          fillColor = 'rgb(0, 200, 0, 0.3)'
+          strokeColor =  'green'
+        }
+        let area = this.getFabricRect(left,top, width, height, fillColor, strokeColor, false)
         this.addFabricArea(area, '', false, 'OmrBubble')
       }
     }
@@ -137,7 +142,7 @@ export default {
           this.selectedForm.findAnchors(area.name)
         }
         if (area.type === 'OMR') {
-          this.selectedForm.findOmrbubbles(area.name)
+          this.selectedForm.omrRead(area.name)
         }
         if (area.isCornerControl) {
           let left = (area.left + this.cornerControlRadius) / this.canvasWidth

@@ -61,8 +61,8 @@ export default {
   },
 
   methods: {
-    addField(color, type) {
-      let area = this.getFabricRect(this.canvasWidth / 2, this.canvasHeight / 2, 50, 50, color)
+    addField(fillColor, type) {
+      let area = this.getFabricRect(this.canvasWidth / 2, this.canvasHeight / 2, 50, 50, fillColor)
       let name = `${type}-${Math.random().toString(36).slice(7)}`
       this.addFabricArea(area, name, false, type)
       return name
@@ -75,7 +75,7 @@ export default {
         return
       }
       this.$store.commit('mutateProperty', ['anchors', {hasAnchors: true, anchorType: 'object'}])
-      let color = 'rgb(0,198,251,0.3)'
+      let fillColor = 'rgb(0,198,251,0.3)'
       let positions = [
         [50, 50],
         [this.canvasWidth - 100, 50],
@@ -84,7 +84,7 @@ export default {
       ]
       for (let i in positions) {
         if (this.anchors.filter(anchor => anchor.name === 'anchor-' + i).length === 0) {
-          let area = this.getFabricRect(positions[i][0], positions[i][1], 50, 50, color)
+          let area = this.getFabricRect(positions[i][0], positions[i][1], 50, 50, fillColor)
           let name = 'anchor-' + i
           this.addFabricArea(area, name, true, 'anchor')
           this.selectedForm.findAnchors(name)
@@ -94,7 +94,7 @@ export default {
 
     addOmr(){
       let areaName = this.addField('rgb(33,239,160,0.3)','OMR')
-      this.selectedForm.findOmrbubbles(areaName)
+      this.selectedForm.omrRead(areaName)
     },
 
     deleteObjects(){

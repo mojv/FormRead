@@ -6,18 +6,30 @@
           <table class="min-w-full divide-y divide-gray-200">
             <thead class="bg-gray-50">
             <tr>
-              <th  v-for="area in columns" scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                {{area.name}}
-              </th>
+              <template  v-for="area in columns">
+                <template v-if="area.type === 'OMR'" >
+                  <th v-for="(_,index) in area.omrQuestions.entries()" scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    {{area.name}} - {{index}}
+                  </th>
+                </template>
+                <th v-if="area.type !== 'OMR'" scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  {{area.name}}
+                </th>
+              </template>
             </tr>
             </thead>
             <tbody class="bg-white divide-y divide-gray-200">
             <tr v-for="form in forms">
-              <td  v-for="area in columns"  class="px-6 py-4 whitespace-nowrap">
-                <div v-for="[resultAreaName, result] of Object.entries(form.results)" class="text-sm text-gray-900">
-                  <p v-if="area.name === resultAreaName">{{result}}</p>
-                </div>
-              </td>
+              <template  v-for="area in columns">
+                <template v-if="area.type === 'OMR'" >
+                  <th v-for="(_,index) in area.omrQuestions.entries()" scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    {{getAnswerByThreshold(form.omrQuestions[area.name][index])}}
+                  </th>
+                </template>
+                <td  v-if="area.type !== 'OMR'" class="px-6 py-4 whitespace-nowrap">
+                  {{form.results[area.name]}}
+                </td>
+              </template>
             </tr>
             <!-- More people... -->
             </tbody>
@@ -36,6 +48,18 @@ export default {
   name: 'ResultsTable',
   mixins: [helpers],
   components: {FieldDropDownOtion},
+  methods: {
+    getAnswerByThreshold(question){
+      let responses = []
+      for(let option in question){
+        console.log(option)
+         if(question[option].blackPixelsRatio > 0.2){
+           responses.push(option)
+         }
+      }
+      return responses.join()
+    }
+  },
   computed: {
     columns: function (){
 

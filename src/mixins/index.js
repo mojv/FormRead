@@ -110,13 +110,13 @@ export default {
             }
             this.$globals.canvas.requestRenderAll()
         },
-        getFabricRect(left, top, width, height, color, hasStroke = false, evented = true) {
+        getFabricRect(left, top, width, height, fillColor, strokeColor = false, evented = true) {
             let props = {
                 width: width,
                 height: height,
                 left: left,
                 top: top,
-                fill: color,
+                fill: fillColor,
                 borderColor: 'red',
                 cornerColor: 'green',
                 cornerSize: 6,
@@ -124,8 +124,8 @@ export default {
                 selectable: evented,
                 evented: evented
             }
-            if(hasStroke){
-                props['stroke'] =  'red'
+            if(strokeColor !== false){
+                props['stroke'] =  strokeColor
             }
             return new fabric.Rect(props)
         },
@@ -173,8 +173,10 @@ export default {
         },
         omrBubbles: function () {
             let omrBubbles = []
-            for(let omrField in this.selectedForm.omrBubbles){
-                omrBubbles = omrBubbles.concat(this.selectedForm.omrBubbles[omrField])
+            for(let omrField in this.selectedForm.omrQuestions){
+                for(let question of this.selectedForm.omrQuestions[omrField]){
+                    omrBubbles = omrBubbles.concat(question)
+                }
             }
             return omrBubbles
         },
