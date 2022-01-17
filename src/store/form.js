@@ -392,17 +392,19 @@ export default class formClass {
 
     omrRead(areaName, isSetUp = true, orientation = 'horizontal'){
         let area = store.state.formReadAreas[areaName]
-        this.findOMRBubbles(area, orientation)
-        for(let [i, question] of this.omrQuestions[area.name].entries()){
-            for(let [j, option] of question.entries()){
-                let [areaCanvas, imgArea] = this.getAreaCanvas(option)
-                let cv_src = cv.imread(areaCanvas)
-                this.omrQuestions[area.name][i][j]['blackPixelsRatio'] = this.getBlackPixelsRatio(cv_src, imgArea)
-                cv_src.delete()
+        if(isSetUp || this.omrQuestions[area.name] === undefined){
+            this.findOMRBubbles(area, orientation)
+            for(let [i, question] of this.omrQuestions[area.name].entries()){
+                for(let [j, option] of question.entries()){
+                    let [areaCanvas, imgArea] = this.getAreaCanvas(option)
+                    let cv_src = cv.imread(areaCanvas)
+                    this.omrQuestions[area.name][i][j]['blackPixelsRatio'] = this.getBlackPixelsRatio(cv_src, imgArea)
+                    cv_src.delete()
+                }
             }
         }
-        store.state.formReadAreas[areaName]['omrQuestions'] = this.omrQuestions[areaName]
         if(isSetUp){
+            store.state.formReadAreas[areaName]['omrQuestions'] = this.omrQuestions[areaName]
             store.commit('mutateProperty', ['formReadAreas', store.state.formReadAreas])
         }
     }
@@ -425,6 +427,7 @@ export default class formClass {
             rect.top = area.top + rect.top / this.canvas.height;
             rect.width = rect.width / this.canvas.width;
             rect.height = rect.height / this.canvas.height;
+            rect.blackPixelsRatio = 0
             return rect
         })
         store.commit('updateFormProp', [this.id, 'omrQuestions', this.omrQuestions])

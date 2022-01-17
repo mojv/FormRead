@@ -94,7 +94,7 @@ export default {
 
     addOmr(){
       let areaName = this.addField('rgb(33,239,160,0.3)','OMR')
-      this.selectedForm.omrRead(areaName)
+      this.selectedForm.omrRead(areaName, true)
     },
 
     deleteObjects(){

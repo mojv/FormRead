@@ -87,7 +87,7 @@ export default {
           this.$globals.canvas.remove(obj)
         }
         if (obj.type === 'OMR' && recalculate) {
-          this.selectedForm.omrRead(obj.name)
+          this.selectedForm.omrRead(obj.name, !recalculate)
         }
       });
       for (let bubble of this.omrBubbles){
@@ -142,7 +142,7 @@ export default {
           this.selectedForm.findAnchors(area.name)
         }
         if (area.type === 'OMR') {
-          this.selectedForm.omrRead(area.name)
+          this.selectedForm.omrRead(area.name, true)
         }
         if (area.isCornerControl) {
           let left = (area.left + this.cornerControlRadius) / this.canvasWidth

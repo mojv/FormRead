@@ -23,7 +23,7 @@
               <template  v-for="area in columns">
                 <template v-if="area.type === 'OMR'" >
                   <th v-for="(_,index) in area.omrQuestions.entries()" scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    {{getAnswerByThreshold(form.omrQuestions[area.name][index])}}
+                    {{getAnswerByThreshold(form.omrQuestions[area.name], index)}}
                   </th>
                 </template>
                 <td  v-if="area.type !== 'OMR'" class="px-6 py-4 whitespace-nowrap">
@@ -49,13 +49,14 @@ export default {
   mixins: [helpers],
   components: {FieldDropDownOtion},
   methods: {
-    getAnswerByThreshold(question){
+    getAnswerByThreshold(questions, index){
       let responses = []
-      for(let option in question){
-        console.log(option)
-         if(question[option].blackPixelsRatio > 0.2){
-           responses.push(option)
-         }
+      if(questions !== undefined){
+        for(let option in questions[index]){
+          if(questions[index][option].blackPixelsRatio > 0.2){
+            responses.push(option)
+          }
+        }
       }
       return responses.join()
     }
