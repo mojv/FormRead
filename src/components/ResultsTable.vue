@@ -53,7 +53,7 @@ export default {
       let responses = []
       if(questions !== undefined){
         for(let option in questions[index]){
-          if(questions[index][option].blackPixelsRatio > 0.2){
+          if(questions[index][option].blackPixelsRatio > 0.4){
             responses.push(option)
           }
         }

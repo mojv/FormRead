@@ -398,7 +398,7 @@ export default class formClass {
                 for(let [j, option] of question.entries()){
                     let [areaCanvas, imgArea] = this.getAreaCanvas(option)
                     let cv_src = cv.imread(areaCanvas)
-                    this.omrQuestions[area.name][i][j]['blackPixelsRatio'] = this.getBlackPixelsRatio(cv_src, imgArea)
+                    this.omrQuestions[area.name][i][j]['blackPixelsRatio'] = this.getBlackPixelsRatio(cv_src, imgArea, areaCanvas)
                     cv_src.delete()
                 }
             }
@@ -462,10 +462,12 @@ export default class formClass {
         return questions
     }
 
-    getBlackPixelsRatio(src, imgArea) {
+    getBlackPixelsRatio(src, imgArea, areaCanvas) {
         let dst = src.clone();
         cv.cvtColor(src, dst, cv.COLOR_RGBA2GRAY, 0);
-        cv.threshold(dst, dst, 0, 255, cv.THRESH_BINARY);
+        cv.threshold(dst, dst, 120, 200, cv.THRESH_BINARY);
+        cv.imshow(areaCanvas, dst)
+        console.log(areaCanvas.toDataURL())
         let blackPixelsRatio = 1 - (cv.countNonZero(dst) / imgArea)
         dst.delete()
         return blackPixelsRatio

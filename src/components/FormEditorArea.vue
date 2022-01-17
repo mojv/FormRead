@@ -97,7 +97,7 @@ export default {
         let height = bubble.height * this.canvasHeight
         let fillColor = 'rgb(0, 0, 0, 0)'
         let strokeColor = 'red'
-        if(bubble.blackPixelsRatio > 0.2){
+        if(bubble.blackPixelsRatio > 0.4){
           fillColor = 'rgb(0, 200, 0, 0.3)'
           strokeColor =  'green'
         }
