@@ -56,14 +56,16 @@ export default {
   data: function () {
     return {
       isPanelCollapsed: false,
-      isMoveActivated: false
+      isMoveActivated: false,
+      nameCounter: 0
     }
   },
 
   methods: {
     addField(fillColor, type) {
       let area = this.getFabricRect(this.canvasWidth / 2, this.canvasHeight / 2, 50, 50, fillColor)
-      let name = `${type}-${Math.random().toString(36).slice(7)}`
+      let name = `${type}-${this.nameCounter}`
+      this.nameCounter++
       this.addFabricArea(area, name, false, type)
       return name
     },
