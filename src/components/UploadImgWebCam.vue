@@ -85,7 +85,6 @@ export default {
       let canvas = await document.createElement('canvas')
       canvas.width = this.video.videoWidth;
       canvas.height = this.video.videoHeight;
-      console.log(this.video.videoWidth)
       let context = await canvas.getContext('2d');
       await context.drawImage(this.video, 0, 0, canvas.width, canvas.height)
       let src = canvas.toDataURL()

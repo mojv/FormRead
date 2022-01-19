@@ -43,6 +43,9 @@ export default {
         } else {
           this.$globals.canvas.remove(obj)
           this.$store.commit('deleteFormReadArea', obj.name)
+          if (obj.type === 'OMR') {
+            this.$store.dispatch('deleteOmrQuestionFromAllForms', obj.name)
+          }
         }
       });
       this.$globals.canvas.discardActiveObject().renderAll()
@@ -142,6 +145,7 @@ export default {
           this.selectedForm.findAnchors(area.name)
         }
         if (area.type === 'OMR') {
+          this.$store.dispatch('deleteOmrQuestionFromAllForms', area.name)
           this.selectedForm.omrRead(area.name, true)
         }
         if (area.isCornerControl) {

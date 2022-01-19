@@ -106,6 +106,11 @@ export const store = createStore({
                 state.forms[form].anchors = {}
             }
         },
+        deleteOmrQuestionFromAllForms({ state }, omrAreaName){
+            for (let [formId, form] of Object.entries(state.forms)){
+                delete form.omrQuestions[omrAreaName]
+            }
+        }
     },
 
     getters: {

@@ -393,7 +393,7 @@ export default class formClass {
     omrRead(areaName, isSetUp = true, orientation = 'horizontal'){
         let area = store.state.formReadAreas[areaName]
         if(isSetUp || this.omrQuestions[area.name] === undefined){
-            this.findOMRBubbles(area, orientation)
+            this.findOMRBubbles(area, orientation, isSetUp)
             for(let [i, question] of this.omrQuestions[area.name].entries()){
                 for(let [j, option] of question.entries()){
                     let [areaCanvas, imgArea] = this.getAreaCanvas(option)
@@ -409,7 +409,7 @@ export default class formClass {
         }
     }
 
-    findOMRBubbles(area, orientation){
+    findOMRBubbles(area, orientation, isSetUp){
         let [areaCanvas, imgArea] = this.getAreaCanvas(area)
         let cv_src = cv.imread(areaCanvas)
         let [contours, hierarchy] = this.getContours(cv_src, true)
@@ -417,8 +417,11 @@ export default class formClass {
         boundingRects = boundingRects.filter((rect)=>{
             return rect.width/rect.height > 0.25 && rect.width/rect.height < 4
         })
+        if(isSetUp){
+            store.state.formReadAreas[area.name]['omrBubblesDimensions'] = {width: boundingRects[0].width, height: boundingRects[0].height}
+        }
         boundingRects = boundingRects.filter((rect)=>{
-            return rect.width > boundingRects[0].width*0.8  && rect.height > boundingRects[0].height*0.8
+            return rect.width > store.state.formReadAreas[area.name]['omrBubblesDimensions'].width*0.8  && rect.height > store.state.formReadAreas[area.name]['omrBubblesDimensions'].height*0.8
         })
         this.omrQuestions[area.name] = {}
         this.omrQuestions[area.name] = this.groupBubblesByQuestion(boundingRects, orientation)
@@ -466,8 +469,8 @@ export default class formClass {
         let dst = src.clone();
         cv.cvtColor(src, dst, cv.COLOR_RGBA2GRAY, 0);
         cv.threshold(dst, dst, 120, 200, cv.THRESH_BINARY);
-        cv.imshow(areaCanvas, dst)
-        console.log(areaCanvas.toDataURL())
+        // cv.imshow(areaCanvas, dst)
+        // console.log(areaCanvas.toDataURL())
         let blackPixelsRatio = 1 - (cv.countNonZero(dst) / imgArea)
         dst.delete()
         return blackPixelsRatio
