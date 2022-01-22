@@ -62,18 +62,21 @@ export const store = createStore({
             if(area.isCornerControl || area.type === 'OmrBubble'){
                 return
             }
-            state.formReadAreas[area.name] = {
-                width: area.getScaledWidth() / state.canvasWidth,
-                height: area.getScaledHeight() / state.canvasHeight,
-                left: area.left / state.canvasWidth,
-                top: area.top / state.canvasHeight,
-                fill: area.fill,
-                lockRotation: true,
-                hasRotatingPoint: false,
-                name: area.name,
-                type: area.type,
-                isAnchor: area.isAnchor
+
+            if(state.formReadAreas[area.name] === undefined){
+                state.formReadAreas[area.name] = {}
             }
+
+            state.formReadAreas[area.name].width            = area.getScaledWidth() / state.canvasWidth
+            state.formReadAreas[area.name].height           = area.getScaledHeight() / state.canvasHeight
+            state.formReadAreas[area.name].left             = area.left / state.canvasWidth
+            state.formReadAreas[area.name].top              = area.top / state.canvasHeight
+            state.formReadAreas[area.name].fill             = area.fill
+            state.formReadAreas[area.name].lockRotation     = true
+            state.formReadAreas[area.name].hasRotatingPoint = false
+            state.formReadAreas[area.name].name             = area.name
+            state.formReadAreas[area.name].type             = area.type
+            state.formReadAreas[area.name].isAnchor         = area.isAnchor
         },
         deleteFormReadArea(state, areaName) {
             delete state.formReadAreas[areaName]
@@ -87,7 +90,22 @@ export const store = createStore({
             } catch (e) {
                 state.fabricActiveObject = ''
             }
-        }
+        },
+        updateAreaName(state, [newName, oldName]) {
+            state.formReadAreas[newName] = state.formReadAreas[oldName]
+            delete state.formReadAreas[oldName]
+            state.formReadAreas[newName].name = newName
+            for (let form in state.forms){
+                if(state.forms[form].results[oldName] !== undefined){
+                    state.forms[form].results[newName] = state.forms[form].results[oldName]
+                    delete state.forms[form].results[oldName]
+                }
+                if(state.forms[form].omrQuestions[oldName] !== undefined){
+                    state.forms[form].omrQuestions[newName] = state.forms[form].omrQuestions[oldName]
+                    delete state.forms[form].omrQuestions[oldName]
+                }
+            }
+        },
     },
 
     actions: {

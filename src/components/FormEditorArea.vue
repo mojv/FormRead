@@ -18,6 +18,7 @@ import {fabric} from "fabric";
 import loadingModal from "./loadingModal.vue";
 import helpers from "../mixins"
 import AnchorZoomWindow from "../components/AnchorZoomWindow.vue"
+import {store} from "../store";
 
 export default {
   name: 'FormEditorArea',
@@ -90,7 +91,8 @@ export default {
           this.$globals.canvas.remove(obj)
         }
         if (obj.type === 'OMR' && recalculate) {
-          this.selectedForm.omrRead(obj.name, !recalculate)
+          let orientation = store.state.formReadAreas[obj.name]['omrOrientation']
+          this.selectedForm.omrRead(obj.name, !recalculate, orientation)
         }
       });
       for (let bubble of this.omrBubbles){
@@ -146,7 +148,8 @@ export default {
         }
         if (area.type === 'OMR') {
           this.$store.dispatch('deleteOmrQuestionFromAllForms', area.name)
-          this.selectedForm.omrRead(area.name, true)
+          let orientation = store.state.formReadAreas[area.name]['omrOrientation']
+          this.selectedForm.omrRead(area.name, true,  orientation)
         }
         if (area.isCornerControl) {
           let left = (area.left + this.cornerControlRadius) / this.canvasWidth

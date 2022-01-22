@@ -154,12 +154,12 @@ export default class formClass {
         let cornerArray = [{corner: corner1}, {corner: corner2}, {corner: corner3}, {corner: corner4}];
         //Sort by Y position (to get top-down)
         cornerArray.sort((item1, item2) => {
-            return (item1.corner.top < item2.corner.top) ? -1 : (item1.corner.top > item2.corner.top) ? 1 : 0;
+            return (item1.corner.y < item2.corner.y) ? -1 : (item1.corner.y > item2.corner.y) ? 1 : 0;
         }).slice(0, 5);
 
         for(let [index, item] of cornerArray.entries()){
-            let left = item.corner.left / this.canvas.width
-            let top =  item.corner.top / this.canvas.height
+            let left = item.corner.x / this.canvas.width
+            let top =  item.corner.y / this.canvas.height
             this.anchors['anchor-' + index] = [left , top]
         }
         store.commit('updateFormProp', [this.id, 'anchors', this.anchors])
@@ -339,7 +339,8 @@ export default class formClass {
             }else if(area.type === 'BCR'){
                 this.bcrRead(area)
             }else if(area.type === 'OMR'){
-                this.omrRead(area.name, false)
+                console.log(store.state.formReadAreas[area.name]['orientation'])
+                this.omrRead(area.name, false, store.state.formReadAreas[area.name])
             }
         }
     }
@@ -390,7 +391,7 @@ export default class formClass {
         });
     }
 
-    omrRead(areaName, isSetUp = true, orientation = 'horizontal'){
+    omrRead(areaName, isSetUp, orientation){
         let area = store.state.formReadAreas[areaName]
         if(isSetUp || this.omrQuestions[area.name] === undefined){
             this.findOMRBubbles(area, orientation, isSetUp)
@@ -406,6 +407,12 @@ export default class formClass {
         if(isSetUp){
             store.state.formReadAreas[areaName]['omrQuestions'] = this.omrQuestions[areaName]
             store.commit('mutateProperty', ['formReadAreas', store.state.formReadAreas])
+            let optionsLength = this.omrQuestions[areaName][0].length
+            let currentLabels = store.state.formReadAreas[areaName]['questionLabels']
+            if(currentLabels === undefined || currentLabels.length !== optionsLength){
+                store.state.formReadAreas[areaName]['questionLabels'] = Array.from(Array(optionsLength).keys())
+            }
+            store.state.formReadAreas[areaName]['firstQuestionBubbleImgs'] = this.getFirstQuestionBubbleImgs(areaName)
         }
     }
 
@@ -421,7 +428,12 @@ export default class formClass {
             store.state.formReadAreas[area.name]['omrBubblesDimensions'] = {width: boundingRects[0].width, height: boundingRects[0].height}
         }
         boundingRects = boundingRects.filter((rect)=>{
-            return rect.width > store.state.formReadAreas[area.name]['omrBubblesDimensions'].width*0.8  && rect.height > store.state.formReadAreas[area.name]['omrBubblesDimensions'].height*0.8
+            let cond1 = rect.width > store.state.formReadAreas[area.name]['omrBubblesDimensions'].width*0.8
+            let cond2 = rect.width < store.state.formReadAreas[area.name]['omrBubblesDimensions'].width*1.2
+            let cond3 = rect.height > store.state.formReadAreas[area.name]['omrBubblesDimensions'].height*0.8
+            let cond4 = rect.height < store.state.formReadAreas[area.name]['omrBubblesDimensions'].height*1.2
+
+            return cond1 && cond2 && cond3 && cond4
         })
         this.omrQuestions[area.name] = {}
         this.omrQuestions[area.name] = this.groupBubblesByQuestion(boundingRects, orientation)
@@ -434,6 +446,7 @@ export default class formClass {
             return rect
         })
         store.commit('updateFormProp', [this.id, 'omrQuestions', this.omrQuestions])
+        store.state.formReadAreas[area.name]['omrOrientation'] = orientation
         cv_src.delete(); contours.delete(); hierarchy.delete()
     }
 
@@ -474,6 +487,15 @@ export default class formClass {
         let blackPixelsRatio = 1 - (cv.countNonZero(dst) / imgArea)
         dst.delete()
         return blackPixelsRatio
+    }
+
+    getFirstQuestionBubbleImgs(areaName) {
+        let bubbleImgs = []
+        for(let option of this.omrQuestions[areaName][0]){
+            let [areaCanvas] = this.getAreaCanvas(option)
+            bubbleImgs.push(areaCanvas.toDataURL())
+        }
+        return bubbleImgs
     }
 }
 

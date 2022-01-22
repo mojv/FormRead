@@ -180,5 +180,8 @@ export default {
             }
             return omrBubbles
         },
+        fabricActiveObject: function () {
+            return this.$store.state.fabricActiveObject
+        }
     }
 }

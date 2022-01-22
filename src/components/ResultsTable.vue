@@ -22,8 +22,8 @@
             <tr v-for="form in forms">
               <template  v-for="area in columns">
                 <template v-if="area.type === 'OMR'" >
-                  <th v-for="(_,index) in area.omrQuestions.entries()" scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    {{getAnswerByThreshold(form.omrQuestions[area.name], index)}}
+                  <th v-for="(_,index) in area.omrQuestions.entries()" scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 tracking-wider">
+                    {{getAnswerByThreshold(form.omrQuestions[area.name], index, area.name)}}
                   </th>
                 </template>
                 <td  v-if="area.type !== 'OMR'" class="px-6 py-4 whitespace-nowrap">
@@ -43,18 +43,20 @@
 <script>
 import FieldDropDownOtion from './FieldDropDownOtion.vue'
 import helpers from "../mixins"
+import {store} from "../store";
 
 export default {  
   name: 'ResultsTable',
   mixins: [helpers],
   components: {FieldDropDownOtion},
   methods: {
-    getAnswerByThreshold(questions, index){
+    getAnswerByThreshold(questions, index, areaName){
       let responses = []
+      let labels = store.state.formReadAreas[areaName]['questionLabels']
       if(questions !== undefined){
         for(let option in questions[index]){
           if(questions[index][option].blackPixelsRatio > 0.4){
-            responses.push(option)
+            responses.push(labels[option])
           }
         }
       }
@@ -63,13 +65,8 @@ export default {
   },
   computed: {
     columns: function (){
-
       return Object.filter(this.formReadAreas, area => !area.isAnchor);
-
     },
-    rows: function (){
-
-    }
   }
 }
 </script>
