@@ -85,31 +85,6 @@ export default {
       cornerControl.line2 = line2
       return cornerControl
     },
-    updateOmrBubbles(recalculate){
-      this.$globals.canvas.getObjects().forEach((obj) => {
-        if (obj.type === 'OmrBubble') {
-          this.$globals.canvas.remove(obj)
-        }
-        if (obj.type === 'OMR' && recalculate) {
-          let orientation = store.state.formReadAreas[obj.name]['omrOrientation']
-          this.selectedForm.omrRead(obj.name, !recalculate, orientation)
-        }
-      });
-      for (let bubble of this.omrBubbles){
-        let left = bubble.left * this.canvasWidth
-        let top = bubble.top * this.canvasHeight
-        let width = bubble.width * this.canvasWidth
-        let height = bubble.height * this.canvasHeight
-        let fillColor = 'rgb(0, 0, 0, 0)'
-        let strokeColor = 'red'
-        if(bubble.blackPixelsRatio > 0.4){
-          fillColor = 'rgb(0, 200, 0, 0.3)'
-          strokeColor =  'green'
-        }
-        let area = this.getFabricRect(left,top, width, height, fillColor, strokeColor, false)
-        this.addFabricArea(area, '', false, 'OmrBubble')
-      }
-    }
   },
 
   watch: {

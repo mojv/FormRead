@@ -77,6 +77,9 @@ export const store = createStore({
             state.formReadAreas[area.name].name             = area.name
             state.formReadAreas[area.name].type             = area.type
             state.formReadAreas[area.name].isAnchor         = area.isAnchor
+            if(area.isCornerControl || area.type === 'OMR'){
+                state.formReadAreas[area.name].omrThreshold = 0.4
+            }
         },
         deleteFormReadArea(state, areaName) {
             delete state.formReadAreas[areaName]

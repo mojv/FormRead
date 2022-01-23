@@ -55,6 +55,23 @@
               />
             </div>
           </div>
+          <div class="w-full px-3 mb-6 md:mb-0">
+            <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mt-4 mb-0" for="grid-state">
+              Darkness Threshold %{{parseInt(omrThreshold*100)}}
+            </label>
+            <div class="relative">
+              <div class="relative pt-1">
+                <input type="range"
+                       class="form-range appearance-none w-full h-1 p-0 bg-gray-100 focus:outline-none focus:ring-0 focus:shadow-none"
+                       min="0"
+                       max="1"
+                       id="customRange2"
+                       step="0.01"
+                       v-model="omrThreshold"
+                />
+              </div>
+            </div>
+          </div>
           <div class="shadow overflow-hidden border-b border-gray-200 sm:rounded-lg m-auto mt-3">
             <table class="divide-y divide-gray-200">
               <thead class="bg-gray-50">
@@ -101,7 +118,9 @@ export default {
   },
 
   data: function () {
-    return {}
+    return {
+      omrThreshold: 40
+    }
   },
 
   methods: {
@@ -128,6 +147,9 @@ export default {
     },
     changeQuestionLabel(e, index) {
       store.state.formReadAreas[this.area.name]['questionLabels'][index] = e.target.value
+    },
+    updateFormReadAreas(formReadAreas){
+      store.commit('mutateProperty', ['formReadAreas',  formReadAreas])
     }
   },
 
@@ -138,6 +160,18 @@ export default {
     questionLabels: function (){
       return store.state.formReadAreas[this.area.name]['questionLabels']
     },
+  },
+
+  watch: {
+    omrThreshold: function (val) {
+      store.state.formReadAreas[this.area.name]['omrThreshold'] = val
+      this.updateFormReadAreas(store.state.formReadAreas)
+      this.updateOmrBubbles(false)
+    },
+  },
+
+  mounted() {
+    this.omrThreshold = store.state.formReadAreas[this.area.name]['omrThreshold']
   }
 
 }

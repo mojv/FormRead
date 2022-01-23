@@ -55,7 +55,7 @@ export default {
       let labels = store.state.formReadAreas[areaName]['questionLabels']
       if(questions !== undefined){
         for(let option in questions[index]){
-          if(questions[index][option].blackPixelsRatio > 0.4){
+          if(questions[index][option].blackPixelsRatio > store.state.formReadAreas[areaName]['omrThreshold']){
             responses.push(labels[option])
           }
         }

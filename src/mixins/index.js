@@ -1,6 +1,7 @@
 // define a mixin object
 
 import {fabric} from "fabric";
+import {store} from "../store";
 
 export default {
     methods: {
@@ -129,6 +130,31 @@ export default {
             }
             return new fabric.Rect(props)
         },
+        updateOmrBubbles(recalculate){
+            this.$globals.canvas.getObjects().forEach((obj) => {
+                if (obj.type === 'OmrBubble') {
+                    this.$globals.canvas.remove(obj)
+                }
+                if (obj.type === 'OMR' && recalculate) {
+                    let orientation = store.state.formReadAreas[obj.name]['omrOrientation']
+                    this.selectedForm.omrRead(obj.name, !recalculate, orientation)
+                }
+            });
+            for (let bubble of this.omrBubbles){
+                let left = bubble.left * this.canvasWidth
+                let top = bubble.top * this.canvasHeight
+                let width = bubble.width * this.canvasWidth
+                let height = bubble.height * this.canvasHeight
+                let fillColor = 'rgb(0, 0, 0, 0)'
+                let strokeColor = 'red'
+                if(bubble.blackPixelsRatio > store.state.formReadAreas[bubble.areaName]['omrThreshold']){
+                    fillColor = 'rgb(0, 200, 0, 0.3)'
+                    strokeColor =  'green'
+                }
+                let area = this.getFabricRect(left,top, width, height, fillColor, strokeColor, false)
+                this.addFabricArea(area, '', false, 'OmrBubble')
+            }
+        }
     },
 
     computed: {
@@ -175,7 +201,10 @@ export default {
             let omrBubbles = []
             for(let omrField in this.selectedForm.omrQuestions){
                 for(let question of this.selectedForm.omrQuestions[omrField]){
-                    omrBubbles = omrBubbles.concat(question)
+                    for (let option of question){
+                        option['areaName'] = omrField
+                        omrBubbles.push(option)
+                    }
                 }
             }
             return omrBubbles
