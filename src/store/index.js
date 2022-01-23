@@ -79,6 +79,7 @@ export const store = createStore({
             state.formReadAreas[area.name].isAnchor         = area.isAnchor
             if(area.isCornerControl || area.type === 'OMR'){
                 state.formReadAreas[area.name].omrThreshold = 0.4
+                state.formReadAreas[area.name].omrOrientation = 'horizontal'
             }
         },
         deleteFormReadArea(state, areaName) {

@@ -405,6 +405,7 @@ export default class formClass {
             }
         }
         if(isSetUp){
+            store.state.formReadAreas[area.name]['omrOrientation'] = orientation
             store.state.formReadAreas[areaName]['omrQuestions'] = this.omrQuestions[areaName]
             store.commit('mutateProperty', ['formReadAreas', store.state.formReadAreas])
             let optionsLength = this.omrQuestions[areaName][0].length
@@ -446,7 +447,6 @@ export default class formClass {
             return rect
         })
         store.commit('updateFormProp', [this.id, 'omrQuestions', this.omrQuestions])
-        store.state.formReadAreas[area.name]['omrOrientation'] = orientation
         cv_src.delete(); contours.delete(); hierarchy.delete()
     }
 
