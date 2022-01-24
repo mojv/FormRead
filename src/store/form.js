@@ -422,20 +422,7 @@ export default class formClass {
         let cv_src = cv.imread(areaCanvas)
         let [contours, hierarchy] = this.getContours(cv_src, true)
         let boundingRects = this.filterContoursByArea(contours, 0, imgArea*0.95)
-        boundingRects = boundingRects.filter((rect)=>{
-            return rect.width/rect.height > 0.25 && rect.width/rect.height < 4
-        })
-        if(isSetUp){
-            store.state.formReadAreas[area.name]['omrBubblesDimensions'] = {width: boundingRects[0].width, height: boundingRects[0].height}
-        }
-        boundingRects = boundingRects.filter((rect)=>{
-            let cond1 = rect.width > store.state.formReadAreas[area.name]['omrBubblesDimensions'].width*0.8
-            let cond2 = rect.width < store.state.formReadAreas[area.name]['omrBubblesDimensions'].width*1.2
-            let cond3 = rect.height > store.state.formReadAreas[area.name]['omrBubblesDimensions'].height*0.8
-            let cond4 = rect.height < store.state.formReadAreas[area.name]['omrBubblesDimensions'].height*1.2
-
-            return cond1 && cond2 && cond3 && cond4
-        })
+        boundingRects = this.filterBubbles(boundingRects, area, isSetUp)
         this.omrQuestions[area.name] = {}
         this.omrQuestions[area.name] = this.groupBubblesByQuestion(boundingRects, orientation)
         boundingRects.map((rect) => {
@@ -476,6 +463,39 @@ export default class formClass {
             }
         }
         return questions
+    }
+
+    filterBubbles(boundingRects, area, isSetUp) {
+        // delete really stretched rects
+        boundingRects = boundingRects.filter((rect)=>{
+            return rect.width/rect.height > 0.25 && rect.width/rect.height < 4
+        })
+        if(isSetUp){
+            store.state.formReadAreas[area.name]['omrBubblesDimensions'] = {width: boundingRects[0].width, height: boundingRects[0].height}
+        }
+        // filter only really similar bubbles
+        boundingRects = boundingRects.filter((rect)=>{
+            let cond1 = rect.width > store.state.formReadAreas[area.name]['omrBubblesDimensions'].width*0.8
+            let cond2 = rect.width < store.state.formReadAreas[area.name]['omrBubblesDimensions'].width*1.2
+            let cond3 = rect.height > store.state.formReadAreas[area.name]['omrBubblesDimensions'].height*0.8
+            let cond4 = rect.height < store.state.formReadAreas[area.name]['omrBubblesDimensions'].height*1.2
+
+            return cond1 && cond2 && cond3 && cond4
+        })
+        // delete duplicate bubbles
+        boundingRects = boundingRects.filter((item, pos) => {
+            let count = 0
+            for (let rect of boundingRects){
+                let cond1 = item.left > rect.left*0.95 && item.left < rect.left*1.05
+                let cond2 = item.top > rect.top*0.95 && item.top < rect.top*1.05
+                if(cond1 && cond2){
+                    count++
+                }
+            }
+            return count < 2;
+        })
+
+        return boundingRects
     }
 
     getBlackPixelsRatio(src, imgArea, areaCanvas) {
