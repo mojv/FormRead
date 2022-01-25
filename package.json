@@ -22,7 +22,9 @@
   "devDependencies": {
     "@vitejs/plugin-vue": "^1.9.3",
     "autoprefixer": "^10.4.0",
+    "javascript-obfuscator": "^3.0.0",
     "postcss": "^8.3.11",
+    "rollup-plugin-obfuscator": "^0.2.1",
     "tailwindcss": "^2.2.19",
     "vite": "^2.6.4"
   }
