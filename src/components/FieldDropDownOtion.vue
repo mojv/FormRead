@@ -36,21 +36,25 @@
           </div>
           <div class="w-1/2 px-3 mb-6 md:mb-0">
             <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" for="grid-state">
-              Bubble Size
+              Bubble Size Auto
+              <input type="checkbox" v-model="area.autoBubbleSize">
             </label>
+
             <div class="relative flex">
               <input
-                  type="number"
-                  class="form-control block w-1/2 px-3 py-1.5 text-base font-normal text-gray-700 bg-white bg-clip-padding border border-solid border-gray-300 rounded transition ease-in-out m-0 focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none"
-                  placeholder="Width"
+                  :disabled="area.autoBubbleSize"
                   :value="this.area.omrBubblesDimensions.width"
+                  class="form-control block w-1/2 px-3 py-1.5 text-base font-normal text-gray-700 border border-solid rounded transition focus:border-blue-600 focus:outline-none"
+                  placeholder="Width"
+                  type="number"
                   @change="changeOmrBubbleSize($event, 'width')"
               />
               <input
-                  type="number"
-                  class="ml-2 form-control block w-1/2 px-3 py-1.5 text-base font-normal text-gray-700 bg-white bg-clip-padding border border-solid border-gray-300 rounded transition ease-in-out m-0 focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none"
-                  placeholder="Height"
+                  :disabled="area.autoBubbleSize"
                   :value="this.area.omrBubblesDimensions.height"
+                  class="form-control block w-1/2 px-3 py-1.5 text-base font-normal text-gray-700 border border-solid rounded transition focus:border-blue-600 focus:outline-none ml-2"
+                  placeholder="Height"
+                  type="number"
                   @change="changeOmrBubbleSize($event, 'height')"
               />
             </div>

@@ -6,28 +6,18 @@
           <table class="min-w-full divide-y divide-gray-200">
             <thead class="bg-gray-50">
             <tr>
-              <template  v-for="area in columns">
-                <template v-if="area.type === 'OMR'" >
-                  <th v-for="(_,index) in area.omrQuestions.entries()" scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    {{area.name}} - {{index}}
-                  </th>
-                </template>
-                <th v-if="area.type !== 'OMR'" scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  {{area.name}}
+              <template  v-for="(_, columnName) in results[0]">
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  {{columnName}}
                 </th>
               </template>
             </tr>
             </thead>
             <tbody class="bg-white divide-y divide-gray-200">
-            <tr v-for="form in forms">
-              <template  v-for="area in columns">
-                <template v-if="area.type === 'OMR'" >
-                  <th v-for="(_,index) in area.omrQuestions.entries()" scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 tracking-wider">
-                    {{getAnswerByThreshold(form.omrQuestions[area.name], index, area.name)}}
-                  </th>
-                </template>
-                <td  v-if="area.type !== 'OMR'" class="px-6 py-4 whitespace-nowrap">
-                  {{form.results[area.name]}}
+            <tr v-for="result in results">
+              <template  v-for="(_, columnName) in results[0]">
+                <td  class="px-6 py-4 whitespace-nowrap">
+                  {{result[columnName]}}
                 </td>
               </template>
             </tr>
@@ -51,9 +41,15 @@ export default {
   components: {FieldDropDownOtion},
   methods: {
     getAnswerByThreshold(questions, index, areaName){
+      if(questions[index] === undefined){
+        return "error"
+      }
       let responses = []
       let labels = store.state.formReadAreas[areaName]['questionLabels']
       if(questions !== undefined){
+        if(questions[index].length !==  store.state.formReadAreas[areaName].omrQuestions[index].length){
+          return 'error'
+        }
         for(let option in questions[index]){
           if(questions[index][option].blackPixelsRatio > store.state.formReadAreas[areaName]['omrThreshold']){
             responses.push(labels[option])
@@ -64,9 +60,26 @@ export default {
     }
   },
   computed: {
-    columns: function (){
+    areas: function (){
       return Object.filter(this.formReadAreas, area => !area.isAnchor);
     },
+    results: function (){
+      let results = []
+      for(let [_, form] of Object.entries(this.forms)){
+        let row = {}
+        for(let [_, area] of Object.entries(this.areas)){
+          if(area.type === 'OMR'){
+            for(let index in area.omrQuestions){
+              row[area.name + '-' + index] = this.getAnswerByThreshold(form.omrQuestions[area.name], index, area.name)
+            }
+          }else{
+            row[area.name] = form.results[area.name]
+          }
+        }
+        results.push(row)
+      }
+      return results
+    }
   }
 }
 </script>

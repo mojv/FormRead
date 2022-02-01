@@ -105,7 +105,7 @@ export default {
             area.type = type
             area.isAnchor = isAnchor;
             this.$globals.canvas.add(area);
-            this.$store.commit('updateFormReadArea', area)
+            this.$store.commit('updateFormReadArea', [area, true])
             if(type !== 'OmrBubble'){
                 this.$globals.canvas.setActiveObject(area)
             }

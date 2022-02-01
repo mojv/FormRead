@@ -339,7 +339,6 @@ export default class formClass {
             }else if(area.type === 'BCR'){
                 this.bcrRead(area)
             }else if(area.type === 'OMR'){
-                console.log(store.state.formReadAreas[area.name]['orientation'])
                 this.omrRead(area.name, false, store.state.formReadAreas[area.name])
             }
         }
@@ -394,7 +393,12 @@ export default class formClass {
     omrRead(areaName, isSetUp, orientation){
         let area = store.state.formReadAreas[areaName]
         if(isSetUp || this.omrQuestions[area.name] === undefined){
-            this.findOMRBubbles(area, orientation, isSetUp)
+            if(!this.findOMRBubbles(area, orientation, isSetUp)){
+                store.state.formReadAreas[areaName]['omrQuestions'] = []
+                store.state.formReadAreas[areaName]['questionLabels'] = []
+                store.state.formReadAreas[areaName]['firstQuestionBubbleImgs'] = []
+                return
+            }
             for(let [i, question] of this.omrQuestions[area.name].entries()){
                 for(let [j, option] of question.entries()){
                     let [areaCanvas, imgArea] = this.getAreaCanvas(option)
@@ -404,7 +408,7 @@ export default class formClass {
                 }
             }
         }
-        if(isSetUp){
+        if(isSetUp && this.omrQuestions[areaName].length !== 0){
             store.state.formReadAreas[area.name]['omrOrientation'] = orientation
             store.state.formReadAreas[areaName]['omrQuestions'] = this.omrQuestions[areaName]
             store.commit('mutateProperty', ['formReadAreas', store.state.formReadAreas])
@@ -421,9 +425,11 @@ export default class formClass {
         let [areaCanvas, imgArea] = this.getAreaCanvas(area)
         let cv_src = cv.imread(areaCanvas)
         let [contours, hierarchy] = this.getContours(cv_src, true)
+        if(contours.size() === 0){
+            return false
+        }
         let boundingRects = this.filterContoursByArea(contours, 0, imgArea*0.95)
         boundingRects = this.filterBubbles(boundingRects, area, isSetUp)
-        this.omrQuestions[area.name] = {}
         this.omrQuestions[area.name] = this.groupBubblesByQuestion(boundingRects, orientation)
         boundingRects.map((rect) => {
             rect.left = area.left + rect.left / this.canvas.width;
@@ -435,6 +441,7 @@ export default class formClass {
         })
         store.commit('updateFormProp', [this.id, 'omrQuestions', this.omrQuestions])
         cv_src.delete(); contours.delete(); hierarchy.delete()
+        return true
     }
 
     groupBubblesByQuestion(boundingRects, orientation){
@@ -470,7 +477,7 @@ export default class formClass {
         boundingRects = boundingRects.filter((rect)=>{
             return rect.width/rect.height > 0.25 && rect.width/rect.height < 4
         })
-        if(isSetUp){
+        if(isSetUp && area.autoBubbleSize){
             store.state.formReadAreas[area.name]['omrBubblesDimensions'] = {width: boundingRects[0].width, height: boundingRects[0].height}
         }
         // filter only really similar bubbles
@@ -486,8 +493,8 @@ export default class formClass {
         boundingRects = boundingRects.filter((item, pos) => {
             let count = 0
             for (let rect of boundingRects){
-                let cond1 = item.left > rect.left*0.95 && item.left < rect.left*1.05
-                let cond2 = item.top > rect.top*0.95 && item.top < rect.top*1.05
+                let cond1 = Math.abs(item.left - rect.left) < item.width/2
+                let cond2 = Math.abs(item.top - rect.top) < item.height/2
                 if(cond1 && cond2){
                     count++
                 }

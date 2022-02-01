@@ -117,7 +117,7 @@ export default {
     this.$globals.canvas.on("object:modified", () => {
       this.anchorZoomShow = false
       this.$globals.canvas.getActiveObjects().forEach((area) => {
-        this.$store.commit('updateFormReadArea', area)
+        this.$store.commit('updateFormReadArea', [area, false])
         if (area.isAnchor) {
           this.selectedForm.findAnchors(area.name)
         }

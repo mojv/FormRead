@@ -58,7 +58,7 @@ export const store = createStore({
             }
             this.commit('selectForm', Object.keys(state.forms)[0])
         },
-        updateFormReadArea(state, area) {
+        updateFormReadArea(state, [area, isCreate]) {
             if(area.isCornerControl || area.type === 'OmrBubble'){
                 return
             }
@@ -77,9 +77,11 @@ export const store = createStore({
             state.formReadAreas[area.name].name             = area.name
             state.formReadAreas[area.name].type             = area.type
             state.formReadAreas[area.name].isAnchor         = area.isAnchor
-            if(area.isCornerControl || area.type === 'OMR'){
+            console.log(isCreate)
+            if(area.type === 'OMR' && isCreate){
                 state.formReadAreas[area.name].omrThreshold = 0.4
                 state.formReadAreas[area.name].omrOrientation = 'horizontal'
+                state.formReadAreas[area.name].autoBubbleSize = true
             }
         },
         deleteFormReadArea(state, areaName) {
