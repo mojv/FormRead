@@ -65,6 +65,7 @@ export const store = createStore({
 
             if(state.formReadAreas[area.name] === undefined){
                 state.formReadAreas[area.name] = {}
+                state.formReadAreas[area.name].columnPosition = Object.keys(state.formReadAreas).length
             }
 
             state.formReadAreas[area.name].width            = area.getScaledWidth() / state.canvasWidth

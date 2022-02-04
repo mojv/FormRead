@@ -1,10 +1,9 @@
 <template>
-  <div class="border-b tab">
-    <div class="border-l-2 border-transparent relative">
+
       <header class="flex justify-between items-center h-16">
         <input class="text-grey-darkest font-thin text-xl w-full h-full px-8" :value="area.name"
                @change="changeAreaName($event)">
-        <div class="rounded-full border border-grey w-7 h-7 flex items-center justify-center test mr-4" for="chck1">
+        <div class="rounded-full border border-grey w-7 h-7 flex items-center justify-center test mr-4 handle cursor-move" for="chck1">
           <!-- icon by feathericons.com -->
           <svg aria-hidden="true" class="" data-reactid="266" fill="none" height="24" stroke="#606F7B"
                stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="24"
@@ -103,8 +102,6 @@
           </div>
         </div>
       </div>
-    </div>
-  </div>
 </template>
 
 <script>

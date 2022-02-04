@@ -2,9 +2,20 @@
   <div class="w-full py-1 overflow-y-auto h-full shadow-md bg-white overflow-y-auto h-full" id='FormOptionsPanel'>
     <section class="shadow row">
       <div class="tabs">
-        <template v-for="(area, areaName) in formReadAreas" :key="index" >
-          <field-drop-down-otion v-if="!area.isAnchor"  :area="area" :selected="fabricActiveObject === area.name" v-on:click="selectArea(areaName)" />
-        </template>
+        <draggable
+            tag="ul"
+            v-model="formReadAreasSortable"
+            handle=".handle"
+            item-key="name"
+        >
+          <template #item="{ element, index }">
+            <div class="border-b tab">
+              <li class="border-l-2 border-transparent relative">
+                <field-drop-down-otion v-if="!element.isAnchor"  :area="element" :selected="fabricActiveObject === element.name" v-on:click="selectArea(element.name)" />
+              </li>
+            </div>
+          </template>
+        </draggable>
       </div>
     </section>
   </div>
@@ -14,13 +25,19 @@
 
 import FieldDropDownOtion from './FieldDropDownOtion.vue'
 import helpers from "../mixins"
+import draggable from 'vuedraggable'
+import {store} from "../store";
 
 export default {
   name: 'FormOptionsPanel',
   inject: ['$globals'],
   mixins: [helpers],
-  components: {FieldDropDownOtion},
-
+  components: {FieldDropDownOtion, draggable},
+  data() {
+    return {
+      list: []
+    };
+  },
   methods: {
     selectArea(areaName){
       this.$globals.canvas.getObjects().forEach((obj) => {
@@ -31,10 +48,27 @@ export default {
       });
     }
   },
+  computed: {
+    formReadAreasSortable: {
+      get: function () {
+        let areasArray = Object.keys(this.formReadAreas).map((key) => this.formReadAreas[key])
+        return areasArray.sort((area1, area2) => {
+          return area1.columnPosition > area2.columnPosition
+        })
+      },
+      set(areas) {
+        for (let [position, area] in areas.entries()){
+          store.state.formReadAreas[area.name]['columnPosition'] = position
+        }
+        console.log(store.state.formReadAreas)
+        store.commit('mutateProperty', ['formReadAreas',  store.state.formReadAreas])
+      }
+    },
+  }
 
 }
 </script>
 
-<style>
+<style scoped>
 
 </style>

@@ -17,7 +17,7 @@
     "tesseract.js": "^2.1.5",
     "vue": "^3.2.16",
     "vue-router": "4",
-    "vuedraggable": "^2.24.3",
+    "vuedraggable": "^4.1.0",
     "vuex": "^4.0.2",
     "xlsx": "^0.18.0"
   },
