@@ -20,6 +20,7 @@
       <move-icon @click="enableScroll" class="mx-1 fill-current text-black hover:text-gray-500 cursor-pointer" />
       <table-icon @click="$emit('show-results', '')" />
       <play-icon @click="processAllForms" class="mx-1 fill-current text-black hover:text-gray-500 cursor-pointer" />
+      <download-icon @click="exportData" class="mx-1 fill-current text-black hover:text-gray-500 cursor-pointer" />
     </div>
     <div v-if="isMoveActivated" class="w-full h-full relative z-20 flex justify-center flex-wrap flex-row sm:flex-row items-center">
       <move-icon @click="disableScroll" class="mx-1 fill-current text-black hover:text-gray-500 cursor-pointer" />
@@ -43,15 +44,16 @@ import menuIcon from './Icons/MenuIcon.vue'
 import MoveIcon from './Icons/MoveIcon.vue'
 import TableIcon from './Icons/TableIcon.vue'
 import PlayIcon from './Icons/PlayIcon.vue'
+import DownloadIcon from './Icons/DownloadIcon.vue'
 
-import {fabric} from "fabric";
 import helpers from "../mixins"
+import {utils, writeFile} from "xlsx";
 
 export default {
   name: 'FormToolbar',
   inject: ['$globals'],
   mixins: [helpers],
-  components: {TableIcon, qrIcon, ocrIcon, omrIcon, cutIcon, anchorIcon, cancelIcon, readAnchorIcon, menuIcon, MoveIcon, PlayIcon},
+  components: {TableIcon, qrIcon, ocrIcon, omrIcon, cutIcon, anchorIcon, cancelIcon, readAnchorIcon, menuIcon, MoveIcon, PlayIcon, DownloadIcon},
 
   data: function () {
     return {
@@ -134,8 +136,14 @@ export default {
       for (let form in this.forms){
         this.forms[form].formRead()
       }
+    },
+    exportData(){
+      let filename = 'results.xlsx';
+      let ws = utils.json_to_sheet(this.results);
+      let wb = utils.book_new();
+      utils.book_append_sheet(wb, ws, "results");
+      writeFile(wb,filename)
     }
-
   },
 
 }

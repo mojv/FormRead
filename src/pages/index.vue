@@ -1,14 +1,14 @@
 <template>
   <!--  <script src="https://badge.dimensions.ai/badge.js"></script>-->
   <div @click="setActiveObject" class="bg-gray-50 h-screen" v-show="!activateCam">
-    <app-header  v-if="formsCant === 0" />
+    <app-header  v-if="formsCant === 0 && Object.keys(this.formReadAreas).length === 0" />
     <div class="h-body" :class='layoutItemsDisplay'>
       <upload-file @activateCam="setActivateCam"
           :description='"Multiple sheets OMR (optical mark recognition) OCR (Optical Character Recognition) and BCR (Bar Code Recognition)"'
           :tittle='"FREE OMR, OCR & BCR"'
-          v-if="formsCant === 0"
+          v-if="formsCant === 0 && Object.keys(this.formReadAreas).length === 0"
       />
-      <template v-if="formsCant > 0">
+      <template v-if="formsCant > 0 || Object.keys(this.formReadAreas).length !== 0">
         <scrollable-forms-list v-show="layoutItemsDisplay['scrollList']" @activateCam="setActivateCam" @collapse-columns="setGridColumns"/>
         <form-toolbar @collapse-columns="setGridColumns" @show-results="showResultsTable"/>
         <form-editor-area v-show="layoutItemsDisplay['editorArea'] && !showResults" />

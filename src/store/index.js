@@ -33,6 +33,9 @@ export const store = createStore({
             state.totalForms = Object.keys(state.forms).length
         },
         selectForm(state, formId) {
+            if(state.totalForms === 0){
+                return
+            }
             state.selectedFormId = formId
 
             if(state.forms[state.selectedFormId].isAnchorProcessed){
@@ -53,9 +56,6 @@ export const store = createStore({
         deleteForm(state, formId) {
             delete state.forms[formId]
             state.totalForms--
-            if(state.totalForms === 0){
-                location.reload();
-            }
             this.commit('selectForm', Object.keys(state.forms)[0])
         },
         updateFormReadArea(state, [area, isCreate]) {
@@ -142,6 +142,9 @@ export const store = createStore({
             return state.forms
         },
         selectedFormAnchorsCount(state) {
+            if(state.totalForms === 0){
+                return
+            }
             return Object.keys(state.forms[state.selectedFormId].anchors).length
         },
         countImageSrc(state) {

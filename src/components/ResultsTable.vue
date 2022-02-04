@@ -33,54 +33,11 @@
 <script>
 import FieldDropDownOtion from './FieldDropDownOtion.vue'
 import helpers from "../mixins"
-import {store} from "../store";
 
 export default {  
   name: 'ResultsTable',
   mixins: [helpers],
   components: {FieldDropDownOtion},
-  methods: {
-    getAnswerByThreshold(questions, index, areaName){
-      if(questions[index] === undefined){
-        return "error"
-      }
-      let responses = []
-      let labels = store.state.formReadAreas[areaName]['questionLabels']
-      if(questions !== undefined){
-        if(questions[index].length !==  store.state.formReadAreas[areaName].omrQuestions[index].length){
-          return 'error'
-        }
-        for(let option in questions[index]){
-          if(questions[index][option].blackPixelsRatio > store.state.formReadAreas[areaName]['omrThreshold']){
-            responses.push(labels[option])
-          }
-        }
-      }
-      return responses.join()
-    }
-  },
-  computed: {
-    areas: function (){
-      return Object.filter(this.formReadAreas, area => !area.isAnchor);
-    },
-    results: function (){
-      let results = []
-      for(let [_, form] of Object.entries(this.forms)){
-        let row = {}
-        for(let [_, area] of Object.entries(this.areas)){
-          if(area.type === 'OMR'){
-            for(let index in area.omrQuestions){
-              row[area.name + '-' + index] = this.getAnswerByThreshold(form.omrQuestions[area.name], index, area.name)
-            }
-          }else{
-            row[area.name] = form.results[area.name]
-          }
-        }
-        results.push(row)
-      }
-      return results
-    }
-  }
 }
 </script>
 

@@ -58,6 +58,9 @@ export default {
             }
         },
         drawAnchorLines: function () {
+            if(this.$store.state.totalForms === 0){
+                return
+            }
             this.deleteAnchorsLines()
             if (this.selectedForm.isAnchorProcessed) {
                 return
@@ -154,6 +157,24 @@ export default {
                 let area = this.getFabricRect(left,top, width, height, fillColor, strokeColor, false)
                 this.addFabricArea(area, '', false, 'OmrBubble')
             }
+        },
+        getAnswerByThreshold(questions, index, areaName){
+            if(questions === undefined || questions[index] === undefined){
+                return
+            }
+            let responses = []
+            let labels = store.state.formReadAreas[areaName]['questionLabels']
+            if(questions !== undefined){
+                if(questions[index].length !==  store.state.formReadAreas[areaName].omrQuestions[index].length){
+                    return 'error'
+                }
+                for(let option in questions[index]){
+                    if(questions[index][option].blackPixelsRatio > store.state.formReadAreas[areaName]['omrThreshold']){
+                        responses.push(labels[option])
+                    }
+                }
+            }
+            return responses.join()
         }
     },
 
@@ -180,9 +201,15 @@ export default {
             return this.$store.state.selectedFormId
         },
         selectedFormSrc: function () {
+            if(this.$store.state.totalForms === 0){
+                return ''
+            }
             return this.$store.state.forms[this.selectedFormId].src
         },
         selectedFormAnchors: function () {
+            if(this.$store.state.totalForms === 0){
+                return ''
+            }
             return this.$store.state.forms[this.selectedFormId].anchors
         },
         selectedForm: function () {
@@ -198,6 +225,9 @@ export default {
             return Object.keys(this.$store.state.forms).length
         },
         omrBubbles: function () {
+            if(this.$store.state.totalForms === 0){
+                return ''
+            }
             let omrBubbles = []
             for(let omrField in this.selectedForm.omrQuestions){
                 for(let question of this.selectedForm.omrQuestions[omrField]){
@@ -211,6 +241,24 @@ export default {
         },
         fabricActiveObject: function () {
             return this.$store.state.fabricActiveObject
+        },
+        results: function (){
+            let results = []
+            let areas = Object.filter(this.formReadAreas, area => !area.isAnchor)
+            for(let [_, form] of Object.entries(this.forms)){
+                let row = {}
+                for(let [_, area] of Object.entries(areas)){
+                    if(area.type === 'OMR'){
+                        for(let index in area.omrQuestions){
+                            row[area.name + '-' + index] = this.getAnswerByThreshold(form.omrQuestions[area.name], index, area.name)
+                        }
+                    }else{
+                        row[area.name] = form.results[area.name]
+                    }
+                }
+                results.push(row)
+            }
+            return results
         }
     }
 }
