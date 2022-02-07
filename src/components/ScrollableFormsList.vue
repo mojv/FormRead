@@ -9,7 +9,7 @@
              @change="uploadImagesFiles($event)"/>
       <input v-if="$store.state.isFromCamMode" type='button' class="hidden" multiple @click="activateCam"/>
     </label>
-    <template v-for="(form, id) in forms">
+    <template v-for="(form, id) in forms" :key="id">
       <div
           :class="{'border-green-400': selectedFormId === id}"
           v-if="form.src !== ''"

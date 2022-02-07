@@ -83,7 +83,7 @@
               </tr>
               </thead>
               <tbody class="bg-white divide-y divide-gray-200">
-              <tr v-for="(img, index) in firstQuestionBubbleImgs" class=" h-10">
+              <tr v-for="(img, index) in firstQuestionBubbleImgs" class=" h-10" :key="index">
                 <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                   <img :src="img" class="h-5 m-auto">
                 </th>

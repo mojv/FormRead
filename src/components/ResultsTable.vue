@@ -6,7 +6,7 @@
           <table class="min-w-full divide-y divide-gray-200">
             <thead class="bg-gray-50">
             <tr>
-              <template  v-for="(_, columnName) in results[0]">
+              <template  v-for="(_, columnName) in results[0]" :key="columnName">
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   {{columnName}}
                 </th>
@@ -14,8 +14,8 @@
             </tr>
             </thead>
             <tbody class="bg-white divide-y divide-gray-200">
-            <tr v-for="result in results">
-              <template  v-for="(_, columnName) in results[0]">
+            <tr v-for="result in results" :key="result.id">
+              <template  v-for="(_, columnName) in results[0]" :key="columnName">
                 <td  class="px-6 py-4 whitespace-nowrap">
                   {{result[columnName]}}
                 </td>

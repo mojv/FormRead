@@ -267,6 +267,7 @@ export default {
             })
             for(let [_, form] of Object.entries(this.forms)){
                 let row = {}
+                row.file_name = form.id
                 for(let [_, area] of sortedAreas.entries()){
                     if(area.type === 'OMR'){
                         for(let index in area.omrQuestions){
