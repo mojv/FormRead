@@ -12,7 +12,7 @@
         </ul>
       </div>
       <read-anchor-icon v-if="$store.getters.selectedFormAnchorsCount === 4 && showAnchorsToolbar" v-on:click="processAnchors" />
-      <cancelIcon v-if="showAnchorsToolbar" @click="deleteObjects" class="mx-1 fill-current text-black hover:text-gray-500 cursor-pointer" />
+      <cancelIcon v-if="showAnchorsToolbar" @click="deleteAnchorObjects" class="mx-1 fill-current text-black hover:text-gray-500 cursor-pointer" />
       <qr-icon v-if="!showAnchorsToolbar" @click="addField('rgb(110,214,36,0.3)','BCR')" class="mx-1 fill-current text-black hover:text-gray-500 cursor-pointer" />
       <ocr-icon v-if="!showAnchorsToolbar" @click="addField('rgb(158,68,226,0.3)','OCR')" class="mx-1 fill-current text-black hover:text-gray-500 cursor-pointer" />
       <omr-icon v-if="!showAnchorsToolbar" @click="addOmr('rgb(33,239,160,0.3)','OMR')" class="mx-1 fill-current text-black hover:text-gray-500 cursor-pointer" />
@@ -99,12 +99,6 @@ export default {
     addOmr(){
       let areaName = this.addField('rgb(33,239,160,0.3)','OMR')
       this.selectedForm.omrRead(areaName, true, 'horizontal')
-    },
-
-    deleteObjects(){
-      this.deleteAllAnchorObjects(false)
-      this.$store.dispatch('deleteAllAnchors')
-      this.$store.commit('mutateProperty', ['anchors', {hasAnchors: false, anchorType: ''}])
     },
 
     processAnchors(){

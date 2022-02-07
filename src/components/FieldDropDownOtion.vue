@@ -1,15 +1,10 @@
 <template>
-
       <header class="flex justify-between items-center h-16">
         <input class="text-grey-darkest font-thin text-xl w-full h-full px-8" :value="area.name"
                @change="changeAreaName($event)">
-        <div class="rounded-full border border-grey w-7 h-7 flex items-center justify-center test mr-4 handle cursor-move" for="chck1">
-          <!-- icon by feathericons.com -->
-          <svg aria-hidden="true" class="" data-reactid="266" fill="none" height="24" stroke="#606F7B"
-               stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="24"
-               xmlns="http://www.w3.org/2000/svg">
-            <polyline points="6 9 12 15 18 9">
-            </polyline>
+        <div class="w-7 h-7 flex items-center justify-center test mr-4 handle cursor-move" for="chck1">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
           </svg>
         </div>
       </header>
@@ -118,12 +113,6 @@ export default {
     selected: Boolean
   },
 
-  data: function () {
-    return {
-      omrThreshold: 40
-    }
-  },
-
   methods: {
     changeAreaName(e) {
       let newName = e.target.value
@@ -161,14 +150,16 @@ export default {
     questionLabels: function (){
       return store.state.formReadAreas[this.area.name]['questionLabels']
     },
-  },
-
-  watch: {
-    omrThreshold: function (val) {
-      store.state.formReadAreas[this.area.name]['omrThreshold'] = val
-      this.updateFormReadAreas(store.state.formReadAreas)
-      this.updateOmrBubbles(false)
-    },
+    omrThreshold: {
+      get: function (){
+        return store.state.formReadAreas[this.area.name]['omrThreshold']
+      },
+      set: function (val){
+        store.state.formReadAreas[this.area.name]['omrThreshold'] = val
+        this.updateFormReadAreas(store.state.formReadAreas)
+        this.updateOmrBubbles(false)
+      }
+    }
   },
 
   mounted() {

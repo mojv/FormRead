@@ -88,21 +88,16 @@ export default {
   },
 
   watch: {
-    selectedFormId: function () {
-      this.updateCanvas()
-      this.updateOmrBubbles(true)
-    },
     selectedFormSrc: function () {
-      this.updateCanvas()
+      if(this.formsCant !== 0){
+        this.updateCanvas()
+      }
     },
     'selectedFormAnchors': {
       handler: function () {
         this.drawAnchorLines()
       },
       deep: true
-    },
-    omrBubbles: function (){
-      this.updateOmrBubbles(false)
     },
   },
 
@@ -113,7 +108,6 @@ export default {
     delete fabric.Object.prototype.controls.mtr
     this.$globals.canvas = new fabric.Canvas('formCanvas')
     this.$globals.canvas.uniformScaling = false
-    this.updateCanvas()
     this.$globals.canvas.on("object:modified", () => {
       this.anchorZoomShow = false
       this.$globals.canvas.getActiveObjects().forEach((area) => {
@@ -125,6 +119,7 @@ export default {
           this.$store.dispatch('deleteOmrQuestionFromAllForms', area.name)
           let orientation = store.state.formReadAreas[area.name]['omrOrientation']
           this.selectedForm.omrRead(area.name, true,  orientation)
+          this.updateOmrBubbles(false)
         }
         if (area.isCornerControl) {
           let left = (area.left + this.cornerControlRadius) / this.canvasWidth

@@ -25,12 +25,8 @@ export const store = createStore({
         mutateProperty(state, [prop, val]){
             state[prop] = val
         },
-        addForm(state, [formId, imgSrc, fromCam]) {
-            state.forms[formId] = new formClass(formId, imgSrc, fromCam)
-            if (Object.keys(state.forms).length === 1) {
-                state.selectedFormId = formId
-            }
-            state.totalForms = Object.keys(state.forms).length
+        addForm(state, [formId, imgSrc, fromCam, VueContext]) {
+            state.forms[formId] = new formClass(formId, imgSrc, fromCam, VueContext)
         },
         selectForm(state, formId) {
             if(state.totalForms === 0){
@@ -56,6 +52,7 @@ export const store = createStore({
         deleteForm(state, formId) {
             delete state.forms[formId]
             state.totalForms--
+            state.selectedFormId = ''
             this.commit('selectForm', Object.keys(state.forms)[0])
         },
         updateFormReadArea(state, [area, isCreate]) {
@@ -78,7 +75,7 @@ export const store = createStore({
             state.formReadAreas[area.name].name             = area.name
             state.formReadAreas[area.name].type             = area.type
             state.formReadAreas[area.name].isAnchor         = area.isAnchor
-            console.log(isCreate)
+            state.formReadAreas[area.name].fabricArea       = area
             if(area.type === 'OMR' && isCreate){
                 state.formReadAreas[area.name].omrThreshold = 0.4
                 state.formReadAreas[area.name].omrOrientation = 'horizontal'

@@ -36,6 +36,7 @@ export default {
 
   name: 'ScrollableFormsList',
   emits: ['form-columns'],
+  inject: ['$globals'],
   components: {addIcon},
   mixins: [helpers],
   methods: {
@@ -44,10 +45,18 @@ export default {
       if(document.body.offsetWidth < 700){
         this.$emit('collapse-columns', 'scrollList')
       }
+      this.updateCanvas()
+      this.updateOmrBubbles(true)
     },
     deleteForm(formId) {
       if (confirm(`Do you really want to delete form ${formId}?`)) {
         this.$store.commit('deleteForm', formId)
+        if(this.formsCant !== 0){
+          this.updateCanvas()
+          this.updateOmrBubbles(true)
+        }else{
+          this.deleteAnchorObjects()
+        }
       }
     },
   },

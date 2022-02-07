@@ -9,9 +9,13 @@
             item-key="name"
         >
           <template #item="{ element, index }">
-            <div class="border-b tab">
+            <div class="border-b tab" @click="selectArea(element.name)">
               <li class="border-l-2 border-transparent relative">
-                <field-drop-down-otion v-if="!element.isAnchor"  :area="element" :selected="fabricActiveObject === element.name" v-on:click="selectArea(element.name)" />
+                <field-drop-down-otion
+                    v-if="!element.isAnchor"
+                    :area="element"
+                    :selected="fabricActiveObject === element.name"
+                />
               </li>
             </div>
           </template>
@@ -53,14 +57,13 @@ export default {
       get: function () {
         let areasArray = Object.keys(this.formReadAreas).map((key) => this.formReadAreas[key])
         return areasArray.sort((area1, area2) => {
-          return area1.columnPosition > area2.columnPosition
+          return area1.columnPosition > area2.columnPosition ? 1 : -1
         })
       },
       set(areas) {
-        for (let [position, area] in areas.entries()){
-          store.state.formReadAreas[area.name]['columnPosition'] = position
+        for (let position in areas){
+          store.state.formReadAreas[areas[position].name]['columnPosition'] = position
         }
-        console.log(store.state.formReadAreas)
         store.commit('mutateProperty', ['formReadAreas',  store.state.formReadAreas])
       }
     },

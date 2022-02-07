@@ -41,7 +41,7 @@ export default {
         uploadImagesFiles: function (evt) {
             let files = evt.target.files;
             let context = this
-
+            this.deleteAnchorObjects()
             for (let file of files) {
                 var reader = new FileReader();
 
@@ -49,7 +49,7 @@ export default {
                 reader.onload = (function (theFile, VueContext) {
                     return function (e) {
                         let src = e.target.result
-                        VueContext.$store.commit('addForm', [theFile.name, src, false])
+                        VueContext.$store.commit('addForm', [theFile.name, src, false, VueContext])
                         VueContext.pages--
                     };
                 })(file, context);
@@ -140,7 +140,7 @@ export default {
                 }
                 if (obj.type === 'OMR' && recalculate) {
                     let orientation = store.state.formReadAreas[obj.name]['omrOrientation']
-                    this.selectedForm.omrRead(obj.name, !recalculate, orientation)
+                    this.selectedForm.omrRead(obj.name, false, orientation)
                 }
             });
             for (let bubble of this.omrBubbles){
@@ -175,7 +175,21 @@ export default {
                 }
             }
             return responses.join()
-        }
+        },
+        loadFabricAreasToCanvas(){
+            for(let [_,area] of Object.entries(this.formReadAreas)){
+              if(!area.isAnchor){
+                  this.$globals.canvas.add(area.fabricArea);
+              }
+            }
+        },
+        deleteAnchorObjects(){
+            if(this.showAnchorsToolbar){
+                this.deleteAllAnchorObjects(false)
+                this.$store.dispatch('deleteAllAnchors')
+                this.$store.commit('mutateProperty', ['anchors', {hasAnchors: false, anchorType: ''}])
+            }
+        },
     },
 
     computed: {
@@ -219,6 +233,9 @@ export default {
             return this.$store.state.showLoadingModal
         },
         isFormAnchorProcessed: function () {
+            if(this.selectedForm === undefined){
+                return false
+            }
             return this.selectedForm.isAnchorProcessed
         },
         formsCant: function () {
@@ -245,9 +262,13 @@ export default {
         results: function (){
             let results = []
             let areas = Object.filter(this.formReadAreas, area => !area.isAnchor)
+            let sortedAreas = Object.keys(areas).map((key) => areas[key])
+            sortedAreas = sortedAreas.sort((area1, area2) => {
+                return area1.columnPosition > area2.columnPosition ? 1 : -1
+            })
             for(let [_, form] of Object.entries(this.forms)){
                 let row = {}
-                for(let [_, area] of Object.entries(areas)){
+                for(let [_, area] of sortedAreas.entries()){
                     if(area.type === 'OMR'){
                         for(let index in area.omrQuestions){
                             row[area.name + '-' + index] = this.getAnswerByThreshold(form.omrQuestions[area.name], index, area.name)

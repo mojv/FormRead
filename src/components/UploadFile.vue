@@ -31,6 +31,7 @@ export default {
 
   name: 'UploadFile',
   props: ['tittle', 'description'],
+  inject: ['$globals'],
   mixins: [helpers],
 
   methods: {
