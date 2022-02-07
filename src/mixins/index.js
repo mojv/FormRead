@@ -41,7 +41,6 @@ export default {
         uploadImagesFiles: function (evt) {
             let files = evt.target.files;
             let context = this
-            this.deleteAnchorObjects()
             for (let file of files) {
                 var reader = new FileReader();
 

@@ -46,7 +46,7 @@ export default class formClass {
         let ctx = this.canvas.getContext('2d');
         await ctx.drawImage(image,0,0);
         if(store.state.anchors.hasAnchors && !this.isAnchorProcessed && !isAnchorError){
-            this.processAnchors()
+            await this.processAnchors()
         }
     }
 

@@ -50,12 +50,13 @@ export default {
     },
     deleteForm(formId) {
       if (confirm(`Do you really want to delete form ${formId}?`)) {
-        this.$store.commit('deleteForm', formId)
-        if(this.formsCant !== 0){
+        if(this.formsCant !== 1){
+          this.$store.commit('deleteForm', formId)
           this.updateCanvas()
           this.updateOmrBubbles(true)
         }else{
           this.deleteAnchorObjects()
+          this.$store.commit('deleteForm', formId)
         }
       }
     },

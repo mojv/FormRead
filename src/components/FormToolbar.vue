@@ -132,6 +132,9 @@ export default {
       }
     },
     exportData(){
+      // let state = { ...this.$store.state }
+      // delete state.forms
+      // console.log(JSON.stringify(state))
       let filename = 'results.xlsx';
       let ws = utils.json_to_sheet(this.results);
       let wb = utils.book_new();
