@@ -25,8 +25,8 @@ export const store = createStore({
         mutateProperty(state, [prop, val]){
             state[prop] = val
         },
-        addForm(state, [formId, imgSrc, fromCam, VueContext]) {
-            state.forms[formId] = new formClass(formId, imgSrc, fromCam, VueContext)
+        addForm(state, [formId, imgSrc, fromCam, VueContext, markAsSelected]) {
+            state.forms[formId] = new formClass(formId, imgSrc, fromCam, VueContext, markAsSelected)
         },
         selectForm(state, formId) {
             if(state.totalForms === 0){

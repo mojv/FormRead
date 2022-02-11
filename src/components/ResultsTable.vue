@@ -16,8 +16,13 @@
             <tbody class="bg-white divide-y divide-gray-200">
             <tr v-for="result in results" :key="result.id">
               <template  v-for="(_, columnName) in results[0]" :key="columnName">
-                <td  class="px-6 py-4 whitespace-nowrap">
-                  {{result[columnName]}}
+                <td  class="whitespace-nowrap w-auto">
+                  <select  v-if="result[columnName].type === 'select'" v-model="result[columnName].value" class="w-full bg-white text-grey-darkest font-thin h-full px-8">
+                    <option v-if="!result[columnName].options.includes(result[columnName].value)">{{ result[columnName].value }}</option>
+                    <option v-for="option in result[columnName].options">{{ option }}</option>
+                  </select>
+                  <input  v-if="result[columnName].type === 'text'" v-model="result[columnName].value" class="w-32  bg-white text-grey-darkest font-thin h-full px-2"/>
+                  <p class="bg-white text-grey-darkest font-thin w-full h-full px-8" v-if="result[columnName].type === 'id'">{{ result[columnName].value }}e</p>
                 </td>
               </template>
             </tr>

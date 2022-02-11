@@ -39,21 +39,22 @@ export default {
             });
         },
         uploadImagesFiles: function (evt) {
-            let files = evt.target.files;
+            let files = evt.target.files
             let context = this
+            let markAsSelected = true
             for (let file of files) {
-                var reader = new FileReader();
+                var reader = new FileReader()
 
                 //IIFE to set closure
-                reader.onload = (function (theFile, VueContext) {
+                reader.onload = (function (theFile, VueContext, markAsSelected) {
                     return function (e) {
                         let src = e.target.result
-                        VueContext.$store.commit('addForm', [theFile.name, src, false, VueContext])
+                        VueContext.$store.commit('addForm', [theFile.name, src, false, VueContext, markAsSelected])
                         VueContext.pages--
                     };
-                })(file, context);
-
-                reader.readAsDataURL(file);
+                })(file, context, markAsSelected)
+                markAsSelected = false
+                reader.readAsDataURL(file)
             }
         },
         drawAnchorLines: function () {
@@ -137,11 +138,15 @@ export default {
                 if (obj.type === 'OmrBubble') {
                     this.$globals.canvas.remove(obj)
                 }
-                if (obj.type === 'OMR' && recalculate) {
-                    let orientation = store.state.formReadAreas[obj.name]['omrOrientation']
-                    this.selectedForm.omrRead(obj.name, false, orientation)
-                }
             });
+            if (recalculate) {
+                for(let [_,area] of Object.entries(this.formReadAreas)){
+                    if(area.type === 'OMR'){
+                        let orientation = store.state.formReadAreas[area.name]['omrOrientation']
+                        this.selectedForm.omrRead(area.name, false, orientation)
+                    }
+                }
+            }
             for (let bubble of this.omrBubbles){
                 let left = bubble.left * this.canvasWidth
                 let top = bubble.top * this.canvasHeight
@@ -267,14 +272,21 @@ export default {
             })
             for(let [_, form] of Object.entries(this.forms)){
                 let row = {}
-                row.file_name = form.id
+                row.file_name = {value: form.id, type: 'id'}
                 for(let [_, area] of sortedAreas.entries()){
                     if(area.type === 'OMR'){
                         for(let index in area.omrQuestions){
-                            row[area.name + '-' + index] = this.getAnswerByThreshold(form.omrQuestions[area.name], index, area.name)
+                            row[area.name + '-' + index] = {
+                                value: this.getAnswerByThreshold(form.omrQuestions[area.name], index, area.name),
+                                type: 'select',
+                                options: store.state.formReadAreas[area.name]['questionLabels']
+                            }
                         }
                     }else{
-                        row[area.name] = form.results[area.name]
+                        row[area.name] = {
+                            value: form.results[area.name],
+                            type: 'text'
+                        }
                     }
                 }
                 results.push(row)

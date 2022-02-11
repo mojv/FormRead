@@ -5,7 +5,7 @@ import { BrowserQRCodeReader } from '@zxing/library';
 // import {imread, MatVector, Mat, cvtColor, COLOR_RGBA2GRAY, threshold, THRESH_BINARY, findContours, RETR_EXTERNAL, RETR_LIST, CHAIN_APPROX_SIMPLE, Scalar, drawContours, LINE_8, contourArea, arcLength, approxPolyDP, Point, matFromArray, Size, getPerspectiveTransform, warpPerspective, INTER_LINEAR, BORDER_CONSTANT, imshow, CV_32FC2, boundingRect} from 'opencv.js';
 
 export default class formClass {
-    constructor(formId, src, fromCam, VueContext) {
+    constructor(formId, src, fromCam, VueContext, markAsSelected) {
         this.id = formId
         this.src_original = src;
         this.src = '';
@@ -19,21 +19,21 @@ export default class formClass {
             store.commit('mutateProperty', ['anchors', {hasAnchors: true, anchorType: 'corners'}])
             this.setCanvasFromSrc(src, false).then(async () => {
                 await this.processAnchors
-                this.markAsSelected(VueContext)
+                this.markAsSelected(VueContext, markAsSelected)
             })
         }else{
-            this.setCanvasFromSrc(src, false).then(() => this.markAsSelected(VueContext))
+            this.setCanvasFromSrc(src, false).then(() => this.markAsSelected(VueContext, markAsSelected))
         }
     }
 
-    markAsSelected(VueContext){
+    markAsSelected(VueContext, markAsSelected){
         store.commit('mutateProperty', ['totalForms', Object.keys(store.state.forms).length])
-        store.commit('selectForm', this.id )
-        if(store.state.totalForms === 1){
+        if(markAsSelected){
+            store.commit('selectForm', this.id )
             VueContext.loadFabricAreasToCanvas()
+            VueContext.updateCanvas()
+            VueContext.updateOmrBubbles(true)
         }
-        VueContext.updateCanvas()
-        VueContext.updateOmrBubbles(true)
     }
 
     async setCanvasFromSrc(src, isAnchorError){
@@ -415,7 +415,7 @@ export default class formClass {
             let optionsLength = this.omrQuestions[areaName][0].length
             let currentLabels = store.state.formReadAreas[areaName]['questionLabels']
             if(currentLabels === undefined || currentLabels.length !== optionsLength){
-                store.state.formReadAreas[areaName]['questionLabels'] = Array.from(Array(optionsLength).keys())
+                store.state.formReadAreas[areaName]['questionLabels'] = Array.from(Array(optionsLength).keys()).map((val) =>  String(val))
             }
             store.state.formReadAreas[areaName]['firstQuestionBubbleImgs'] = this.getFirstQuestionBubbleImgs(areaName)
         }
