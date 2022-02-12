@@ -339,7 +339,7 @@ export default class formClass {
             }else if(area.type === 'BCR'){
                 this.bcrRead(area)
             }else if(area.type === 'OMR'){
-                this.omrRead(area.name, false, store.state.formReadAreas[area.name])
+                this.omrRead(area.name, false, store.state.formReadAreas[area.name].omrOrientation)
             }
         }
     }
@@ -404,6 +404,7 @@ export default class formClass {
                     let [areaCanvas, imgArea] = this.getAreaCanvas(option)
                     let cv_src = cv.imread(areaCanvas)
                     this.omrQuestions[area.name][i][j]['blackPixelsRatio'] = this.getBlackPixelsRatio(cv_src, imgArea, areaCanvas)
+                    this.omrQuestions[area.name][i][j]['forceAnswer'] = false
                     cv_src.delete()
                 }
             }

@@ -42,15 +42,21 @@ export default {
             let files = evt.target.files
             let context = this
             let markAsSelected = true
+            this.$store.commit('mutateProperty', ['showLoadingModal', true])
+            this.totalFormsUploaded = files.length
+            this.counterFormUploaded = 0
             for (let file of files) {
                 var reader = new FileReader()
 
                 //IIFE to set closure
-                reader.onload = (function (theFile, VueContext, markAsSelected) {
+                reader.onload = (function (theFile, VueContext, markAsSelected, count) {
                     return function (e) {
                         let src = e.target.result
                         VueContext.$store.commit('addForm', [theFile.name, src, false, VueContext, markAsSelected])
-                        VueContext.pages--
+                        VueContext.counterFormUploaded++
+                        if(VueContext.counterFormUploaded === VueContext.totalFormsUploaded - 1){
+                            VueContext.$store.commit('mutateProperty', ['showLoadingModal', false])
+                        }
                     };
                 })(file, context, markAsSelected)
                 markAsSelected = false
@@ -173,6 +179,9 @@ export default {
                     return 'error'
                 }
                 for(let option in questions[index]){
+                    if(questions[index][option].forceAnswer){
+                        return labels[option]
+                    }
                     if(questions[index][option].blackPixelsRatio > store.state.formReadAreas[areaName]['omrThreshold']){
                         responses.push(labels[option])
                     }
@@ -181,6 +190,9 @@ export default {
             return responses.join()
         },
         loadFabricAreasToCanvas(){
+            this.$globals.canvas.getObjects().forEach((obj) => {
+                this.$globals.canvas.remove(obj)
+            });
             for(let [_,area] of Object.entries(this.formReadAreas)){
               if(!area.isAnchor){
                   this.$globals.canvas.add(area.fabricArea);
@@ -279,13 +291,18 @@ export default {
                             row[area.name + '-' + index] = {
                                 value: this.getAnswerByThreshold(form.omrQuestions[area.name], index, area.name),
                                 type: 'select',
-                                options: store.state.formReadAreas[area.name]['questionLabels']
+                                options: store.state.formReadAreas[area.name]['questionLabels'],
+                                formId: form.id,
+                                questionIndex: index,
+                                areaName: area.name
                             }
                         }
                     }else{
                         row[area.name] = {
                             value: form.results[area.name],
-                            type: 'text'
+                            type: 'text',
+                            areaName: area.name,
+                            formId: form.id
                         }
                     }
                 }
