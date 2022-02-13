@@ -332,7 +332,7 @@ export default class formClass {
         return canvasArea.toDataURL()
     }
 
-    formRead(){
+    async formRead(){
         for(let [, area] of Object.entries(store.state.formReadAreas)){
             if (area.type === 'OCR'){
                 this.ocrRead(area)
@@ -364,6 +364,7 @@ export default class formClass {
             'eng',
         )
 
+        console.log(text)
         this.results[area.name] = text
         store.commit('updateFormProp', [this.id, 'results', this.results])
 

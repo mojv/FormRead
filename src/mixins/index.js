@@ -5,6 +5,17 @@ import {store} from "../store";
 
 export default {
     methods: {
+        selectForm(formId) {
+            this.$store.commit('selectForm', formId)
+            if(document.body.offsetWidth < 700){
+                this.$emit('collapse-columns', 'scrollList')
+            }
+            this.updateCanvas()
+            this.updateOmrBubbles(true)
+        },
+        showResultsTable(){
+            this.$store.commit('mutateProperty', ['showResults', !this.showResults])
+        },
         updateCanvas() {
             fabric.Image.fromURL(this.selectedFormSrc, img => {
                 let height = document.getElementById('FormEditorArea').offsetHeight
@@ -54,7 +65,7 @@ export default {
                         let src = e.target.result
                         VueContext.$store.commit('addForm', [theFile.name, src, false, VueContext, markAsSelected])
                         VueContext.counterFormUploaded++
-                        if(VueContext.counterFormUploaded === VueContext.totalFormsUploaded - 1){
+                        if(VueContext.counterFormUploaded >= VueContext.totalFormsUploaded - 1){
                             VueContext.$store.commit('mutateProperty', ['showLoadingModal', false])
                         }
                     };
@@ -174,18 +185,20 @@ export default {
             }
             let responses = []
             let labels = store.state.formReadAreas[areaName]['questionLabels']
-            if(questions !== undefined){
-                if(questions[index].length !==  store.state.formReadAreas[areaName].omrQuestions[index].length){
-                    return 'error'
+            let hasError = false
+            if(questions[index].length !==  store.state.formReadAreas[areaName].omrQuestions[index].length){
+                hasError = true
+            }
+            for(let option in questions[index]){
+                if(questions[index][option].forceAnswer){
+                    return labels[option]
                 }
-                for(let option in questions[index]){
-                    if(questions[index][option].forceAnswer){
-                        return labels[option]
-                    }
-                    if(questions[index][option].blackPixelsRatio > store.state.formReadAreas[areaName]['omrThreshold']){
-                        responses.push(labels[option])
-                    }
+                if(questions[index][option].blackPixelsRatio > store.state.formReadAreas[areaName]['omrThreshold']){
+                    responses.push(labels[option])
                 }
+            }
+            if(hasError){
+                return 'error'
             }
             return responses.join()
         },
@@ -256,6 +269,9 @@ export default {
         },
         formsCant: function () {
             return Object.keys(this.$store.state.forms).length
+        },
+        showResults: function () {
+            return this.$store.state.showResults
         },
         omrBubbles: function () {
             if(this.$store.state.totalForms === 0){

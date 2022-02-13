@@ -10,7 +10,7 @@
       />
       <template v-if="formsCant > 0">
         <scrollable-forms-list v-show="layoutItemsDisplay['scrollList']" @activateCam="setActivateCam" @collapse-columns="setGridColumns"/>
-        <form-toolbar @collapse-columns="setGridColumns" @show-results="showResultsTable"/>
+        <form-toolbar @collapse-columns="setGridColumns" />
         <form-editor-area v-show="layoutItemsDisplay['editorArea'] && !showResults" />
         <results-table v-show="layoutItemsDisplay['editorArea'] && showResults" />
         <form-options-panel v-show="layoutItemsDisplay['optionPanel']" />
@@ -51,7 +51,6 @@ export default {
   data() {
     return {
       activateCam: false,
-      showResults: false,
       layoutItems: {
         formGridDisplay: false,
         scrollList: true,
@@ -81,9 +80,6 @@ export default {
     },
     setActivateCam(activateCam){
       this.activateCam= activateCam
-    },
-    showResultsTable(_){
-      this.showResults = !this.showResults
     }
   },
 

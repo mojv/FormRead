@@ -4,23 +4,29 @@
       <menu-icon :orientation="'left'" @click="$emit('collapse-columns', 'scrollList')" class="mx-1 fill-current text-black hover:text-gray-500 cursor-pointer" />
     </div>
     <div v-if="!isMoveActivated"  class="w-full h-full relative z-20 flex justify-center flex-wrap flex-row sm:flex-row items-center">
-      <div class="dropdown" v-if="!showAnchorsToolbar" >
-        <anchor-icon @click="" class="mx-1 fill-current text-black hover:text-gray-500 cursor-pointer" />
-        <ul class="dropdown-menu absolute hidden text-gray-700 pt-1">
-          <li @click="addAnchor"><a class="rounded-t bg-gray-200 hover:bg-gray-400 py-2 px-4 block whitespace-no-wrap" href="#">Object</a></li>
-          <li @click="detectCorners" class=""><a class="bg-gray-200 hover:bg-gray-400 py-2 px-4 block whitespace-no-wrap" href="#">Corners</a></li>
-        </ul>
-      </div>
-      <read-anchor-icon v-if="$store.getters.selectedFormAnchorsCount === 4 && showAnchorsToolbar" v-on:click="processAnchors" />
-      <cancelIcon v-if="showAnchorsToolbar" @click="deleteAnchorObjects" class="mx-1 fill-current text-black hover:text-gray-500 cursor-pointer" />
-      <qr-icon v-if="!showAnchorsToolbar" @click="addField('rgb(110,214,36,0.3)','BCR')" class="mx-1 fill-current text-black hover:text-gray-500 cursor-pointer" />
-      <ocr-icon v-if="!showAnchorsToolbar" @click="addField('rgb(158,68,226,0.3)','OCR')" class="mx-1 fill-current text-black hover:text-gray-500 cursor-pointer" />
-      <omr-icon v-if="!showAnchorsToolbar" @click="addOmr('rgb(33,239,160,0.3)','OMR')" class="mx-1 fill-current text-black hover:text-gray-500 cursor-pointer" />
-      <cut-icon v-if="!showAnchorsToolbar" @click="addField('rgb(255,117,140,0.3)','cuts')" class="mx-1 fill-current text-black hover:text-gray-500 cursor-pointer" />
-      <move-icon @click="enableScroll" class="mx-1 fill-current text-black hover:text-gray-500 cursor-pointer" />
-      <table-icon @click="$emit('show-results', '')" />
-      <play-icon @click="processAllForms" class="mx-1 fill-current text-black hover:text-gray-500 cursor-pointer" />
-      <download-icon @click="exportData" class="mx-1 fill-current text-black hover:text-gray-500 cursor-pointer" />
+      <template v-if="!showResults">
+        <div class="dropdown" v-if="!showAnchorsToolbar" >
+          <anchor-icon @click="" class="mx-1 fill-current text-black hover:text-gray-500 cursor-pointer" />
+          <ul class="dropdown-menu absolute hidden text-gray-700 pt-1">
+            <li @click="addAnchor"><a class="rounded-t bg-gray-200 hover:bg-gray-400 py-2 px-4 block whitespace-no-wrap" href="#">Object</a></li>
+            <li @click="detectCorners" class=""><a class="bg-gray-200 hover:bg-gray-400 py-2 px-4 block whitespace-no-wrap" href="#">Corners</a></li>
+          </ul>
+        </div>
+        <read-anchor-icon v-if="$store.getters.selectedFormAnchorsCount === 4 && showAnchorsToolbar" v-on:click="processAnchors" />
+        <cancelIcon v-if="showAnchorsToolbar" @click="deleteAnchorObjects" class="mx-1 fill-current text-black hover:text-gray-500 cursor-pointer" />
+        <qr-icon v-if="!showAnchorsToolbar" @click="addField('rgb(110,214,36,0.3)','BCR')" class="mx-1 fill-current text-black hover:text-gray-500 cursor-pointer" />
+        <ocr-icon v-if="!showAnchorsToolbar" @click="addField('rgb(158,68,226,0.3)','OCR')" class="mx-1 fill-current text-black hover:text-gray-500 cursor-pointer" />
+        <omr-icon v-if="!showAnchorsToolbar" @click="addOmr('rgb(33,239,160,0.3)','OMR')" class="mx-1 fill-current text-black hover:text-gray-500 cursor-pointer" />
+        <cut-icon v-if="!showAnchorsToolbar" @click="addField('rgb(255,117,140,0.3)','cuts')" class="mx-1 fill-current text-black hover:text-gray-500 cursor-pointer" />
+        <move-icon @click="enableScroll" class="mx-1 fill-current text-black hover:text-gray-500 cursor-pointer  block sm:hidden" />
+        <table-icon @click="showResultsTable" />
+      </template>
+      <template v-if="showResults">
+        <form-icon @click="showResultsTable" />
+        <play-icon @click="processAllForms" class="mx-1 fill-current text-black hover:text-gray-500 cursor-pointer" />
+        <check-icon @click="checkNextPossibleError" class="mx-1 fill-current text-black hover:text-gray-500 cursor-pointer" />
+        <download-icon @click="exportData" class="mx-1 fill-current text-black hover:text-gray-500 cursor-pointer" />
+      </template>
     </div>
     <div v-if="isMoveActivated" class="w-full h-full relative z-20 flex justify-center flex-wrap flex-row sm:flex-row items-center">
       <move-icon @click="disableScroll" class="mx-1 fill-current text-black hover:text-gray-500 cursor-pointer" />
@@ -45,6 +51,9 @@ import MoveIcon from './Icons/MoveIcon.vue'
 import TableIcon from './Icons/TableIcon.vue'
 import PlayIcon from './Icons/PlayIcon.vue'
 import DownloadIcon from './Icons/DownloadIcon.vue'
+import FormIcon from './Icons/FormIcon.vue'
+import CheckIcon from './Icons/CheckIcon.vue'
+
 
 import helpers from "../mixins"
 import {utils, writeFile} from "xlsx";
@@ -53,13 +62,14 @@ export default {
   name: 'FormToolbar',
   inject: ['$globals'],
   mixins: [helpers],
-  components: {TableIcon, qrIcon, ocrIcon, omrIcon, cutIcon, anchorIcon, cancelIcon, readAnchorIcon, menuIcon, MoveIcon, PlayIcon, DownloadIcon},
+  components: {TableIcon, qrIcon, ocrIcon, omrIcon, cutIcon, anchorIcon, cancelIcon, readAnchorIcon, menuIcon, MoveIcon, PlayIcon, DownloadIcon, FormIcon, CheckIcon},
 
   data: function () {
     return {
       isPanelCollapsed: false,
       isMoveActivated: false,
-      nameCounter: 0
+      nameCounter: 0,
+      currentCel: ''
     }
   },
 
@@ -140,6 +150,23 @@ export default {
       let wb = utils.book_new();
       utils.book_append_sheet(wb, ws, "results");
       writeFile(wb,filename)
+    },
+
+    checkNextPossibleError(){
+      for (let [,row] of this.results.entries()){
+        for (let [colName,area] of Object.entries(row)){
+          let celTableId = area.formId + colName
+          if((area.value === '' || area.value.toLowerCase() === 'error' || area.value.includes(',')) && celTableId !== this.currentCel){
+            let celElmnt = document.getElementById(celTableId);
+            console.log(celElmnt)
+            celElmnt.focus();
+            this.currentCel = celTableId
+            return
+          }
+        }
+      }
+      this.currentCel = ''
+      alert('No erros found')
     }
   },
 

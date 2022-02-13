@@ -18,6 +18,7 @@ export const store = createStore({
             totalForms: 0,
             isFromCamMode: false,
             anchors: {hasAnchors: false, anchorType: '', areAnchorsRead: false},
+            showResults: false
         }
     },
 

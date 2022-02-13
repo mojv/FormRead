@@ -40,14 +40,6 @@ export default {
   components: {addIcon},
   mixins: [helpers],
   methods: {
-    selectForm(formId) {
-      this.$store.commit('selectForm', formId)
-      if(document.body.offsetWidth < 700){
-        this.$emit('collapse-columns', 'scrollList')
-      }
-      this.updateCanvas()
-      this.updateOmrBubbles(true)
-    },
     deleteForm(formId) {
       if (confirm(`Do you really want to delete form ${formId}?`)) {
         if(this.formsCant !== 1){

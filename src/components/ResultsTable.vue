@@ -23,6 +23,7 @@
                       v-if="result[columnName].type === 'select'"
                       :value="result[columnName].value"
                       class="w-full bg-white text-grey-darkest font-thin h-full text-center"
+                      :id="result[columnName].formId + columnName"
                   >
                     <option v-if="!result[columnName].options.includes(result[columnName].value)">{{ result[columnName].value }}</option>
                     <option v-for="option in result[columnName].options">{{ option }}</option>
@@ -33,8 +34,11 @@
                       v-if="result[columnName].type === 'text'"
                       :value="result[columnName].value"
                       class="w-32  bg-white text-grey-darkest font-thin h-full px-2"
+                      :id="result[columnName].formId + columnName"
                   />
-                  <p class="bg-white text-grey-darkest font-thin w-full h-full px-8" v-if="result[columnName].type === 'id'">{{ result[columnName].value }}e</p>
+                  <p @click="showForm(result[columnName].value)" class="bg-white text-grey-darkest font-thin w-full h-full px-8 cursor-pointer" v-if="result[columnName].type === 'id'">
+                    {{ result[columnName].value }}
+                  </p>
                 </td>
               </template>
             </tr>
@@ -44,7 +48,7 @@
         </div>
       </div>
     </div>
-    <div class="pt-2 w-full h-1/5 rounded-lg flex justify-center items-center bg-gray-100 overflow-auto">
+    <div v-if="selectAreaSrc" class="pt-2 w-full h-1/5 rounded-lg flex justify-center items-center bg-gray-100 overflow-auto">
       <img :src="selectAreaSrc" class="rounded-lg shadow-lg m-auto ">
     </div>
   </div>
@@ -74,10 +78,10 @@ export default {
       let firstBubble = this.$store.state.forms[result.formId].omrQuestions[result.areaName][result.questionIndex][0]
       let lastBubble = this.$store.state.forms[result.formId].omrQuestions[result.areaName][result.questionIndex].slice(-1)[0]
       let questionArea = {
-        top: firstBubble.top - firstBubble.height/3,
-        left: firstBubble.left - firstBubble.width/3,
-        width: (lastBubble.left - firstBubble.left) + firstBubble.width*(5/3),
-        height: (lastBubble.top - firstBubble.top) + firstBubble.height*(5/3)
+        top: firstBubble.top - firstBubble.height/2,
+        left: firstBubble.left - firstBubble.width/2,
+        width: (lastBubble.left - firstBubble.left) + firstBubble.width*2,
+        height: (lastBubble.top - firstBubble.top) + firstBubble.height*2
       }
       let [areaCanvas, _] = this.$store.state.forms[result.formId].getAreaCanvas(questionArea)
       this.selectAreaSrc = areaCanvas.toDataURL()
@@ -88,6 +92,10 @@ export default {
     overrideOMRValue(e, result){
       let optionIndex = result.options.findIndex((element) => element === e.target.value)
       this.$store.state.forms[result.formId].omrQuestions[result.areaName][result.questionIndex][optionIndex]['forceAnswer'] = true
+    },
+    showForm(formId){
+      this.showResultsTable()
+      this.selectForm(formId)
     }
   }
 }
