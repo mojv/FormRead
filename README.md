@@ -146,8 +146,8 @@ to save the changes made to your form:
             }
         }    
 
-This is meant only for you to display some alerts to your users in case you are requiring mandatory area fields to be 
-created:
+    This is meant only for you to display some alerts to your users in case you are requiring mandatory area fields to be 
+    created:
 
 When a user click on download results, the `getResults` method will be triggered, there you'll get the result data
 in a `JSON` format
