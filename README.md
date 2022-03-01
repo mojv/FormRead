@@ -5,7 +5,8 @@
 # FormRead
 <h2>Free OMR - OCR and BCR web software 
 <h2>visit <a href="https://formread.org/">FormRead Page</a></h2>
-### This Github project is meant only for documentation purposes and issues management
+    
+This Github project is meant only for documentation purposes and issues management
 
 # REST API Documentation
 
