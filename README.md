@@ -119,32 +119,32 @@ to save the changes made to your form:
 - the `schema` variable will let you know the fields created so far:
 
 
-    {
-        "file_name": {
-            "type": "text"
-        },
-        "BCR-0": {
-            "type": "text"
-        },
-        "OCR-1": {
-            "type": "text"
-        },
-        "OMR-2-0": {
-            "type": "select",
-            "options": ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"],
-            "questionIndex": "0"
-        },
-        "OMR-2-1": {
-            "type": "select",
-            "options": ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"],
-            "questionIndex": "1"
-        },
-        "OMR-2-2": {
-            "type": "select",
-            "options": ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"],
-            "questionIndex": "2"
-        }
-    }    
+        {
+            "file_name": {
+                "type": "text"
+            },
+            "BCR-0": {
+                "type": "text"
+            },
+            "OCR-1": {
+                "type": "text"
+            },
+            "OMR-2-0": {
+                "type": "select",
+                "options": ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"],
+                "questionIndex": "0"
+            },
+            "OMR-2-1": {
+                "type": "select",
+                "options": ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"],
+                "questionIndex": "1"
+            },
+            "OMR-2-2": {
+                "type": "select",
+                "options": ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"],
+                "questionIndex": "2"
+            }
+        }    
 
 This is meant only for you to display some alerts to your users in case you are requiring mandatory area fields to be 
 created:
