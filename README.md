@@ -13,15 +13,15 @@ For enterprise uses the API can be used by generating and Bearer Auth token.
 
 Login in the FormRead <a href='https://formread.org/dashboard'>dashboard</a>. and access the API Token option
 
-![img_1.png](img_1.png)
+![image](https://user-images.githubusercontent.com/23704874/156108437-7e1ecc1b-5d82-4e47-a08b-31f98e7b525d.png)
 
 Create the API tokens to allow third-party services to authenticate with our application on your behalf
 
-![img_2.png](img_2.png)
+![image](https://user-images.githubusercontent.com/23704874/156108468-d29b4c82-f1d6-4752-ab7f-ce89fd0d4c13.png)
 
 Copy the token generated in a secure place (it will only be shown once)
 
-![img_3.png](img_3.png)
+![image](https://user-images.githubusercontent.com/23704874/156108490-7209c634-0b16-4d6f-8af9-50738382593f.png)
 
 
 ##Create New Form
@@ -68,7 +68,7 @@ Copy the token generated in a secure place (it will only be shown once)
 
 the `thumbnail` a src url that contains general img form:
 
-![img_4.png](img_4.png)
+![image](https://user-images.githubusercontent.com/23704874/156108528-c63f22b6-3f3b-4e50-899f-3613bcdb0b2f.png)
 
 
 ## Edit a Form
