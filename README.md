@@ -192,4 +192,6 @@ in a `JSON` format
     1
 
 
-
+## Postman Collection Link
+    
+   https://www.getpostman.com/collections/42902089286ca96b2283
