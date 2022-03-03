@@ -29,9 +29,9 @@ Copy the token generated in a secure place (it will only be shown once)
 
 ### Request
 
-`POST /api/forms/`
+`POST /api/forms`
 
-    curl --location --request POST 'https://formread.org/api/forms/' \
+    curl --location --request POST 'https://formread.org/api/forms' \
         --header 'Accept: application/json' \
         --header 'Authorization: Bearer grqr7w3pZ4u7Kif7CJpICzhBitOFXbq4VvXfGvMA' \
         --form 'form_name="new form"'
