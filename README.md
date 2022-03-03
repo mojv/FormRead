@@ -113,7 +113,7 @@ Create also a script that listen to the events of the iframe like in the example
     </body>
     </html>
 
-When user save the, the `editForm` method will be triggered, there you have access to 2 varaibles:
+When users click on the save button, the `editForm` method will be triggered, there you have access to 2 varaibles:
 
 - `formData` variable will contain the encoded form attributes that can be sent using the [Update](#update-form) 
 to save the changes made to your form:
@@ -147,11 +147,11 @@ to save the changes made to your form:
             }
         }    
 
-    This is meant only for you to display some alerts to your users in case you are requiring mandatory area fields to be 
+    The `schema` variable is meant only for you to display some alerts to your users in case you are requiring mandatory area fields to be 
     created:
 
 When a user click on download results, the `getResults` method will be triggered, there you'll get the result data
-in a `JSON` format
+in a `JSON` format so you can store then in your system
 
 ## Update Form
 
