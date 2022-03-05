@@ -8,7 +8,7 @@
     
 This Github project is meant only for documentation purposes and issues management
 
-# REST API Documentation
+# OMR API Documentation
 
 For enterprise uses the API can be used by generating and Bearer Auth token.
 
