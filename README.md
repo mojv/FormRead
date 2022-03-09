@@ -88,7 +88,7 @@ Create also a script that listen to the events of the iframe like in the example
     </head>
     <body style="height: 100%">
 
-        <iframe src="https://formread.org/api/forms/8/edit/po75a0pqut4fa16XWgdEP2qRDwnhgfiqP3H0Dij6" style="height: 100%; width: 100%"></iframe>
+        <iframe src="https://formread.org/api/forms/{form_id}/edit/{iframe_token}" style="height: 100%; width: 100%"></iframe>
 
         <script>
             var eventMethod = window.addEventListener ? "addEventListener" : "attachEvent";
