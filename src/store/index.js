@@ -7,6 +7,7 @@ export const store = createStore({
 
     state() {
         return {
+            formName: 'Untitled Report',
             forms: {},
             selectedFormId: "",
             formReadAreas: {},
@@ -18,7 +19,8 @@ export const store = createStore({
             totalForms: 0,
             isFromCamMode: false,
             anchors: {hasAnchors: false, anchorType: '', areAnchorsRead: false},
-            showResults: false
+            showResults: false,
+            savedFormId: ''
         }
     },
 
@@ -81,6 +83,9 @@ export const store = createStore({
                 state.formReadAreas[area.name].omrThreshold = 0.4
                 state.formReadAreas[area.name].omrOrientation = 'horizontal'
                 state.formReadAreas[area.name].autoBubbleSize = true
+            }
+            if(area.type === 'BCR' && isCreate){
+                state.formReadAreas[area.name].bcrType = 'QR_CODE'
             }
         },
         deleteFormReadArea(state, areaName) {

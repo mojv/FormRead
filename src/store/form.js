@@ -1,6 +1,7 @@
 import {store} from "./index";
 import Tesseract from 'tesseract.js';
-import { BrowserQRCodeReader } from '@zxing/library';
+import {Html5Qrcode} from "html5-qrcode"
+import {Html5QrcodeSupportedFormats} from "html5-qrcode"
 
 // import {imread, MatVector, Mat, cvtColor, COLOR_RGBA2GRAY, threshold, THRESH_BINARY, findContours, RETR_EXTERNAL, RETR_LIST, CHAIN_APPROX_SIMPLE, Scalar, drawContours, LINE_8, contourArea, arcLength, approxPolyDP, Point, matFromArray, Size, getPerspectiveTransform, warpPerspective, INTER_LINEAR, BORDER_CONSTANT, imshow, CV_32FC2, boundingRect} from 'opencv.js';
 
@@ -17,22 +18,15 @@ export default class formClass {
         this.results = {}
         if(fromCam){
             store.commit('mutateProperty', ['anchors', {hasAnchors: true, anchorType: 'corners'}])
-            this.setCanvasFromSrc(src, false).then(async () => {
-                await this.processAnchors
-                this.markAsSelected(VueContext, markAsSelected)
-            })
-        }else{
-            this.setCanvasFromSrc(src, false).then(() => this.markAsSelected(VueContext, markAsSelected))
         }
+        this.setCanvasFromSrc(src, false).then(() => this.markAsSelected(VueContext, markAsSelected))
     }
 
     markAsSelected(VueContext, markAsSelected){
         store.commit('mutateProperty', ['totalForms', Object.keys(store.state.forms).length])
         if(markAsSelected){
             store.commit('selectForm', this.id )
-            VueContext.loadFabricAreasToCanvas()
-            VueContext.updateCanvas()
-            VueContext.updateOmrBubbles(true)
+            VueContext.updateCanvas(true)
         }
     }
 
@@ -364,7 +358,6 @@ export default class formClass {
             'eng',
         )
 
-        console.log(text)
         this.results[area.name] = text
         store.commit('updateFormProp', [this.id, 'results', this.results])
 
@@ -372,23 +365,33 @@ export default class formClass {
 
     async bcrRead(area){
         let [areaCanvas, ] = this.getAreaCanvas(area)
-        const codeReader = new BrowserQRCodeReader()
         let canvasZoom = document.createElement('canvas')
         canvasZoom.width = 220
-        canvasZoom.height = 220
+        canvasZoom.height = areaCanvas.height* 220/areaCanvas.width
         let context = canvasZoom.getContext('2d');
         context.drawImage(areaCanvas, 0, 0, canvasZoom.width, canvasZoom.height);
-        let src = canvasZoom.toDataURL()
-        codeReader.decodeFromImage(undefined, src).then((result)=> {
-            this.results[area.name] = result.text
-            store.commit('updateFormProp', [this.id, 'results', this.results])
-        }, (err)=> {
-            console.error(err);
-            this.results[area.name] = 'Code not recognized'
-            store.commit('updateFormProp', [this.id, 'results', this.results])
-        }).catch((err)=> {
-            console.error(err);
+        let formatsToSupport = [Html5QrcodeSupportedFormats[area.bcrType]];
+        let file = this.dataURLtoFile(canvasZoom.toDataURL())
+
+        const html5QrCode = new Html5Qrcode(/* element id */
+            "reader",
+            { formatsToSupport: formatsToSupport }
+        );
+
+        html5QrCode.scanFile(file, true).then(decodedText => {
+            this.results[area.name] = decodedText
+        }).catch(err => {
+            this.results[area.name] = 'error'
         });
+    }
+
+    dataURLtoFile(dataurl) {
+        var arr = dataurl.split(','), mime = arr[0].match(/:(.*?);/)[1],
+            bstr = atob(arr[1]), n = bstr.length, u8arr = new Uint8Array(n);
+        while(n--){
+            u8arr[n] = bstr.charCodeAt(n);
+        }
+        return new File([u8arr], 'filename', {type:mime});
     }
 
     omrRead(areaName, isSetUp, orientation){
@@ -484,24 +487,28 @@ export default class formClass {
         }
         // filter only really similar bubbles
         boundingRects = boundingRects.filter((rect)=>{
-            let cond1 = rect.width > store.state.formReadAreas[area.name]['omrBubblesDimensions'].width*0.8
-            let cond2 = rect.width < store.state.formReadAreas[area.name]['omrBubblesDimensions'].width*1.2
-            let cond3 = rect.height > store.state.formReadAreas[area.name]['omrBubblesDimensions'].height*0.8
-            let cond4 = rect.height < store.state.formReadAreas[area.name]['omrBubblesDimensions'].height*1.2
+            let cond1 = rect.width > store.state.formReadAreas[area.name]['omrBubblesDimensions'].width*0.6
+            let cond2 = rect.width < store.state.formReadAreas[area.name]['omrBubblesDimensions'].width*1.4
+            let cond3 = rect.height > store.state.formReadAreas[area.name]['omrBubblesDimensions'].height*0.6
+            let cond4 = rect.height < store.state.formReadAreas[area.name]['omrBubblesDimensions'].height*1.4
 
             return cond1 && cond2 && cond3 && cond4
         })
         // delete duplicate bubbles
-        boundingRects = boundingRects.filter((item, pos) => {
-            let count = 0
-            for (let rect of boundingRects){
-                let cond1 = Math.abs(item.left - rect.left) < item.width/2
-                let cond2 = Math.abs(item.top - rect.top) < item.height/2
-                if(cond1 && cond2){
-                    count++
+
+        for(let [pos1, rect1] of boundingRects.entries()){
+            for(let [pos2, rect2]  of boundingRects.entries()){
+                if(pos1 !== pos2 && boundingRects[pos1].repeat === undefined){
+                    let cond1 = Math.abs(rect1.left - rect2.left) < rect1.width/2
+                    let cond2 = Math.abs(rect1.top - rect2.top) < rect1.height/2
+                    if(cond1 && cond2){
+                        boundingRects[pos2]['repeat'] = true
+                    }
                 }
             }
-            return count < 2;
+        }
+        boundingRects = boundingRects.filter((rect)=>{
+            return rect.repeat === undefined
         })
 
         return boundingRects

@@ -34,10 +34,7 @@
 
 export default {
   name: "AppHeader",
-  components: {
-    // Link,
-    // JetApplicationLogo
-  },
+  // components: {Link, JetApplicationLogo},
   data() {
     return {
       showMenu: false

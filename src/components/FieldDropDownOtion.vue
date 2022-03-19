@@ -9,6 +9,36 @@
         </div>
       </header>
       <div class="tab-content" v-show="selected">
+        <div v-if="area.type === 'BCR'" class="pl-8 pr-8 pb-5 text-grey-darkest flex flex-wrap" >
+              <div class="w-1/2 px-3 mb-6 md:mb-0">
+                  <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" for="grid-state">
+                      Barcode Type
+                  </label>
+                  <div class="relative">
+                      <select :value="area.bcrType" @change="changeBcrType($event)"
+                              class="form-select appearance-none block w-full px-3 py-1.5 text-base font-normal text-gray-700 bg-white bg-clip-padding bg-no-repeat border border-solid border-gray-300 rounded transition ease-in-out m-0 focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none"
+                              aria-label="Default select example">
+                          <option value="QR_CODE">QR CODE</option>
+                          <option value="AZTEC">AZTEC</option>
+                          <option value="CODABAR">CODABAR</option>
+                          <option value="CODE_39">CODE 39</option>
+                          <option value="CODE_93">CODE 93</option>
+                          <option value="CODE_128">CODE 128</option>
+                          <option value="DATA_MATRIX">DATA MATRIX</option>
+                          <option value="MAXICODE">MAXICODE</option>
+                          <option value="ITF">ITF</option>
+                          <option value="EAN_13">EAN 13</option>
+                          <option value="EAN_8">EAN 8</option>
+                          <option value="PDF_417">PDF 417</option>
+                          <option value="RSS_14">RSS 14</option>
+                          <option value="RSS_EXPANDED">RSS EXPANDED</option>
+                          <option value="UPC_A">UPC A</option>
+                          <option value="UPC_E">UPC E</option>
+                          <option value="UPC_EAN_EXTENSION">UPC EAN EXTENSION</option>
+                      </select>
+                  </div>
+              </div>
+          </div>
         <div v-if="area.type === 'OMR'" class="pl-8 pr-8 pb-5 text-grey-darkest flex flex-wrap" >
           <div class="w-1/2 px-3 mb-6 md:mb-0">
             <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" for="grid-state">
@@ -21,11 +51,6 @@
                 <option value="horizontal">horizontal</option>
                 <option value="vertical">vertical</option>
               </select>
-              <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
-                <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-                  <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/>
-                </svg>
-              </div>
             </div>
           </div>
           <div class="w-1/2 px-3 mb-6 md:mb-0">
@@ -122,6 +147,9 @@ export default {
         }
       });
       this.$store.commit('updateAreaName', [newName, this.area.name])
+    },
+    changeBcrType(e) {
+        store.state.formReadAreas[this.area.name]['bcrType'] = e.target.value
     },
     changeOmrOrientation(e) {
       store.state.formReadAreas[this.area.name]['omrOrientation'] = e.target.value

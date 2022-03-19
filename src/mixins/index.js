@@ -16,7 +16,7 @@ export default {
         showResultsTable(){
             this.$store.commit('mutateProperty', ['showResults', !this.showResults])
         },
-        updateCanvas() {
+        updateCanvas(shouldReloadAreas) {
             fabric.Image.fromURL(this.selectedFormSrc, img => {
                 let height = document.getElementById('FormEditorArea').offsetHeight
                 let width  = document.body.offsetWidth
@@ -37,6 +37,10 @@ export default {
                     scaleY: canvas.height / img.height
                 });
                 this.drawAnchorLines()
+                if(shouldReloadAreas){
+                    this.loadFabricAreasToCanvas()
+                    this.updateOmrBubbles(true)
+                }
             });
         },
         deleteAllAnchorObjects(onlyCanvas) {
@@ -56,6 +60,13 @@ export default {
             this.$store.commit('mutateProperty', ['showLoadingModal', true])
             this.totalFormsUploaded = files.length
             this.counterFormUploaded = 0
+            let counter  = 0
+            let totalFiles = files.length
+            if(this.$page.props.user === null && files.length > 10){
+                this.totalFormsUploaded = 10
+                totalFiles = 10
+            }
+
             for (let file of files) {
                 var reader = new FileReader()
 
@@ -72,6 +83,10 @@ export default {
                 })(file, context, markAsSelected)
                 markAsSelected = false
                 reader.readAsDataURL(file)
+                counter++
+                if(counter === totalFiles){
+                    break
+                }
             }
         },
         drawAnchorLines: function () {
@@ -208,7 +223,26 @@ export default {
             });
             for(let [_,area] of Object.entries(this.formReadAreas)){
               if(!area.isAnchor){
-                  this.$globals.canvas.add(area.fabricArea);
+                  let fabricArea = this.getFabricRect(
+                      area.left * this.canvasWidth,
+                      area.top * this.canvasHeight,
+                      area.width * this.canvasWidth,
+                      area.height * this.canvasHeight,
+                      area.fill
+                  )
+                  fabricArea.toObject = (function (toObject) {
+                      return function () {
+                          return fabric.util.object.extend(toObject.call(this), {
+                              name: this.name,
+                              type: this.type,
+                              isAnchor: this.isAnchor
+                          });
+                      };
+                  })(fabricArea.toObject);
+                  fabricArea.name = area.name
+                  fabricArea.type = area.type
+                  fabricArea.isAnchor = area.isAnchor
+                  this.$globals.canvas.add(fabricArea)
               }
             }
         },
@@ -222,6 +256,14 @@ export default {
     },
 
     computed: {
+        formName: {
+            get: function () {
+                return this.$store.state.formName
+            },
+            set(value){
+                this.$store.commit('mutateProperty', ['formName', value])
+            }
+        },
         formReadAreas: function () {
             return this.$store.state.formReadAreas
         },
@@ -293,7 +335,12 @@ export default {
         },
         results: function (){
             let results = []
-            let areas = Object.filter(this.formReadAreas, area => !area.isAnchor)
+            let areas = {}
+            for(let [areaName, area] of Object.entries(this.formReadAreas)){
+                if(!area.isAnchor){
+                    areas[areaName] = area
+                }
+            }
             let sortedAreas = Object.keys(areas).map((key) => areas[key])
             sortedAreas = sortedAreas.sort((area1, area2) => {
                 return area1.columnPosition > area2.columnPosition ? 1 : -1

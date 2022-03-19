@@ -2,6 +2,9 @@
   <div class="w-full py-1 overflow-y-auto h-full shadow-md bg-white overflow-y-auto h-full" id='FormOptionsPanel'>
     <section class="shadow row">
       <div class="tabs">
+        <header class="flex justify-between items-center h-16 shadow-md mb-2">
+            <input class="text-grey-darkest font-thin text-xl w-full h-full px-8" v-model="formName">
+        </header>
         <draggable
             tag="ul"
             v-model="formReadAreasSortable"

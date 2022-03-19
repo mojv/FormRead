@@ -17,7 +17,7 @@
 import {fabric} from "fabric";
 import loadingModal from "./loadingModal.vue";
 import helpers from "../mixins"
-import AnchorZoomWindow from "../components/AnchorZoomWindow.vue"
+import AnchorZoomWindow from "./AnchorZoomWindow.vue"
 import {store} from "../store";
 
 export default {
@@ -50,6 +50,7 @@ export default {
         }
       });
       this.$globals.canvas.discardActiveObject().renderAll()
+      this.updateOmrBubbles(false)
     },
     makeLine(coords) {
       return new fabric.Line(coords, {
