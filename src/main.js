@@ -17,10 +17,10 @@ app.provide('$globals', globals)
 
 app.mount('#app');
 
-// Enable navigation prompt
-window.onbeforeunload = function() {
-    return true;
-};
+// // Enable navigation prompt
+// window.onbeforeunload = function() {
+//     return true;
+// };
 
 //Global prototype function for filtering objects
 Object.filter = (obj, predicate) =>

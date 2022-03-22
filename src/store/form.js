@@ -10,7 +10,7 @@ export default class formClass {
         this.id = formId
         this.src_original = src;
         this.src = '';
-        this.canvas = null
+        this.image = null
         this.anchors = {}
         this.isAnchorProcessed = false
         this.hasError = false
@@ -30,38 +30,49 @@ export default class formClass {
         }
     }
 
+    getFormCanvas(){
+        let formCanvas = document.createElement('canvas')
+        formCanvas.height = this.image.height; formCanvas.width = this.image.width
+        let ctx = formCanvas.getContext('2d');
+        ctx.drawImage(this.image,0,0);
+        return formCanvas
+    }
+
     async setCanvasFromSrc(src, isAnchorError){
         this.src = src
-        this.canvas = await document.createElement('canvas')
         let image = new Image()
         image.src = src
         await image.decode();
-        this.canvas.height = image.height; this.canvas.width = image.width
-        let ctx = this.canvas.getContext('2d');
-        await ctx.drawImage(image,0,0);
+        this.image = image
         if(store.state.anchors.hasAnchors && !this.isAnchorProcessed && !isAnchorError){
             await this.processAnchors()
         }
     }
 
-    async detectSheetCorners() {
-        let cv_src = cv.imread(this.canvas)
-        let imgArea = this.canvas.height * this.canvas.width
+    detectSheetCorners(formCanvas = null) {
+        if(formCanvas === null){
+            formCanvas = this.getFormCanvas()
+        }
+        let cv_src = cv.imread(formCanvas)
         let [contours, hierarchy] = this.getContours(cv_src)
 
-        this.findExternalSheetCorners(contours)
+        this.findExternalSheetCorners(contours, formCanvas)
         cv_src.delete();
         contours.delete();
         hierarchy.delete();
     }
 
-    async updateSrc(dst) {
+    async updateSrc(dst, formCanvas) {
         // display images in canvas
-        await cv.imshow(this.canvas, dst);
-        let new_src = await this.canvas.toDataURL()
+        cv.imshow(formCanvas, dst);
+        let new_src = formCanvas.toDataURL()
         store.commit('updateFormProp', [this.id, 'src', new_src])
         store.commit('updateFormProp', [this.id, 'isAnchorProcessed', true])
         dst.delete()
+        let image = new Image()
+        image.src = new_src
+        await image.decode();
+        this.image = image
     }
 
     getContours(src, isCanny = false) {
@@ -118,7 +129,7 @@ export default class formClass {
         return false;
     }
 
-    findExternalSheetCorners(contours) {
+    findExternalSheetCorners(contours, formCanvas) {
         let foundContour = new cv.MatVector();
         let sortableContours = this.sortContours(contours);
 
@@ -152,8 +163,8 @@ export default class formClass {
         }).slice(0, 5);
 
         for(let [index, item] of cornerArray.entries()){
-            let left = item.corner.x / this.canvas.width
-            let top =  item.corner.y / this.canvas.height
+            let left = item.corner.x / formCanvas.width
+            let top =  item.corner.y / formCanvas.height
             this.anchors['anchor-' + index] = [left , top]
         }
         store.commit('updateFormProp', [this.id, 'anchors', this.anchors])
@@ -215,19 +226,22 @@ export default class formClass {
         return transformed;
     }
 
-    async findAnchors(areaName) {
+    findAnchors(areaName, formCanvas = null) {
         if(this.hasError){
             return
         }
+        if(formCanvas === null){
+            formCanvas = this.getFormCanvas()
+        }
         let area = store.state.formReadAreas[areaName]
-        let [areaCanvas, imgArea] = this.getAreaCanvas(area)
-        let cv_src = await cv.imread(areaCanvas)
+        let [areaCanvas, imgArea] = this.getAreaCanvas(area, formCanvas)
+        let cv_src = cv.imread(areaCanvas)
         let [contours, hierarchy]  = this.getContours(cv_src)
         let boundingRects = this.filterContoursByArea(contours,0, imgArea * 0.95)
 
         if(boundingRects.length > 0){
-            let left = area.left + (boundingRects[0].left + boundingRects[0].width/2) / this.canvas.width
-            let top =  area.top  + (boundingRects[0].top + boundingRects[0].height/2)/ this.canvas.height
+            let left = area.left + (boundingRects[0].left + boundingRects[0].width/2) / formCanvas.width
+            let top =  area.top  + (boundingRects[0].top + boundingRects[0].height/2)/ formCanvas.height
             this.anchors[areaName] = [left , top]
         }else {
             delete this.anchors[areaName]
@@ -237,27 +251,28 @@ export default class formClass {
         cv_src.delete(); contours.delete(); hierarchy.delete();
     }
 
-    async processAnchors(){
+    processAnchors(){
+        let formCanvas = this.getFormCanvas()
         if(Object.keys(this.anchors).length === 0){
             if(store.state.anchors.anchorType === 'corners'){
-                await this.detectSheetCorners()
+                this.detectSheetCorners(formCanvas)
             }else{
-                await this.findAnchors('anchor-0')
-                await this.findAnchors('anchor-1')
-                await this.findAnchors('anchor-3')
-                await this.findAnchors('anchor-2')
+                this.findAnchors('anchor-0', formCanvas)
+                this.findAnchors('anchor-1', formCanvas)
+                this.findAnchors('anchor-3', formCanvas)
+                this.findAnchors('anchor-2', formCanvas)
             }
         }
         if(Object.keys(this.anchors).length === 4){
-            let corner1 = new cv.Point(this.anchors['anchor-0'][0]*this.canvas.width, this.anchors['anchor-0'][1]*this.canvas.height);
-            let corner2 = new cv.Point(this.anchors['anchor-1'][0]*this.canvas.width, this.anchors['anchor-1'][1]*this.canvas.height);
-            let corner3 = new cv.Point(this.anchors['anchor-3'][0]*this.canvas.width, this.anchors['anchor-3'][1]*this.canvas.height);
-            let corner4 = new cv.Point(this.anchors['anchor-2'][0]*this.canvas.width, this.anchors['anchor-2'][1]*this.canvas.height);
+            let corner1 = new cv.Point(this.anchors['anchor-0'][0]*formCanvas.width, this.anchors['anchor-0'][1]*formCanvas.height);
+            let corner2 = new cv.Point(this.anchors['anchor-1'][0]*formCanvas.width, this.anchors['anchor-1'][1]*formCanvas.height);
+            let corner3 = new cv.Point(this.anchors['anchor-3'][0]*formCanvas.width, this.anchors['anchor-3'][1]*formCanvas.height);
+            let corner4 = new cv.Point(this.anchors['anchor-2'][0]*formCanvas.width, this.anchors['anchor-2'][1]*formCanvas.height);
 
             let cornerArray = [{corner: corner1}, {corner: corner2}, {corner: corner3}, {corner: corner4}];
-            let cv_src = await cv.imread(this.canvas)
+            let cv_src = cv.imread(formCanvas)
             let dst = this.fourPointsTransform(cv_src, cornerArray)
-            await this.updateSrc(dst)
+            this.updateSrc(dst, formCanvas)
         }else {
             for(let name of ['anchor-0','anchor-1','anchor-3','anchor-2']){
                 if(this.anchors[name] === undefined){
@@ -271,20 +286,23 @@ export default class formClass {
 
     }
 
-    getAreaCanvas(area) {
-        let width = area.width * this.canvas.width
-        let height = area.height * this.canvas.height
-        let left = area.left * this.canvas.width
-        let top =  area.top * this.canvas.height
+    getAreaCanvas(area, formCanvas = null) {
+        if(formCanvas === null){
+            formCanvas = this.getFormCanvas()
+        }
+        let width = area.width * formCanvas.width
+        let height = area.height * formCanvas.height
+        let left = area.left * formCanvas.width
+        let top =  area.top * formCanvas.height
 
-        let canvasArea = this.getCanvasCut(left, top, width, height)
+        let canvasArea = this.getCanvasCut(left, top, width, height, formCanvas)
 
         let imgArea = width * height
         return [canvasArea, imgArea]
     }
 
-    getCanvasCut(left, top, width, height){
-        let ctx = this.canvas.getContext('2d');
+    getCanvasCut(left, top, width, height, formCanvas){
+        let ctx = formCanvas.getContext('2d');
 
         let areaImgData = ctx.getImageData(left, top, width, height);
         let canvasArea = document.createElement('canvas');
@@ -309,11 +327,12 @@ export default class formClass {
     }
 
     getAnchorZoomSrc(centerLeft, centerTop){
-        let width = this.canvas.width * 0.05
-        let left = centerLeft * this.canvas.width - (width/2)
-        let top =  centerTop * this.canvas.height - (width/2)
 
-        let canvasArea = this.getCanvasCut(left, top, width, width)
+        let width = formCanvas.width * 0.05
+        let left = centerLeft * formCanvas.width - (width/2)
+        let top =  centerTop * formCanvas.height - (width/2)
+
+        let canvasArea = this.getCanvasCut(left, top, width, width, formCanvas)
         let ctx_area = canvasArea.getContext('2d');
         ctx_area.beginPath();
         ctx_area.strokeStyle = "red"; // Green path
@@ -327,19 +346,20 @@ export default class formClass {
     }
 
     async formRead(){
+        let formCanvas = this.getFormCanvas()
         for(let [, area] of Object.entries(store.state.formReadAreas)){
             if (area.type === 'OCR'){
-                this.ocrRead(area)
+                this.ocrRead(area, formCanvas)
             }else if(area.type === 'BCR'){
-                this.bcrRead(area)
+                this.bcrRead(area, formCanvas)
             }else if(area.type === 'OMR'){
-                this.omrRead(area.name, false, store.state.formReadAreas[area.name].omrOrientation)
+                this.omrRead(area.name, false, store.state.formReadAreas[area.name].omrOrientation, formCanvas)
             }
         }
     }
 
-    async ocrRead(area){
-        let [areaCanvas, ] = this.getAreaCanvas(area)
+    async ocrRead(area, formCanvas){
+        let [areaCanvas, ] = this.getAreaCanvas(area, formCanvas)
         // var worker = Tesseract.createWorker();
         // await worker.load();
         // await worker.loadLanguage('eng');
@@ -363,8 +383,8 @@ export default class formClass {
 
     }
 
-    async bcrRead(area){
-        let [areaCanvas, ] = this.getAreaCanvas(area)
+    async bcrRead(area, formCanvas){
+        let [areaCanvas, ] = this.getAreaCanvas(area, formCanvas)
         let canvasZoom = document.createElement('canvas')
         canvasZoom.width = 220
         canvasZoom.height = areaCanvas.height* 220/areaCanvas.width
@@ -394,10 +414,13 @@ export default class formClass {
         return new File([u8arr], 'filename', {type:mime});
     }
 
-    omrRead(areaName, isSetUp, orientation){
+    omrRead(areaName, isSetUp, orientation, formCanvas = null){
+        if(formCanvas === null){
+            formCanvas = this.getFormCanvas()
+        }
         let area = store.state.formReadAreas[areaName]
         if(isSetUp || this.omrQuestions[area.name] === undefined){
-            if(!this.findOMRBubbles(area, orientation, isSetUp)){
+            if(!this.findOMRBubbles(area, orientation, isSetUp, formCanvas)){
                 store.state.formReadAreas[areaName]['omrQuestions'] = []
                 store.state.formReadAreas[areaName]['questionLabels'] = []
                 store.state.formReadAreas[areaName]['firstQuestionBubbleImgs'] = []
@@ -405,7 +428,7 @@ export default class formClass {
             }
             for(let [i, question] of this.omrQuestions[area.name].entries()){
                 for(let [j, option] of question.entries()){
-                    let [areaCanvas, imgArea] = this.getAreaCanvas(option)
+                    let [areaCanvas, imgArea] = this.getAreaCanvas(option, formCanvas)
                     let cv_src = cv.imread(areaCanvas)
                     this.omrQuestions[area.name][i][j]['blackPixelsRatio'] = this.getBlackPixelsRatio(cv_src, imgArea, areaCanvas)
                     this.omrQuestions[area.name][i][j]['forceAnswer'] = false
@@ -422,12 +445,12 @@ export default class formClass {
             if(currentLabels === undefined || currentLabels.length !== optionsLength){
                 store.state.formReadAreas[areaName]['questionLabels'] = Array.from(Array(optionsLength).keys()).map((val) =>  String(val))
             }
-            store.state.formReadAreas[areaName]['firstQuestionBubbleImgs'] = this.getFirstQuestionBubbleImgs(areaName)
+            store.state.formReadAreas[areaName]['firstQuestionBubbleImgs'] = this.getFirstQuestionBubbleImgs(areaName, formCanvas)
         }
     }
 
-    findOMRBubbles(area, orientation, isSetUp){
-        let [areaCanvas, imgArea] = this.getAreaCanvas(area)
+    async findOMRBubbles(area, orientation, isSetUp, formCanvas){
+        let [areaCanvas, imgArea] = this.getAreaCanvas(area, formCanvas)
         let cv_src = cv.imread(areaCanvas)
         let [contours, hierarchy] = this.getContours(cv_src, true)
         if(contours.size() === 0){
@@ -437,10 +460,10 @@ export default class formClass {
         boundingRects = this.filterBubbles(boundingRects, area, isSetUp)
         this.omrQuestions[area.name] = this.groupBubblesByQuestion(boundingRects, orientation)
         boundingRects.map((rect) => {
-            rect.left = area.left + rect.left / this.canvas.width;
-            rect.top = area.top + rect.top / this.canvas.height;
-            rect.width = rect.width / this.canvas.width;
-            rect.height = rect.height / this.canvas.height;
+            rect.left = area.left + rect.left / formCanvas.width;
+            rect.top = area.top + rect.top / formCanvas.height;
+            rect.width = rect.width / formCanvas.width;
+            rect.height = rect.height / formCanvas.height;
             rect.blackPixelsRatio = 0
             return rect
         })
@@ -525,10 +548,10 @@ export default class formClass {
         return blackPixelsRatio
     }
 
-    getFirstQuestionBubbleImgs(areaName) {
+    getFirstQuestionBubbleImgs(areaName, formCanvas) {
         let bubbleImgs = []
         for(let option of this.omrQuestions[areaName][0]){
-            let [areaCanvas] = this.getAreaCanvas(option)
+            let [areaCanvas] = this.getAreaCanvas(option, formCanvas)
             bubbleImgs.push(areaCanvas.toDataURL())
         }
         return bubbleImgs
