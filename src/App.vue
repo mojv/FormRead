@@ -21,6 +21,12 @@
   </div>
   <upload-img-web-cam v-if="activateCam" @activateCam="setActivateCam"/>
   <div id="reader" hidden></div>
+  <loading-modal
+      v-if="
+        $store.getters.countImageSrc < $store.state.totalForms ||
+        showLoadingModal
+      "
+  />
 </template>
 
 <script>
@@ -34,9 +40,10 @@ import AppHeader from "./components/AppHeader.vue"
 import FormToolbar from "./components/FormToolbar.vue"
 import UploadImgWebCam from "./components/UploadImgWebCam.vue"
 import ResultsTable from "./components/ResultsTable.vue"
-
+import loadingModal from "./components/loadingModal.vue";
 import helpers from "./mixins"
 import {fabric} from "fabric";
+// import {Inertia} from "@inertiajs/inertia";
 // import DialogModal from "@/Jetstream/DialogModal";
 
 
@@ -53,7 +60,8 @@ export default defineComponent({
     AppHeader,
     FormToolbar,
     UploadImgWebCam,
-    ResultsTable
+    ResultsTable,
+    loadingModal
   },
 
   props: [

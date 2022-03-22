@@ -349,11 +349,11 @@ export default class formClass {
         let formCanvas = this.getFormCanvas()
         for(let [, area] of Object.entries(store.state.formReadAreas)){
             if (area.type === 'OCR'){
-                this.ocrRead(area, formCanvas)
+                await this.ocrRead(area, formCanvas)
             }else if(area.type === 'BCR'){
-                this.bcrRead(area, formCanvas)
+                await this.bcrRead(area, formCanvas)
             }else if(area.type === 'OMR'){
-                this.omrRead(area.name, false, store.state.formReadAreas[area.name].omrOrientation, formCanvas)
+                await this.omrRead(area.name, false, store.state.formReadAreas[area.name].omrOrientation, formCanvas)
             }
         }
     }

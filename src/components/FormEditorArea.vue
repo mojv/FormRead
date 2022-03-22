@@ -4,18 +4,11 @@
        @keydown.delete="deleteObjects()" tabindex="0">
     <canvas class="shadow-lg rounded-lg" id="formCanvas"></canvas>
   </div>
-  <loading-modal
-      v-if="
-        $store.getters.countImageSrc < $store.state.totalForms ||
-        showLoadingModal
-      "
-  />
   <anchor-zoom-window v-if="anchorZoomShow" :src="anchorZoomSrc"/>
 </template>
 
 <script>
 import {fabric} from "fabric";
-import loadingModal from "./loadingModal.vue";
 import helpers from "../mixins"
 import AnchorZoomWindow from "./AnchorZoomWindow.vue"
 import {store} from "../store";
@@ -23,7 +16,7 @@ import {store} from "../store";
 export default {
   name: 'FormEditorArea',
   inject: ['$globals'],
-  components: {loadingModal, AnchorZoomWindow},
+  components: {AnchorZoomWindow},
   inheritAttrs: false,
   mixins: [helpers],
 
