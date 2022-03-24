@@ -18,14 +18,14 @@
         <qr-icon v-if="!showAnchorsToolbar" @click="addField('rgb(110,214,36,0.3)','BCR')" class="mx-1 fill-current text-black hover:text-gray-500 cursor-pointer" />
         <ocr-icon v-if="!showAnchorsToolbar" @click="addField('rgb(158,68,226,0.3)','OCR')" class="mx-1 fill-current text-black hover:text-gray-500 cursor-pointer" />
         <omr-icon v-if="!showAnchorsToolbar" @click="addOmr('rgb(33,239,160,0.3)','OMR')" class="mx-1 fill-current text-black hover:text-gray-500 cursor-pointer" />
-        <!--        <cut-icon v-if="!showAnchorsToolbar" @click="addField('rgb(255,117,140,0.3)','cuts')" class="mx-1 fill-current text-black hover:text-gray-500 cursor-pointer" />-->
+<!--        <cut-icon v-if="!showAnchorsToolbar" @click="addField('rgb(255,117,140,0.3)','cuts')" class="mx-1 fill-current text-black hover:text-gray-500 cursor-pointer" />-->
         <move-icon @click="enableScroll" class="mx-1 fill-current text-black hover:text-gray-500 cursor-pointer  block sm:hidden" />
         <table-icon @click="showResultsTable" />
       </template>
       <template v-if="showResults">
         <form-icon @click="showResultsTable" />
         <play-icon @click="processAllForms" class="mx-1 fill-current text-black hover:text-gray-500 cursor-pointer" />
-        <check-icon @click="checkNextPossibleError" class="mx-1 fill-current text-black hover:text-gray-500 cursor-pointer" />
+        <check-icon @click="showQA = !showQA" class="mx-1 fill-current text-black hover:text-gray-500 cursor-pointer" />
         <download-icon @click="exportData" class="mx-1 fill-current text-black hover:text-gray-500 cursor-pointer" />
       </template>
     </div>
@@ -35,6 +35,7 @@
     <div class="h-full relative z-20 flex justify-center flex-wrap flex-row sm:flex-row items-center">
       <menu-icon :orientation="'right'" @click="$emit('collapse-columns', 'optionPanel')" class="mx-1 fill-current text-black hover:text-gray-500 cursor-pointer" />
     </div>
+      <QAModal v-if="showQA" :show="showQA" @close="() => showQA = false"></QAModal>
   </div>
 </template>
 
@@ -55,6 +56,7 @@ import DownloadIcon from './Icons/DownloadIcon.vue'
 import FormIcon from './Icons/FormIcon.vue'
 import CheckIcon from './Icons/CheckIcon.vue'
 import SaveIcon from './Icons/SaveIcon.vue'
+import QAModal from "./QAModal.vue";
 // import { useForm } from '@inertiajs/inertia-vue3'
 
 import helpers from "../mixins"
@@ -64,14 +66,14 @@ export default {
   name: 'FormToolbar',
   inject: ['$globals'],
   mixins: [helpers],
-  components: {TableIcon, qrIcon, ocrIcon, omrIcon, cutIcon, anchorIcon, cancelIcon, readAnchorIcon, menuIcon, MoveIcon, PlayIcon, DownloadIcon, FormIcon, CheckIcon, SaveIcon},
+  components: {TableIcon, qrIcon, ocrIcon, omrIcon, cutIcon, anchorIcon, cancelIcon, readAnchorIcon, menuIcon, MoveIcon, PlayIcon, DownloadIcon, FormIcon, CheckIcon, SaveIcon, QAModal},
 
   data: function () {
     return {
       isPanelCollapsed: false,
       isMoveActivated: false,
       nameCounter: 0,
-      currentCel: ''
+      showQA: false
     }
   },
 
@@ -141,34 +143,34 @@ export default {
     processAllForms(){
       this.$store.commit('mutateProperty', ['showLoadingModal', true])
       setTimeout(async ()=>{
-        for (let form in this.forms){
-          await this.forms[form].formRead()
-        }
-        this.$store.commit('mutateProperty', ['showLoadingModal', false])
+          for (let form in this.forms){
+              await this.forms[form].formRead()
+          }
+          this.$store.commit('mutateProperty', ['showLoadingModal', false])
       },0);
     },
 
     exportableResults(){
-      let exportableResults = []
-      for (let [_,row] of this.results.entries()){
-        let exportableRow = {}
-        for(let [columnName, value] of Object.entries(row)){
-          exportableRow[columnName] = value.value
+        let exportableResults = []
+        for (let [_,row] of this.results.entries()){
+            let exportableRow = {}
+            for(let [columnName, value] of Object.entries(row)){
+                exportableRow[columnName] = value.value
+            }
+            exportableResults.push(exportableRow)
         }
-        exportableResults.push(exportableRow)
-      }
-      return exportableResults
+        return exportableResults
     },
 
     exportData(){
       if (this.$page.props.isAPI) {
-        window.parent.postMessage(
-            {
-              method: "getResults",
-              results: JSON.stringify(this.exportableResults())
-            }, "*"
-        );
-        return
+          window.parent.postMessage(
+              {
+                  method: "getResults",
+                  results: JSON.stringify(this.exportableResults())
+              }, "*"
+          );
+          return
       }
       let filename = 'results.xlsx';
       let ws = utils.json_to_sheet(this.exportableResults());
@@ -178,77 +180,61 @@ export default {
     },
 
     async saveForm(){
-      let canvas = document.querySelector("#formCanvas")
-      var image = new Image();
-      image.src = canvas.toDataURL()
-      await image.decode();
-      let thumbnailCanvas = document.createElement('canvas')
-      let ctx = thumbnailCanvas.getContext('2d');
-      thumbnailCanvas.width = 90;
-      thumbnailCanvas.height = image.height * (90/image.width);
-      ctx.drawImage(image, 0, 0, thumbnailCanvas.width, thumbnailCanvas.height);
-      let thumbnail = thumbnailCanvas.toDataURL()
-      let state = { ...this.$store.state }
-      state.forms = {}
-      state.totalForms = 0
-      state.showResults = false
-      state.selectedFormId = ''
-      // const form = useForm({'state': state, 'thumbnail': thumbnail})
+        let canvas = document.querySelector("#formCanvas")
+        var image = new Image();
+        image.src = canvas.toDataURL()
+        await image.decode();
+        let thumbnailCanvas = document.createElement('canvas')
+        let ctx = thumbnailCanvas.getContext('2d');
+        thumbnailCanvas.width = 90;
+        thumbnailCanvas.height = image.height * (90/image.width);
+        ctx.drawImage(image, 0, 0, thumbnailCanvas.width, thumbnailCanvas.height);
+        let thumbnail = thumbnailCanvas.toDataURL()
+        let state = { ...this.$store.state }
+        state.forms = {}
+        state.totalForms = 0
+        state.showResults = false
+        state.selectedFormId = ''
+        // const form = useForm({'state': state, 'thumbnail': thumbnail})
 
-      let formData = JSON.stringify(
-          {
-            vuex_state: state,
-            thumbnail: thumbnail,
-            form_name: this.$store.state.formName,
-          }
-      )
-
-      if(this.$page.props.isAPI){
-        let schema = {...this.results[0]}
-        schema.file_name.type = 'text'
-        Object.keys(schema).map((key, index) => {
-          delete schema[key].areaName; delete schema[key].formId; delete schema[key].value
-        });
-
-        formData = btoa(formData)
-        window.parent.postMessage(
+        let formData = JSON.stringify(
             {
-              method: "editForm",
-              formData: formData,
-              schema: JSON.stringify(schema)
-            },
-            "*"
-        );
-      }else{
-        formData = {'form': formData}
-        const form = useForm(formData)
-        if(state.savedFormId !== ""){
-          form.put('/forms/' + state.savedFormId)
-        }else{
-          form.post('/forms')
-        }
-      }
-    },
+                vuex_state: state,
+                thumbnail: thumbnail,
+                form_name: this.$store.state.formName,
+            }
+        )
 
-    checkNextPossibleError(){
-      for (let [,row] of this.results.entries()){
-        for (let [colName,area] of Object.entries(row)){
-          let celTableId = area.formId + colName
-          if((area.value === '' || area.value.toLowerCase() === 'error' || area.value.includes(',')) && celTableId !== this.currentCel){
-            let celElmnt = document.getElementById(celTableId);
-            celElmnt.focus();
-            this.currentCel = celTableId
-            return
-          }
+        if(this.$page.props.isAPI){
+            let schema = {...this.results[0]}
+            schema.file_name.type = 'text'
+            Object.keys(schema).map((key, index) => {
+                delete schema[key].areaName; delete schema[key].formId; delete schema[key].value
+            });
+
+            formData = btoa(formData)
+            window.parent.postMessage(
+                {
+                    method: "editForm",
+                    formData: formData,
+                    schema: JSON.stringify(schema)
+                },
+                "*"
+            );
+        }else{
+            formData = {'form': formData}
+            const form = useForm(formData)
+            if(state.savedFormId !== ""){
+                form.put('/forms/' + state.savedFormId)
+            }else{
+                form.post('/forms')
+            }
         }
-      }
-      this.currentCel = ''
-      alert('No erros found')
     }
   },
 
   mounted() {
-    this.nameCounter = Object.keys(this.formReadAreas).length
+      this.nameCounter = Object.keys(this.formReadAreas).length
   }
 }
 </script>

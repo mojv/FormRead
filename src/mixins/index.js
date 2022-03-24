@@ -199,6 +199,7 @@ export default {
                 return
             }
             let responses = []
+            let responsesForced = []
             let labels = store.state.formReadAreas[areaName]['questionLabels']
             let hasError = false
             if(questions[index].length !==  store.state.formReadAreas[areaName].omrQuestions[index].length){
@@ -206,7 +207,7 @@ export default {
             }
             for(let option in questions[index]){
                 if(questions[index][option].forceAnswer){
-                    return labels[option]
+                    responsesForced.push(labels[option])
                 }
                 if(questions[index][option].blackPixelsRatio > store.state.formReadAreas[areaName]['omrThreshold']){
                     responses.push(labels[option])
@@ -214,6 +215,9 @@ export default {
             }
             if(hasError){
                 return 'error'
+            }
+            if(responsesForced.length > 0){
+                return responsesForced.join()
             }
             return responses.join()
         },
@@ -252,6 +256,33 @@ export default {
                 this.$store.dispatch('deleteAllAnchors')
                 this.$store.commit('mutateProperty', ['anchors', {hasAnchors: false, anchorType: ''}])
             }
+        },
+        selectArea(result){
+            let area = this.$store.state.formReadAreas[result.areaName]
+            let [areaCanvas, _] = this.$store.state.forms[result.formId].getAreaCanvas(area)
+            return  areaCanvas.toDataURL()
+        },
+        selectOMRArea(result){
+            let firstBubble = this.$store.state.forms[result.formId].omrQuestions[result.areaName][result.questionIndex][0]
+            let lastBubble = this.$store.state.forms[result.formId].omrQuestions[result.areaName][result.questionIndex].slice(-1)[0]
+            let questionArea = {
+                top: firstBubble.top - firstBubble.height/2,
+                left: firstBubble.left - firstBubble.width/2,
+                width: (lastBubble.left - firstBubble.left) + firstBubble.width*2,
+                height: (lastBubble.top - firstBubble.top) + firstBubble.height*2
+            }
+            let [areaCanvas, _] = this.$store.state.forms[result.formId].getAreaCanvas(questionArea)
+            return areaCanvas.toDataURL()
+        },
+        overrideValue(e, result){
+            this.$store.state.forms[result.formId].results[result.areaName] = e.target.value
+        },
+        overrideOMRValue(e, result){
+            let optionIndex = result.options.findIndex((element) => element === e.target.value)
+            for(let i in this.$store.state.forms[result.formId].omrQuestions[result.areaName][result.questionIndex]){
+                this.$store.state.forms[result.formId].omrQuestions[result.areaName][result.questionIndex][i]['forceAnswer'] = false
+            }
+            this.$store.state.forms[result.formId].omrQuestions[result.areaName][result.questionIndex][optionIndex]['forceAnswer'] = true
         },
     },
 

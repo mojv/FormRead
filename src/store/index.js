@@ -1,6 +1,5 @@
 import {createStore} from 'vuex'
 import formClass from './form'
-import auth from "./auth";
 
 
 export const store = createStore({
@@ -158,10 +157,6 @@ export const store = createStore({
             }
             return count
         },
-    },
-
-    modules: {
-        auth
     },
 
     plugins: []

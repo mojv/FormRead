@@ -18,7 +18,7 @@
               <template  v-for="(_, columnName) in results[0]" :key="columnName">
                 <td  class="whitespace-nowrap w-auto p-0 pr-1">
                   <select
-                      v-on:focus="selectOMRArea(result[columnName])"
+                      v-on:focus="selectAreaSrc = selectOMRArea(result[columnName])"
                       @change="overrideOMRValue($event, result[columnName])"
                       v-if="result[columnName].type === 'select'"
                       :value="result[columnName].value"
@@ -29,7 +29,7 @@
                     <option v-for="option in result[columnName].options">{{ option }}</option>
                   </select>
                   <input
-                      v-on:focus="selectArea(result[columnName])"
+                      v-on:focus="selectAreaSrc = selectArea(result[columnName])"
                       @change="overrideValue($event, result[columnName])"
                       v-if="result[columnName].type === 'text'"
                       :value="result[columnName].value"
@@ -59,7 +59,7 @@ import FieldDropDownOtion from './FieldDropDownOtion.vue'
 import helpers from "../mixins"
 import {store} from "../store";
 
-export default {  
+export default {
   name: 'ResultsTable',
   mixins: [helpers],
   components: {FieldDropDownOtion},
@@ -69,30 +69,6 @@ export default {
     }
   },
   methods: {
-    selectArea(result){
-      let area = this.$store.state.formReadAreas[result.areaName]
-      let [areaCanvas, _] = this.$store.state.forms[result.formId].getAreaCanvas(area)
-      this.selectAreaSrc = areaCanvas.toDataURL()
-    },
-    selectOMRArea(result){
-      let firstBubble = this.$store.state.forms[result.formId].omrQuestions[result.areaName][result.questionIndex][0]
-      let lastBubble = this.$store.state.forms[result.formId].omrQuestions[result.areaName][result.questionIndex].slice(-1)[0]
-      let questionArea = {
-        top: firstBubble.top - firstBubble.height/2,
-        left: firstBubble.left - firstBubble.width/2,
-        width: (lastBubble.left - firstBubble.left) + firstBubble.width*2,
-        height: (lastBubble.top - firstBubble.top) + firstBubble.height*2
-      }
-      let [areaCanvas, _] = this.$store.state.forms[result.formId].getAreaCanvas(questionArea)
-      this.selectAreaSrc = areaCanvas.toDataURL()
-    },
-    overrideValue(e, result){
-      this.$store.state.forms[result.formId].results[result.areaName] = e.target.value
-    },
-    overrideOMRValue(e, result){
-      let optionIndex = result.options.findIndex((element) => element === e.target.value)
-      this.$store.state.forms[result.formId].omrQuestions[result.areaName][result.questionIndex][optionIndex]['forceAnswer'] = true
-    },
     showForm(formId){
       this.showResultsTable()
       this.selectForm(formId)
