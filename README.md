@@ -88,26 +88,25 @@ Create also a script that listen to the events of the iframe like in the example
     </head>
     <body style="height: 100%">
 
-        <iframe src="https://formread.org/api/forms/{form_id}/edit/{iframe_token}" style="height: 100%; width: 100%"></iframe>
+        <iframe src="https://formread.org/api/forms/291/edit/Hdup3E7cuR4411drf4Fm2imRNUMWu5GOHxlhr1ss" style="height: 100%; width: 100%"></iframe>
 
         <script>
-            var eventMethod = window.addEventListener ? "addEventListener" : "attachEvent";
-            var eventer = window[eventMethod];
-            var messageEvent = eventMethod === "attachEvent" ? "onmessage" : "message";
-    
-            eventer(messageEvent, function (e) {
+            window.addEventListener('message', function (e) {
                 // if (e.origin !== 'https://formread.org') return;
-    
+
+                console.log(e.data.method)
+
                 if (e.data.method === "editForm"){
                     let formData = e.data.formData // data used to saved your form
                     let schema = JSON.parse(e.data.schema)
-                    console.log(results)
+                    console.log(schema)
+             console.log(formData)
                 }
                 if (e.data.method === "getResults"){
                     let results = JSON.parse(e.data.results)
                     console.log(results)
                 }
-    
+
             });
         </script>
     </body>
